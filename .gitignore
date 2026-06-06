@@ -7,3 +7,4 @@ Thumbs.db
 *.local
 .vscode/
 public/legacy/
+bgm/*.wav

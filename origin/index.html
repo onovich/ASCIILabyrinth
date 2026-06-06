@@ -131,6 +131,27 @@
             isPaused: false // 新增：暂停状态标志
         };
 
+        const bgm = new Audio('./bgm/ascii_fps_retro_modern_loop.ogg');
+        bgm.loop = true;
+        bgm.preload = 'auto';
+        bgm.volume = 0.45;
+
+        function startBgm() {
+            const playPromise = bgm.play();
+
+            if (!playPromise || typeof playPromise.then !== 'function') {
+                return;
+            }
+
+            playPromise.then(() => {
+                document.removeEventListener('pointerdown', startBgm);
+                window.removeEventListener('touchstart', startBgm);
+                window.removeEventListener('keydown', startBgm);
+            }).catch(() => {});
+        }
+
+        startBgm();
+
         // 新增：多种 ASCII 字符集预设（按亮度从暗到亮排列）
         const ASCII_SETS = {
             'Classic (经典)': " .:-=+*#%@",
@@ -449,6 +470,8 @@
             }
         }, { passive: false });
 
+        window.addEventListener('touchstart', startBgm, { passive: true });
+
         window.addEventListener('touchmove', (e) => {
             e.preventDefault(); 
             if (gameState.isGameOver) return;
@@ -503,6 +526,8 @@
             }
         });
 
+        document.addEventListener('pointerdown', startBgm);
+
         // 2. 鼠标自由移动控制视角
         window.addEventListener('mousemove', e => {
             if (gameState.isPaused) return; // 新增：暂停期间停止视角转动
@@ -541,6 +566,7 @@
 
             if (keys.hasOwnProperty(k)) keys[k] = true;
         });
+        window.addEventListener('keydown', startBgm);
         window.addEventListener('keyup', e => {
             const k = e.key.toLowerCase();
             if (keys.hasOwnProperty(k)) keys[k] = false;
