@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ASCII 3D FPS 游戏 (彩色分层版)</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none; 
+        }
+
+        /* 升级为 Canvas 渲染，彻底解决字符排版形变问题，并支持彩色 ASCII */
+        #ascii-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* HUD UI */
+        #ui-layer {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            z-index: 10;
+            pointer-events: none;
+            font-weight: bold;
+            font-size: 16px;
+            text-shadow: 2px 2px 0px #000;
+            color: #fff;
+        }
+
+        /* 准星 */
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            pointer-events: none;
+            color: rgba(255, 255, 0, 0.7);
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* 伤害闪烁 */
+        #damage-flash {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: red;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 5;
+            transition: opacity 0.1s;
+        }
+
+        /* 游戏结束屏幕 */
+        #game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            color: #ff3333;
+            text-align: center;
+            display: none;
+            background: rgba(0,0,0,0.85);
+            padding: 20px;
+            border: 2px solid #ff3333;
+        }
+        #game-over button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #0f0;
+            color: #000;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui-layer">
+        生命: <span id="health-val">100</span> | 弹药: <span id="ammo-val">20</span><br>
+        得分: <span id="score-val">0</span>
+    </div>
+    
+    <div id="crosshair">十</div>
+    <div id="damage-flash"></div>
+    
+    <!-- 替换为 Canvas 作为 ASCII 输出载体 -->
+    <canvas id="ascii-canvas"></canvas>
+
+    <div id="game-over">
+        <h1>任务失败 (YOU DIED)</h1>
+        <p>最终得分: <span id="final-score">0</span></p>
+        <button onclick="location.reload()">重新部署 (RESTART)</button>
+    </div>
+
+    <!-- 引入 Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- 新增：引入 lil-gui 开发者面板库 (修复了版本号) -->
+    <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.19.2/dist/lil-gui.umd.js"></script>
+
+    <script>
+        // ==========================================
+        // 1. 游戏状态与核心配置
+        // ==========================================
+        const gameState = {
+            health: 100,
+            ammo: 20,
+            score: 0,
+            isGameOver: false,
+            isPaused: false // 新增：暂停状态标志
+        };
+
+        // 新增：多种 ASCII 字符集预设（按亮度从暗到亮排列）
+        const ASCII_SETS = {
+            'Classic (经典)': " .:-=+*#%@",
+            'Detailed (高灰阶)': " .',:;clodxkO0KXNWM",
+            'Blocks (方块)': " ░▒▓█",
+            'Binary (骇客)': " 01",
+            'Math (数学)': " +-*/=%()[]{}",
+            'Stars (星空)': " ✧★✪✫✬✭✮✯✡"
+        };
+        let currentAsciiChars = ASCII_SETS['Classic (经典)'];
+        
+        // 渲染分辨率配置
+        const PIXEL_SIZE = 14; // 字号大小，稍微调大增加辨识度
+        let CHAR_WIDTH, CHAR_HEIGHT;
+        let cols, rows;
+
+        // ==========================================
+        // 2. Three.js 场景初始化
+        // ==========================================
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000000);
+        // 添加暗蓝色雾效，增加空间深度感
+        scene.fog = new THREE.Fog(0x050a10, 2, 18);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: false });
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.BasicShadowMap;
+
+        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 100);
+        
+        const player = new THREE.Group();
+        player.position.set(2, 1, 2);
+        scene.add(player);
+        
+        const pitchObject = new THREE.Group();
+        player.add(pitchObject);
+        pitchObject.add(camera);
+
+        // 玩家手电筒改为略微偏暖的颜色，不再是惨白
+        const flashLight = new THREE.SpotLight(0xeeffcc, 2.5, 20, Math.PI / 4, 0.5, 1);
+        flashLight.castShadow = true;
+        flashLight.position.set(0, 0, 0);
+        pitchObject.add(flashLight);
+        pitchObject.add(flashLight.target);
+        flashLight.target.position.set(0, 0, -1);
+
+        // 环境光调暗且偏蓝，与手电筒形成冷暖对比
+        const ambientLight = new THREE.AmbientLight(0x0a1a2a);
+        scene.add(ambientLight);
+
+        // ==========================================
+        // 2.5 开发者面板 (Dev UI) 与 Shader 调参设置
+        // ==========================================
+        const devParams = {
+            // 环境光与雾
+            ambientColor: '#0a1a2a',
+            ambientIntensity: 1.0,
+            fogColor: '#050a10',
+            fogNear: 2,
+            fogFar: 18,
+            
+            // 动态光源 (手电筒)
+            flashColor: '#eeffcc',
+            flashIntensity: 2.5,
+            flashDistance: 20,
+            flashAngle: Math.PI / 4,
+            
+            // PBR 物理材质调参
+            wallColor: '#446655',
+            floorColor: '#112233',
+            ceilColor: '#1a1a1a',
+            roughness: 0.9,
+            metalness: 0.0, // 新增金属度
+            
+            // ASCII Shader (后处理)
+            asciiStyle: 'Classic (经典)',
+            invertAscii: false,
+            noiseThreshold: 10,
+            alphaMultiplier: 1.0
+        };
+
+        const gui = new lil.GUI({ title: '⚙️ 开发者光影调参面板' });
+        gui.domElement.style.display = 'none'; // 默认隐藏
+
+        // -- 环境光设置 --
+        const envFolder = gui.addFolder('环境与全局光 (Environment)');
+        envFolder.addColor(devParams, 'ambientColor').name('全局环境光色').onChange(c => ambientLight.color.set(c));
+        envFolder.add(devParams, 'ambientIntensity', 0, 5).name('环境光强度').onChange(v => ambientLight.intensity = v);
+        envFolder.addColor(devParams, 'fogColor').name('深空雾气颜色').onChange(c => { scene.fog.color.set(c); scene.background.set(c); });
+        envFolder.add(devParams, 'fogNear', 0, 10).name('雾气起始距离').onChange(v => scene.fog.near = v);
+        envFolder.add(devParams, 'fogFar', 5, 50).name('雾气衰减距离').onChange(v => scene.fog.far = v);
+
+        // -- 探照灯设置 --
+        const flashFolder = gui.addFolder('玩家光源 (Flashlight)');
+        flashFolder.addColor(devParams, 'flashColor').name('光源颜色').onChange(c => flashLight.color.set(c));
+        flashFolder.add(devParams, 'flashIntensity', 0, 10).name('光源强度').onChange(v => flashLight.intensity = v);
+        flashFolder.add(devParams, 'flashDistance', 5, 50).name('照射距离').onChange(v => flashLight.distance = v);
+        flashFolder.add(devParams, 'flashAngle', 0.1, Math.PI / 2).name('聚光灯角度').onChange(v => flashLight.angle = v);
+
+        // -- 物理材质光照模型设置 --
+        const matFolder = gui.addFolder('PBR 物理光照模型 (Materials)');
+        matFolder.addColor(devParams, 'wallColor').name('墙壁基础色').onChange(c => wallMat.color.set(c));
+        matFolder.addColor(devParams, 'floorColor').name('地板基础色').onChange(c => floorMat.color.set(c));
+        matFolder.addColor(devParams, 'ceilColor').name('天花板基础色').onChange(c => ceilMat.color.set(c));
+        matFolder.add(devParams, 'roughness', 0, 1).name('粗糙度 (Roughness)').onChange(v => {
+            wallMat.roughness = v; floorMat.roughness = v; ceilMat.roughness = v;
+        });
+        matFolder.add(devParams, 'metalness', 0, 1).name('金属度 (Metalness)').onChange(v => {
+            // 调高金属度可以产生非常强烈的镜面高光 (Specular Highlight)
+            wallMat.metalness = v; floorMat.metalness = v; ceilMat.metalness = v;
+        });
+
+        // -- ASCII Shader 后期管线 --
+        const shaderFolder = gui.addFolder('ASCII 后处理着色器 (Shader)');
+        shaderFolder.add(devParams, 'asciiStyle', Object.keys(ASCII_SETS)).name('字符集风格').onChange(v => {
+            currentAsciiChars = devParams.invertAscii ? ASCII_SETS[v].split('').reverse().join('') : ASCII_SETS[v];
+        });
+        shaderFolder.add(devParams, 'invertAscii').name('反转明暗映射').onChange(v => {
+            currentAsciiChars = v ? ASCII_SETS[devParams.asciiStyle].split('').reverse().join('') : ASCII_SETS[devParams.asciiStyle];
+        });
+        shaderFolder.add(devParams, 'noiseThreshold', 0, 50).name('降噪阈值 (过滤暗角)');
+        shaderFolder.add(devParams, 'alphaMultiplier', 0.1, 3.0).name('透明度全局缩放');
+
+        // ==========================================
+        // 3. 地图与场景生成 (调整了材质颜色，形成分层)
+        // ==========================================
+        const levelMap = [
+            "111111111111111",
+            "100010000000201",
+            "104010111110101",
+            "100000140000101",
+            "111011101110101",
+            "120000000010001",
+            "101110111011111",
+            "101300041000041",
+            "101011101011101",
+            "140000000000001",
+            "111111111111111"
+        ];
+
+        const mapSize = 2; 
+        const walls = [];
+        const enemies = [];
+        const items = [];
+        const bullets = [];
+
+        // 新增：特效与粒子全局变量
+        const particles = [];
+        const effectLights = [];
+        let cameraShake = 0;
+
+        // 修改材质，提供色彩基调以供 ASCII 彩色渲染识别
+        const wallMat = new THREE.MeshStandardMaterial({ color: 0x446655, roughness: 0.9 }); // 灰绿色墙体
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x112233, roughness: 1.0 }); // 暗蓝色地板
+        const ceilMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 1.0 });  // 近黑天花板
+
+        function buildLevel() {
+            const floorGeo = new THREE.PlaneGeometry(50, 50);
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            const ceiling = new THREE.Mesh(floorGeo, ceilMat);
+            ceiling.rotation.x = Math.PI / 2;
+            ceiling.position.y = mapSize;
+            scene.add(ceiling);
+
+            const wallGeo = new THREE.BoxGeometry(mapSize, mapSize, mapSize);
+            for (let z = 0; z < levelMap.length; z++) {
+                for (let x = 0; x < levelMap[z].length; x++) {
+                    const type = levelMap[z][x];
+                    const posX = x * mapSize;
+                    const posZ = z * mapSize;
+
+                    if (type === '1') {
+                        const wall = new THREE.Mesh(wallGeo, wallMat);
+                        wall.position.set(posX, mapSize / 2, posZ);
+                        wall.castShadow = true;
+                        wall.receiveShadow = true;
+                        scene.add(wall);
+                        walls.push({ box: new THREE.Box3().setFromObject(wall) });
+                    } else if (type === '2' || type === '3') {
+                        spawnItem(posX, posZ, type === '2' ? 'ammo' : 'health');
+                    } else if (type === '4') {
+                        spawnEnemy(posX, posZ);
+                    }
+                }
+            }
+        }
+
+        // ==========================================
+        // 4. 复杂角色/实体系统
+        // ==========================================
+        function spawnItem(x, z, type) {
+            const geo = type === 'ammo' ? new THREE.BoxGeometry(0.4, 0.4, 0.4) : new THREE.OctahedronGeometry(0.3);
+            const mat = new THREE.MeshStandardMaterial({ color: type === 'ammo' ? 0x00ffff : 0x00ff00, emissive: 0x113311 });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(x, 0.5, z);
+            mesh.castShadow = true;
+            
+            const light = new THREE.PointLight(type === 'ammo' ? 0x00ffff : 0x00ff00, 0.6, 4);
+            mesh.add(light);
+
+            scene.add(mesh);
+            items.push({ mesh, type, active: true });
+        }
+
+        function spawnEnemy(x, z) {
+            const enemyGroup = new THREE.Group();
+            enemyGroup.position.set(x, 0, z);
+
+            const bodyGeo = new THREE.CylinderGeometry(0.3, 0.3, 1.2, 8);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xaa0000, emissive: 0x000000 }); // 显式设置自发光以备闪烁
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.6;
+            body.castShadow = true;
+            body.receiveShadow = true;
+            enemyGroup.add(body);
+
+            const headGeo = new THREE.SphereGeometry(0.25, 8, 8);
+            const headMat = new THREE.MeshStandardMaterial({ color: 0xff3333, emissive: 0x660000 }); // 高亮发光红头
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 1.4;
+            head.castShadow = true;
+            enemyGroup.add(head);
+
+            const eyeLight = new THREE.PointLight(0xff2200, 1.0, 5);
+            eyeLight.position.y = 1.4;
+            enemyGroup.add(eyeLight);
+
+            scene.add(enemyGroup);
+            enemies.push({ group: enemyGroup, health: 3, active: true, speed: 0.02 + Math.random() * 0.01, flashTimer: 0 });
+        }
+
+        function spawnExplosion(pos) {
+            // 产生爆炸粒子
+            for (let i = 0; i < 15; i++) {
+                const size = 0.1 + Math.random() * 0.2;
+                const geo = new THREE.BoxGeometry(size, size, size);
+                const mat = new THREE.MeshBasicMaterial({ color: Math.random() > 0.5 ? 0xff3300 : 0xffaa00 });
+                const p = new THREE.Mesh(geo, mat);
+                p.position.copy(pos);
+                p.position.y += 0.6; 
+                // 给粒子随机抛射速度
+                const vx = (Math.random() - 0.5) * 8;
+                const vy = Math.random() * 8;
+                const vz = (Math.random() - 0.5) * 8;
+                scene.add(p);
+                particles.push({ mesh: p, vx, vy, vz, life: 20 + Math.random() * 15 });
+            }
+            // 产生爆炸瞬间的高亮闪光
+            const burstLight = new THREE.PointLight(0xff5500, 3.0, 8);
+            burstLight.position.copy(pos);
+            burstLight.position.y += 0.6;
+            scene.add(burstLight);
+            effectLights.push({ light: burstLight, life: 10 });
+        }
+
+        function shoot() {
+            if (gameState.isGameOver || gameState.ammo <= 0) return;
+            gameState.ammo--;
+            updateUI();
+
+            const bulletGeo = new THREE.SphereGeometry(0.1, 4, 4);
+            const bulletMat = new THREE.MeshBasicMaterial({ color: 0xffffaa });
+            const bullet = new THREE.Mesh(bulletGeo, bulletMat);
+            
+            // 子弹携带亮黄色动态光源
+            const bulletLight = new THREE.PointLight(0xffdd55, 2.0, 7);
+            bullet.add(bulletLight);
+
+            bullet.position.copy(player.position);
+            bullet.position.y += 0.8; 
+            
+            const direction = new THREE.Vector3();
+            camera.getWorldDirection(direction);
+            
+            scene.add(bullet);
+            bullets.push({ mesh: bullet, dir: direction, life: 60 });
+        }
+
+        function takeDamage() {
+            gameState.health -= 10;
+            updateUI();
+            
+            const flash = document.getElementById('damage-flash');
+            flash.style.opacity = 0.4;
+            setTimeout(() => { flash.style.opacity = 0; }, 100);
+
+            if (gameState.health <= 0) {
+                gameState.isGameOver = true;
+                if (document.pointerLockElement) document.exitPointerLock(); // 释放鼠标指针，允许点击 UI
+                document.getElementById('game-over').style.display = 'block';
+                document.getElementById('final-score').innerText = gameState.score;
+            }
+        }
+
+        // ==========================================
+        // 5. 隐藏式手势交互控制
+        // ==========================================
+        let touchLeft = null; let touchRight = null;
+        let moveForward = 0; let moveRight = 0;
+        let yaw = 0; let pitch = 0;
+
+        window.addEventListener('touchstart', (e) => {
+            if (gameState.isGameOver) return;
+            const halfWidth = window.innerWidth / 2;
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const t = e.changedTouches[i];
+                if (t.clientX < halfWidth) {
+                    touchLeft = { id: t.identifier, startX: t.clientX, startY: t.clientY, curX: t.clientX, curY: t.clientY };
+                } else {
+                    touchRight = { id: t.identifier, startX: t.clientX, startY: t.clientY, curX: t.clientX, curY: t.clientY, isTap: true, time: Date.now() };
+                }
+            }
+        }, { passive: false });
+
+        window.addEventListener('touchmove', (e) => {
+            e.preventDefault(); 
+            if (gameState.isGameOver) return;
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const t = e.changedTouches[i];
+                if (touchLeft && t.identifier === touchLeft.id) {
+                    touchLeft.curX = t.clientX; touchLeft.curY = t.clientY;
+                    const maxRadius = 50;
+                    moveRight = (t.clientX - touchLeft.startX) / maxRadius;
+                    moveForward = -(t.clientY - touchLeft.startY) / maxRadius; 
+                    moveRight = Math.max(-1, Math.min(1, moveRight));
+                    moveForward = Math.max(-1, Math.min(1, moveForward));
+                }
+                if (touchRight && t.identifier === touchRight.id) {
+                    yaw += (t.clientX - touchRight.curX) * -0.005;
+                    pitch += (t.clientY - touchRight.curY) * -0.005;
+                    pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, pitch));
+                    player.rotation.y = yaw;
+                    pitchObject.rotation.x = pitch;
+
+                    if (Math.abs(t.clientX - touchRight.startX) > 10 || Math.abs(t.clientY - touchRight.startY) > 10) {
+                        touchRight.isTap = false;
+                    }
+                    touchRight.curX = t.clientX; touchRight.curY = t.clientY;
+                }
+            }
+        }, { passive: false });
+
+        window.addEventListener('touchend', (e) => {
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const t = e.changedTouches[i];
+                if (touchLeft && t.identifier === touchLeft.id) { touchLeft = null; moveForward = 0; moveRight = 0; }
+                if (touchRight && t.identifier === touchRight.id) {
+                    if (touchRight.isTap && Date.now() - touchRight.time < 300) shoot();
+                    touchRight = null;
+                }
+            }
+        });
+
+        // --- PC端完美键鼠支持 (Pointer Lock & WASD) ---
+        // 1. 鼠标锁定与开火
+        document.addEventListener('pointerdown', (e) => {
+            if (gameState.isGameOver) return;
+            if (gameState.isPaused) return; // 新增：暂停期间（调参期间）不允许鼠标锁定和开火
+            // 排除手机端的触摸事件，防止和上述的触控逻辑冲突
+            if (e.pointerType === 'touch') return; 
+            
+            if (document.pointerLockElement === document.body) {
+                if (e.button === 0) shoot(); // 锁定状态下：左键开火
+            } else {
+                document.body.requestPointerLock(); // 未锁定状态下：点击请求隐藏并锁定鼠标
+            }
+        });
+
+        // 2. 鼠标自由移动控制视角
+        window.addEventListener('mousemove', e => {
+            if (gameState.isPaused) return; // 新增：暂停期间停止视角转动
+            if (document.pointerLockElement === document.body) {
+                // 读取鼠标的物理相对位移 (movementX/Y)，实现真正的 FPS 视角
+                yaw -= e.movementX * 0.002; 
+                pitch -= e.movementY * 0.002;
+                pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, pitch));
+                player.rotation.y = yaw; 
+                pitchObject.rotation.x = pitch;
+            }
+        });
+
+        // 3. 更丝滑的 WASD 键盘记录（支持斜向移动）
+        const keys = { w: false, a: false, s: false, d: false };
+        window.addEventListener('keydown', e => {
+            const k = e.key.toLowerCase();
+            
+            // 新增：P键控制开发者面板与游戏暂停
+            if (k === 'p') {
+                gameState.isPaused = !gameState.isPaused;
+                gui.domElement.style.display = gameState.isPaused ? 'block' : 'none';
+                
+                if (gameState.isPaused) {
+                    // 呼出面板时，释放鼠标供用户点击 UI
+                    if (document.pointerLockElement) document.exitPointerLock();
+                    document.getElementById('ui-layer').innerHTML += '<br><span id="pause-text" style="color:#ff0">已暂停 (PAUSED)</span>';
+                } else {
+                    // 关闭面板时，自动请求锁定鼠标，恢复游戏
+                    const pt = document.getElementById('pause-text');
+                    if (pt) pt.remove();
+                    // 这里不直接锁定，让用户通过下一次点击屏幕来锁定即可
+                }
+                return;
+            }
+
+            if (keys.hasOwnProperty(k)) keys[k] = true;
+        });
+        window.addEventListener('keyup', e => {
+            const k = e.key.toLowerCase();
+            if (keys.hasOwnProperty(k)) keys[k] = false;
+        });
+
+        // ==========================================
+        // 6. 核心游戏循环与物理计算
+        // ==========================================
+        function checkWallCollision(newPos) {
+            const playerRadius = 0.3;
+            for (const wall of walls) {
+                if (newPos.x + playerRadius > wall.box.min.x && newPos.x - playerRadius < wall.box.max.x &&
+                    newPos.z + playerRadius > wall.box.min.z && newPos.z - playerRadius < wall.box.max.z) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function updateUI() {
+            document.getElementById('health-val').innerText = gameState.health;
+            document.getElementById('ammo-val').innerText = gameState.ammo;
+            document.getElementById('score-val').innerText = gameState.score;
+        }
+
+        const clock = new THREE.Clock();
+
+        function updateLogic() {
+            if (gameState.isGameOver) return;
+            const delta = Math.min(clock.getDelta(), 0.1); 
+
+            // 相机震动逻辑
+            if (cameraShake > 0) {
+                camera.position.x = (Math.random() - 0.5) * cameraShake;
+                camera.position.y = (Math.random() - 0.5) * cameraShake;
+                cameraShake *= 0.8; // 阻尼衰减
+                if (cameraShake < 0.01) {
+                    cameraShake = 0;
+                    camera.position.set(0, 0, 0);
+                }
+            }
+
+            // 粒子与特效光逻辑
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.mesh.position.x += p.vx * delta;
+                p.mesh.position.y += p.vy * delta;
+                p.mesh.position.z += p.vz * delta;
+                p.vy -= 15 * delta; // 模拟重力抛物线下坠
+                p.life--;
+                if (p.life <= 0) {
+                    scene.remove(p.mesh);
+                    particles.splice(i, 1);
+                }
+            }
+            for (let i = effectLights.length - 1; i >= 0; i--) {
+                const el = effectLights[i];
+                el.light.intensity *= 0.7; // 光源极速衰减，形成闪光感
+                el.life--;
+                if (el.life <= 0) {
+                    scene.remove(el.light);
+                    effectLights.splice(i, 1);
+                }
+            }
+
+            // 融合：将手机端触摸滑杆与 PC 端 WASD 按键状态合并
+            let curMoveF = moveForward + (keys.w ? 1 : 0) - (keys.s ? 1 : 0);
+            let curMoveR = moveRight + (keys.d ? 1 : 0) - (keys.a ? 1 : 0);
+            
+            // 限制最大值为 1，防止键盘和手机同时输入导致移速翻倍
+            curMoveF = Math.max(-1, Math.min(1, curMoveF));
+            curMoveR = Math.max(-1, Math.min(1, curMoveR));
+
+            if (curMoveF !== 0 || curMoveR !== 0) {
+                const speed = 4.0 * delta; 
+                const dir = new THREE.Vector3(curMoveR, 0, -curMoveF).normalize();
+                dir.applyEuler(new THREE.Euler(0, yaw, 0)); 
+                const nextPos = player.position.clone().add(dir.multiplyScalar(speed));
+                
+                if (!checkWallCollision(new THREE.Vector3(nextPos.x, player.position.y, player.position.z))) player.position.x = nextPos.x;
+                if (!checkWallCollision(new THREE.Vector3(player.position.x, player.position.y, nextPos.z))) player.position.z = nextPos.z;
+            }
+
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const b = bullets[i];
+                b.mesh.position.add(b.dir.clone().multiplyScalar(20 * delta));
+                b.life--;
+
+                let hit = false;
+                for (const wall of walls) if (wall.box.containsPoint(b.mesh.position)) hit = true;
+
+                if (!hit) {
+                    for (const enemy of enemies) {
+                        // 修复：忽略高度差，只计算 XZ 平面的真实水平距离。0.6 稍微扩大了命中判定区。
+                        const distXZ = Math.hypot(b.mesh.position.x - enemy.group.position.x, b.mesh.position.z - enemy.group.position.z);
+                        if (enemy.active && distXZ < 0.6) {
+                            hit = true;
+                            enemy.health--;
+                            
+                            // 触发敌人全身受击高亮闪烁
+                            enemy.flashTimer = 5;
+                            enemy.group.children[0].material.emissive.setHex(0xffaaaa); 
+                            enemy.group.children[1].material.emissive.setHex(0xffffff); 
+                            
+                            if (enemy.health <= 0) {
+                                enemy.active = false;
+                                scene.remove(enemy.group);
+                                gameState.score += 100;
+                                updateUI();
+                                
+                                // 触发击杀特效：相机震动 + 爆炸粒子与强光
+                                cameraShake = 0.5; 
+                                spawnExplosion(enemy.group.position); 
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (hit || b.life <= 0) { scene.remove(b.mesh); bullets.splice(i, 1); }
+            }
+
+            for (const enemy of enemies) {
+                if (!enemy.active) continue;
+                
+                // 处理受击闪烁的颜色恢复
+                if (enemy.flashTimer > 0) {
+                    enemy.flashTimer--;
+                    if (enemy.flashTimer <= 0) {
+                        enemy.group.children[0].material.emissive.setHex(0x000000); 
+                        enemy.group.children[1].material.emissive.setHex(0x660000); 
+                    }
+                }
+
+                // 修复：忽略高度差，仅判断水平距离以触发攻击
+                const distXZ = Math.hypot(enemy.group.position.x - player.position.x, enemy.group.position.z - player.position.z);
+                if (distXZ < 10) {
+                    enemy.group.lookAt(player.position.x, 0, player.position.z);
+                    if (distXZ > 0.8) {
+                        const dir = new THREE.Vector3().subVectors(player.position, enemy.group.position).normalize();
+                        dir.y = 0;
+                        enemy.group.position.add(dir.multiplyScalar(enemy.speed));
+                    } else {
+                        if (Math.random() < 0.05) takeDamage();
+                    }
+                }
+            }
+
+            for (const item of items) {
+                if (!item.active) continue;
+                item.mesh.rotation.x += 2 * delta; item.mesh.rotation.y += 3 * delta;
+                if (player.position.distanceTo(item.mesh.position) < 1.0) {
+                    item.active = false;
+                    scene.remove(item.mesh);
+                    if (item.type === 'ammo') gameState.ammo += 15;
+                    else gameState.health = Math.min(100, gameState.health + 30);
+                    updateUI();
+                }
+            }
+        }
+
+        // ==========================================
+        // 7. 全新架构：彩色 Canvas 2D ASCII 渲染引擎
+        // ==========================================
+        const asciiCanvas = document.getElementById('ascii-canvas');
+        const ctx = asciiCanvas.getContext('2d', { alpha: false }); // 优化性能
+        
+        function resizeRenderer() {
+            // 等宽字体 Courier 的高宽比大概是 1 : 0.6
+            CHAR_HEIGHT = PIXEL_SIZE;
+            CHAR_WIDTH = PIXEL_SIZE * 0.6; 
+
+            // 计算屏幕能容纳的字符阵列维度
+            cols = Math.floor(window.innerWidth / CHAR_WIDTH);
+            rows = Math.floor(window.innerHeight / CHAR_HEIGHT);
+            
+            // WebGL 底层采样的分辨率
+            renderer.setSize(cols, rows, false);
+            
+            // 设置 Canvas 真实的显示尺寸
+            asciiCanvas.width = window.innerWidth;
+            asciiCanvas.height = window.innerHeight;
+            
+            // 核心修复：摄像机长宽比直接使用真实屏幕长宽比，抵消字符自身的非正方形拉伸！
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        }
+        window.addEventListener('resize', resizeRenderer);
+        resizeRenderer(); 
+
+        let pixelBuffer = new Uint8Array(0);
+
+        function renderAscii() {
+            // 1. 渲染 3D 场景到内存
+            renderer.render(scene, camera);
+            
+            // 2. 提取像素 RGB 数据
+            const gl = renderer.getContext();
+            const bufferSize = cols * rows * 4;
+            if (pixelBuffer.length !== bufferSize) pixelBuffer = new Uint8Array(bufferSize);
+            gl.readPixels(0, 0, cols, rows, gl.RGBA, gl.UNSIGNED_BYTE, pixelBuffer);
+
+            // 3. 清空 Canvas 准备重绘
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, asciiCanvas.width, asciiCanvas.height);
+
+            // 设置绘制字体
+            ctx.font = `bold ${PIXEL_SIZE}px 'Courier New', Courier, monospace`;
+            ctx.textBaseline = 'top';
+
+            // 4. 遍历像素并绘制彩色 ASCII
+            for (let y = 0; y < rows; y++) {
+                // WebGL 的 Y 轴是从下往上的，所以需要翻转 Y 轴读取
+                const glY = rows - 1 - y;
+                
+                for (let x = 0; x < cols; x++) {
+                    const i = (glY * cols + x) * 4;
+                    const r = pixelBuffer[i];
+                    const g = pixelBuffer[i+1];
+                    const b = pixelBuffer[i+2];
+                    
+                    // 计算灰度值决定字符密度
+                    const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+                    
+                    // 修改：使用开发者面板配置的降噪阈值
+                    if (luminance < devParams.noiseThreshold) continue; 
+                    
+                    const charIndex = Math.floor((luminance / 255) * (currentAsciiChars.length - 1));
+                    const char = currentAsciiChars[charIndex];
+
+                    // 修改：使用开发者面板配置的透明度缩放系数
+                    let alpha = Math.max(0.15, luminance / 255) * devParams.alphaMultiplier;
+                    alpha = Math.min(1.0, alpha).toFixed(2); // 确保 alpha 不超过 1
+
+                    ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+                    ctx.fillText(char, x * CHAR_WIDTH, y * CHAR_HEIGHT);
+                }
+            }
+        }
+
+        // ==========================================
+        // 8. 启动
+        // ==========================================
+        buildLevel();
+        updateUI();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            // 修改：暂停状态下跳过物理和逻辑更新，仅保留渲染引擎继续运行（所见即所得调参）
+            if (!gameState.isPaused) {
+                updateLogic();
+            }
+            renderAscii(); 
+        }
+        animate();
+
+    </script>
+</body>
+</html>
