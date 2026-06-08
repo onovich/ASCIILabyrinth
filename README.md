@@ -1,26 +1,25 @@
 # ASCII Labyrinth
 
-ASCII Labyrinth is a deployable Vite + React shell around a preserved single-file ASCII FPS prototype.<br/>**ASCII Labyrinth 是一个围绕保留版单文件 ASCII FPS 原型构建的可部署 Vite + React 外壳。**
+ASCII Labyrinth is a deployable Vite wrapper that launches the playable ASCII FPS runtime directly.<br/>**ASCII Labyrinth 是一个可部署的 Vite 包装项目，会直接启动可玩的 ASCII FPS 运行时。**
 
 ## Overview
 
-The original gameplay runtime still lives in origin/index.html and is automatically synchronized into public/runtime before development and production builds.<br/>**原始玩法运行时仍保存在 origin/index.html 中，并会在开发与生产构建前自动同步到 public/runtime。**
+The gameplay runtime lives in origin/index.html and is automatically synchronized into public/runtime before development and production builds.<br/>**玩法运行时保存在 origin/index.html 中，并会在开发与生产构建前自动同步到 public/runtime。**
 
-This repository now provides a standard frontend entry, GitHub Pages-safe Vite routing, and a React presentation layer for delivery and future migration work.<br/>**当前仓库已经提供标准前端入口、适配 GitHub Pages 的 Vite 路由，以及用于交付和后续迁移的 React 表现层。**
+The root page redirects into the runtime so pointer-lock mouse controls work as a top-level document while still keeping GitHub Pages-safe Vite routing.<br/>**根页面会直接进入运行时，使鼠标锁定控制以顶层文档方式工作，同时保留适配 GitHub Pages 的 Vite 路由。**
 
 ## Highlights
 
-- Keeps the original Three.js plus Canvas ASCII renderer playable without rewriting the prototype first.<br/>**在不先重写原型的前提下，保留原始 Three.js 与 Canvas ASCII 渲染器的可玩状态。**
+- Keeps the original Three.js gameplay loop playable while the ASCII output is now handled by a WebGL post-processing shader.<br/>**保留原始 Three.js 玩法循环的可玩状态，同时将 ASCII 输出改为 WebGL 后处理 Shader。**
 - Adds a Vite build pipeline with a verified production build and repository-name-aware base routing for GitHub Pages.<br/>**新增 Vite 构建流水线，并已验证生产构建通过，同时为 GitHub Pages 配置了与仓库名一致的 base 路由。**
-- Establishes src/data, src/logic/engine, src/logic/hooks, src/view/screens, and src/view/components as the migration baseline.<br/>**建立了 src/data、src/logic/engine、src/logic/hooks、src/view/screens 和 src/view/components 作为迁移基线。**
-- Ships a React shell that hosts the preserved runtime while exposing the current architecture status honestly.<br/>**提供一个托管保留运行时的 React 外壳，并如实展示当前架构状态。**
+- Adds procedural facility generation, two weapons, Web Audio event sounds, and a key-code-exit escape objective.<br/>**新增程序化设施生成、两种武器、Web Audio 事件音效，以及钥匙、密码、出口组成的逃生目标。**
+- Uses TUI-style HUD, mission, radio, password, and ending panels so the interface matches the ASCII terminal scene.<br/>**使用 TUI 风格的 HUD、任务、无线电、密码和结局面板，让界面与 ASCII 终端场景保持统一。**
 
 ## Architecture
 
-- src/data stores repository-level content and migration-facing project facts that should continue absorbing extracted gameplay constants and maps.<br/>**src/data 用于存放仓库级内容和迁移导向的项目信息，后续应继续吸收被抽离出的玩法常量与地图数据。**
-- src/logic/engine currently isolates runtime addressing and marks the boundary where collision, AI, combat, and update loops should move next.<br/>**src/logic/engine 当前隔离了运行时接入边界，并标记出下一步应迁入的碰撞、AI、战斗与更新循环逻辑。**
-- src/logic/hooks contains React-only orchestration such as runtime reload state and Pages-safe iframe URLs.<br/>**src/logic/hooks 负责仅属于 React 的编排逻辑，例如运行时重载状态和适配 Pages 的 iframe 地址。**
-- src/view renders the repository shell, status panels, and the gameplay viewport without interfering with the original high-frequency runtime loop.<br/>**src/view 负责渲染仓库壳层、状态面板和玩法视口，同时不干扰原始高频运行时循环。**
+- origin/index.html is the authoritative runtime source for gameplay, rendering, controls, HUD, and objective flow.<br/>**origin/index.html 是玩法、渲染、控制、HUD 和目标流程的权威运行时来源。**
+- scripts/sync-runtime.mjs copies the runtime and audio assets into public/runtime before dev and production builds.<br/>**scripts/sync-runtime.mjs 会在开发和生产构建前把运行时与音频资源复制到 public/runtime。**
+- index.html is intentionally tiny: it redirects to runtime/index.html so the game runs as the top-level page instead of inside an iframe.<br/>**index.html 有意保持很小：它会跳转到 runtime/index.html，让游戏作为顶层页面运行，而不是放在 iframe 中。**
 
 ## Getting Started
 
@@ -37,6 +36,6 @@ This repository now provides a standard frontend entry, GitHub Pages-safe Vite r
 
 ## Status
 
-This repository is migration-ready, not fully refactored: the gameplay engine, AI, collision, ASCII sampling, and effect systems still remain inside the preserved single-file runtime.<br/>**当前仓库处于迁移就绪状态，而不是完全重构完成：玩法引擎、AI、碰撞、ASCII 采样和特效系统仍保留在单文件运行时中。**
+This repository is runtime-first: the playable game is concentrated in origin/index.html and synchronized for deployment.<br/>**当前仓库以运行时为中心：可玩的游戏集中在 origin/index.html，并会被同步用于部署。**
 
-The next extraction targets are map data, gameplay constants, enemy and pickup updates, combat resolution, and the ASCII render pipeline.<br/>**下一步优先抽离的对象包括地图数据、玩法常量、敌人与补给更新、战斗结算，以及 ASCII 渲染管线。**
+Future cleanup can remove the unused React presentation files or extract gameplay systems from the runtime once the single-file experience is stable.<br/>**后续清理可以移除未使用的 React 展示文件，或在单文件体验稳定后继续抽离玩法系统。**

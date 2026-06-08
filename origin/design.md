@@ -50,7 +50,7 @@ UI HUD: 左上角显示生命值 (Max 100)、弹药量、分数。中心十字�
 
 UI/调试: lil-gui (v0.19) - 用于开发者光影参数调节。
 
-渲染输出: 原生 HTML5 Canvas 2D API - 用于绘制 ASCII 字符阵列。
+渲染输出: WebGL 后处理 Shader - 用于在 GPU 上绘制 ASCII 字符阵列。
 
 架构形态: 单 HTML 文件 (index.html)，零构建工具，开箱即用。
 
@@ -58,15 +58,15 @@ UI/调试: lil-gui (v0.19) - 用于开发者光影参数调节。
 
 本作采用了独特的“降维打击”渲染管线，这是接手 AI 必须深刻理解的核心：
 
-后台 3D 渲染: Three.js 将场景渲染到内存中的低分辨率 WebGL 缓冲区 (cols x rows)。
+后台 3D 渲染: Three.js 将场景渲染到低分辨率 WebGL RenderTarget (cols x rows)。
 
-像素采样: 每帧使用 gl.readPixels 提取缓冲区的 RGBA 原始数据。
+GPU 后处理: 全屏 WebGL Fragment Shader 按字符网格采样 RenderTarget，不再把像素回读到 CPU。
 
-灰度映射: 遍历像素，使用公式 0.299*R + 0.587*G + 0.114*B 计算亮度 (Luminance)。
+灰度映射: Shader 使用公式 0.299*R + 0.587*G + 0.114*B 计算亮度 (Luminance)。
 
-字符提取: 根据亮度，在字符集 (ASCII_CHARS) 中按比例索引出对应的 ASCII 字符。
+字符提取: 根据亮度，在预生成的 ASCII 字符图集 Texture 中按比例索引出对应字符。
 
-前台 2D 绘制: 清空 Canvas 2D，使用 WebGL 提取的真实 RGB 颜色和基于亮度的透明度 (Alpha)，将字符绘制到屏幕上。
+前台 WebGL 输出: Shader 使用真实 RGB 颜色和基于亮度的透明度 (Alpha)，直接在 GPU 上输出字符化画面。
 
 3.3 碰撞与物理逻辑
 
@@ -102,9 +102,9 @@ Canvas fillText 使用的颜色格式为 rgba(r, g, b, alpha)。
 
 WebGL Custom Shader 重构 (最高优先级):
 
-当前痛点: gl.readPixels 会导致 CPU 和 GPU 之间的强制同步，极其消耗性能；Canvas 2D 绘制几万个文本的开销极大。
+已解决痛点: 旧版 CPU 像素回读会导致 CPU 和 GPU 之间的强制同步，逐字符文本绘制的开销极大；当前版本已改为 WebGL 后处理 Shader。
 
-迭代方向: 废弃 Canvas 2D。将 ASCII 映射逻辑直接写入 WebGL 后期处理着色器 (Post-Processing Fragment Shader)。将 ASCII 字符集做成一张 Texture (Atlas)，在 Shader 中根据像素亮度对这张 Texture 进行 UV 采样。此举可将帧率提升 10 倍以上。
+当前实现: 已废弃每帧逐字符文本绘制。ASCII 映射逻辑写入 WebGL 后期处理着色器 (Post-Processing Fragment Shader)，ASCII 字符集预生成 Texture Atlas，Shader 根据像素亮度对 Atlas 进行 UV 采样。
 
 空间分区 (Spatial Partitioning):
 
@@ -122,11 +122,11 @@ WebGL Custom Shader 重构 (最高优先级):
 
 [x] Phase 2: 视觉进化 - 引入彩色 Canvas 渲染，加入透明度分层，修复模型形变，增加粒子爆炸特效和光影面板。
 
-[ ] Phase 3: 性能飞跃 - (待接手) 迁移 ASCII 渲染管线至 WebGL Shader。
+[x] Phase 3: 性能飞跃 - 已迁移 ASCII 渲染管线至 WebGL 后处理 Shader，并加入墙体空间分区以减少碰撞遍历。
 
-[ ] Phase 4: 内容填充 - (待接手) 多种武器、随机地图生成、音效系统 (Web Audio API)。
+[x] Phase 4: 内容填充 - 已加入 SIDEARM / SCATTER 武器切换、程序化设施地图生成、Web Audio API 事件音效。
 
-[ ] Phase 5: 基础关卡体验 - (待接手) 设计并实现一条完整逃生流程：玩家需要在迷宫中对抗敌人、搜集弹药与医疗补给、确保存活；随后找到钥匙，解锁隐藏房间，在房间内获得密码提示；最后定位出口大门，输入密码并完成逃出生天的结局演出。
+[x] Phase 5: 基础关卡体验 - 已实现完整逃生流程：玩家需要在迷宫中对抗敌人、搜集弹药与医疗补给、确保存活；随后找到钥匙，解锁隐藏房间，在房间内获得密码提示；最后定位出口大门，输入密码并完成逃出生天的结局演出。
 
 	TODO 细化:
 	- 开场目标文本: 用简短 HUD 文本或无线电对白说明“活下来，找到钥匙并逃离设施”。
@@ -135,6 +135,8 @@ WebGL Custom Shader 重构 (最高优先级):
 	- 隐藏房间: 用钥匙开启隐藏门，房间内通过终端文本、墙面字条或短对白给出密码线索。
 	- 终局交互: 玩家到达出口大门后进行密码输入，成功后触发结局文本，失败则提示重新确认线索。
 	- 叙事表现: 全程仅加入轻量文本和短对话，不打断当前街机式节奏。
+
+[x] Phase 6: TUI 风格一致性 - 已将 HUD、任务提示、无线电日志、密码输入与结局界面改为命令行制表符/边框风格，使 UI 与 ASCII 场景画面更统一。
 
 7. 项目启动指南
 

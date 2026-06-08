@@ -5,11 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ASCII 3D FPS 游戏 (彩色分层版)</title>
     <style>
+        :root {
+            --term-green: #8cff9a;
+            --term-cyan: #6ee7ff;
+            --term-amber: #ffd166;
+            --term-red: #ff5c5c;
+            --panel-bg: rgba(0, 12, 10, 0.72);
+        }
+
         body {
             margin: 0;
             padding: 0;
             background-color: #000;
-            color: #0f0;
+            color: var(--term-green);
             font-family: 'Courier New', Courier, monospace;
             overflow: hidden;
             user-select: none;
@@ -28,17 +36,37 @@
             z-index: 1;
         }
 
-        /* HUD UI */
-        #ui-layer {
+        .tui-layer {
             position: absolute;
-            top: 10px;
-            left: 15px;
             z-index: 10;
             pointer-events: none;
-            font-weight: bold;
-            font-size: 16px;
-            text-shadow: 2px 2px 0px #000;
-            color: #fff;
+            font-size: 14px;
+            line-height: 1.18;
+            white-space: pre;
+            color: var(--term-green);
+            text-shadow: 0 0 8px rgba(140, 255, 154, 0.38), 2px 2px 0 #000;
+        }
+
+        .tui-panel {
+            padding: 0;
+            background: var(--panel-bg);
+        }
+
+        #ui-layer {
+            top: 10px;
+            left: 12px;
+        }
+
+        #mission-layer {
+            top: 10px;
+            right: 12px;
+            color: var(--term-cyan);
+        }
+
+        #log-layer {
+            left: 12px;
+            bottom: 12px;
+            color: var(--term-amber);
         }
 
         /* 准星 */
@@ -49,9 +77,10 @@
             transform: translate(-50%, -50%);
             z-index: 10;
             pointer-events: none;
-            color: rgba(255, 255, 0, 0.7);
+            color: rgba(140, 255, 154, 0.78);
             font-weight: bold;
             font-size: 18px;
+            text-shadow: 0 0 10px rgba(140, 255, 154, 0.6);
         }
 
         /* 伤害闪烁 */
@@ -68,46 +97,101 @@
             transition: opacity 0.1s;
         }
 
-        /* 游戏结束屏幕 */
-        #game-over {
+        .terminal-modal {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 20;
-            color: #ff3333;
+            color: var(--term-green);
             text-align: center;
             display: none;
-            background: rgba(0,0,0,0.85);
-            padding: 20px;
-            border: 2px solid #ff3333;
+            background: rgba(0, 0, 0, 0.92);
+            padding: 18px 22px;
+            border: 1px solid var(--term-green);
+            box-shadow: 0 0 24px rgba(140, 255, 154, 0.2);
+            pointer-events: auto;
+            min-width: min(88vw, 480px);
         }
+
+        .terminal-modal h1,
+        .terminal-modal h2 {
+            margin: 0 0 12px;
+            font-size: 20px;
+            color: var(--term-amber);
+        }
+
+        .terminal-modal pre {
+            margin: 0 0 12px;
+            text-align: left;
+            white-space: pre-wrap;
+        }
+
+        .terminal-modal input {
+            width: 100%;
+            margin: 6px 0 10px;
+            padding: 9px 10px;
+            border: 1px solid var(--term-green);
+            background: #020604;
+            color: var(--term-green);
+            font: inherit;
+            text-align: center;
+            letter-spacing: 0.3em;
+            outline: none;
+        }
+
+        .terminal-modal button,
         #game-over button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: #0f0;
-            color: #000;
-            border: none;
+            margin: 6px 4px 0;
+            padding: 9px 14px;
+            background: #03140c;
+            color: var(--term-green);
+            border: 1px solid var(--term-green);
             font-weight: bold;
             cursor: pointer;
             font-family: inherit;
+        }
+
+        .terminal-modal button:hover,
+        #game-over button:hover {
+            background: var(--term-green);
+            color: #000;
         }
     </style>
 </head>
 <body>
 
-    <div id="ui-layer">
-        生命: <span id="health-val">100</span> | 弹药: <span id="ammo-val">20</span><br>
-        得分: <span id="score-val">0</span>
+    <div id="ui-layer" class="tui-layer tui-panel"></div>
+    <div id="mission-layer" class="tui-layer tui-panel"></div>
+    <div id="log-layer" class="tui-layer tui-panel"></div>
+
+    <div id="metrics-store" style="display:none">
+        <span id="health-val">100</span>
+        <span id="ammo-val">20</span>
+        <span id="score-val">0</span>
     </div>
     
-    <div id="crosshair">十</div>
+    <div id="crosshair">┼</div>
     <div id="damage-flash"></div>
     
     <!-- 替换为 Canvas 作为 ASCII 输出载体 -->
     <canvas id="ascii-canvas"></canvas>
 
-    <div id="game-over">
+    <div id="password-panel" class="terminal-modal">
+        <h2>┌─[ EXIT ACCESS ]─┐</h2>
+        <pre>输入隐藏房间获得的四位撤离密码。</pre>
+        <input id="password-input" maxlength="4" inputmode="numeric" autocomplete="off">
+        <button id="password-submit">确认 (ENTER)</button>
+        <button id="password-cancel">取消 (ESC)</button>
+    </div>
+
+    <div id="ending-panel" class="terminal-modal">
+        <h1>┌─[ EXTRACTION COMPLETE ]─┐</h1>
+        <pre id="ending-text"></pre>
+        <button onclick="location.reload()">再次部署 (RESTART)</button>
+    </div>
+
+    <div id="game-over" class="terminal-modal">
         <h1>任务失败 (YOU DIED)</h1>
         <p>最终得分: <span id="final-score">0</span></p>
         <button onclick="location.reload()">重新部署 (RESTART)</button>
@@ -127,16 +211,87 @@
             health: 100,
             ammo: 20,
             score: 0,
+            weaponIndex: 0,
+            hasKey: false,
+            foundCode: false,
+            escaped: false,
+            objective: '活下来，找到钥匙并逃离设施。',
+            nearbyAction: '',
             isGameOver: false,
             isPaused: false // 新增：暂停状态标志
         };
+        const EXIT_CODE = '3142';
+        const messageLog = [];
+        const weapons = [
+            {
+                id: 'sidearm',
+                name: 'SIDEARM',
+                cost: 1,
+                pellets: 1,
+                spread: 0,
+                cooldown: 220,
+                damage: 1,
+                speed: 21,
+                lightColor: 0xffdd55
+            },
+            {
+                id: 'scatter',
+                name: 'SCATTER',
+                cost: 3,
+                pellets: 6,
+                spread: 0.16,
+                cooldown: 720,
+                damage: 1,
+                speed: 18,
+                lightColor: 0xff9955
+            }
+        ];
+        let lastShotAt = 0;
+        let audioContext = null;
 
         const bgm = new Audio('./bgm/ascii_fps_retro_modern_loop.ogg');
         bgm.loop = true;
         bgm.preload = 'auto';
         bgm.volume = 0.45;
 
+        function ensureAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioContext.state === 'suspended') audioContext.resume();
+        }
+
+        function playTone(freq, duration = 0.08, type = 'square', gain = 0.04) {
+            if (!audioContext) return;
+            const osc = audioContext.createOscillator();
+            const amp = audioContext.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            amp.gain.setValueAtTime(gain, audioContext.currentTime);
+            amp.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+            osc.connect(amp).connect(audioContext.destination);
+            osc.start();
+            osc.stop(audioContext.currentTime + duration);
+        }
+
+        function playSfx(name) {
+            ensureAudio();
+            const patterns = {
+                shoot: [[150, 0.04, 'sawtooth', 0.05], [80, 0.07, 'square', 0.03]],
+                shotgun: [[95, 0.08, 'sawtooth', 0.07], [180, 0.04, 'square', 0.04]],
+                pickup: [[740, 0.06, 'triangle', 0.04], [980, 0.08, 'triangle', 0.03]],
+                key: [[520, 0.08, 'triangle', 0.05], [1040, 0.1, 'triangle', 0.04]],
+                door: [[220, 0.12, 'sawtooth', 0.04], [330, 0.08, 'triangle', 0.03]],
+                error: [[110, 0.12, 'square', 0.05]],
+                success: [[660, 0.08, 'triangle', 0.04], [880, 0.08, 'triangle', 0.04], [1320, 0.12, 'triangle', 0.04]],
+                damage: [[55, 0.12, 'sawtooth', 0.06]],
+                enemyDown: [[180, 0.06, 'square', 0.04], [90, 0.1, 'sawtooth', 0.04]]
+            };
+            for (const args of patterns[name] || []) playTone(...args);
+        }
+
         function startBgm() {
+            ensureAudio();
             const playPromise = bgm.play();
 
             if (!playPromise || typeof playPromise.then !== 'function') {
@@ -162,6 +317,38 @@
             'Stars (星空)': " ✧★✪✫✬✭✮✯✡"
         };
         let currentAsciiChars = ASCII_SETS['Classic (经典)'];
+        let postMaterial = null;
+        let asciiAtlasTexture = null;
+
+        function buildAsciiAtlasTexture(chars) {
+            const cellSize = 32;
+            const atlasCanvas = document.createElement('canvas');
+            const atlasCtx = atlasCanvas.getContext('2d');
+            atlasCanvas.width = cellSize * chars.length;
+            atlasCanvas.height = cellSize;
+            atlasCtx.clearRect(0, 0, atlasCanvas.width, atlasCanvas.height);
+            atlasCtx.fillStyle = '#fff';
+            atlasCtx.font = `bold ${Math.floor(cellSize * 0.8)}px 'Courier New', Courier, monospace`;
+            atlasCtx.textAlign = 'center';
+            atlasCtx.textBaseline = 'middle';
+            for (let i = 0; i < chars.length; i++) {
+                atlasCtx.fillText(chars[i], i * cellSize + cellSize / 2, cellSize / 2 + 1);
+            }
+            const texture = new THREE.CanvasTexture(atlasCanvas);
+            texture.minFilter = THREE.NearestFilter;
+            texture.magFilter = THREE.NearestFilter;
+            texture.generateMipmaps = false;
+            return texture;
+        }
+
+        function refreshAsciiAtlas() {
+            if (asciiAtlasTexture) asciiAtlasTexture.dispose();
+            asciiAtlasTexture = buildAsciiAtlasTexture(currentAsciiChars);
+            if (postMaterial) {
+                postMaterial.uniforms.tAscii.value = asciiAtlasTexture;
+                postMaterial.uniforms.charCount.value = currentAsciiChars.length;
+            }
+        }
         
         // 渲染分辨率配置
         const PIXEL_SIZE = 14; // 字号大小，稍微调大增加辨识度
@@ -176,9 +363,17 @@
         // 添加暗蓝色雾效，增加空间深度感
         scene.fog = new THREE.Fog(0x050a10, 2, 18);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: false });
+        const asciiCanvas = document.getElementById('ascii-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas: asciiCanvas, antialias: false, powerPreference: 'high-performance' });
+        renderer.setPixelRatio(1);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.BasicShadowMap;
+        const renderTarget = new THREE.WebGLRenderTarget(1, 1, {
+            minFilter: THREE.LinearFilter,
+            magFilter: THREE.NearestFilter,
+            format: THREE.RGBAFormat,
+            depthBuffer: true
+        });
 
         const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 100);
         
@@ -232,6 +427,55 @@
             noiseThreshold: 10,
             alphaMultiplier: 1.0
         };
+        refreshAsciiAtlas();
+        const postScene = new THREE.Scene();
+        const postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+        postMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                tScene: { value: renderTarget.texture },
+                tAscii: { value: asciiAtlasTexture },
+                gridSize: { value: new THREE.Vector2(1, 1) },
+                charCount: { value: currentAsciiChars.length },
+                noiseThreshold: { value: devParams.noiseThreshold / 255 },
+                alphaMultiplier: { value: devParams.alphaMultiplier }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = vec4(position.xy, 0.0, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D tScene;
+                uniform sampler2D tAscii;
+                uniform vec2 gridSize;
+                uniform float charCount;
+                uniform float noiseThreshold;
+                uniform float alphaMultiplier;
+                varying vec2 vUv;
+
+                void main() {
+                    vec2 cell = floor(vUv * gridSize);
+                    vec2 cellUv = fract(vUv * gridSize);
+                    vec2 sampleUv = (cell + 0.5) / gridSize;
+                    vec3 sceneColor = texture2D(tScene, sampleUv).rgb;
+                    float luminance = dot(sceneColor, vec3(0.299, 0.587, 0.114));
+                    if (luminance < noiseThreshold) {
+                        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+                        return;
+                    }
+
+                    float charIndex = floor(luminance * (charCount - 1.0) + 0.5);
+                    vec2 atlasUv = vec2((charIndex + cellUv.x) / charCount, 1.0 - cellUv.y);
+                    float glyph = texture2D(tAscii, atlasUv).r;
+                    float alpha = min(1.0, max(0.15, luminance) * alphaMultiplier) * glyph;
+                    vec3 color = sceneColor * (0.3 + glyph * 1.45);
+                    gl_FragColor = vec4(mix(vec3(0.0), color, alpha), 1.0);
+                }
+            `
+        });
+        postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), postMaterial));
 
         const gui = new lil.GUI({ title: '⚙️ 开发者光影调参面板' });
         gui.domElement.style.display = 'none'; // 默认隐藏
@@ -268,34 +512,124 @@
         const shaderFolder = gui.addFolder('ASCII 后处理着色器 (Shader)');
         shaderFolder.add(devParams, 'asciiStyle', Object.keys(ASCII_SETS)).name('字符集风格').onChange(v => {
             currentAsciiChars = devParams.invertAscii ? ASCII_SETS[v].split('').reverse().join('') : ASCII_SETS[v];
+            refreshAsciiAtlas();
         });
         shaderFolder.add(devParams, 'invertAscii').name('反转明暗映射').onChange(v => {
             currentAsciiChars = v ? ASCII_SETS[devParams.asciiStyle].split('').reverse().join('') : ASCII_SETS[devParams.asciiStyle];
+            refreshAsciiAtlas();
         });
-        shaderFolder.add(devParams, 'noiseThreshold', 0, 50).name('降噪阈值 (过滤暗角)');
-        shaderFolder.add(devParams, 'alphaMultiplier', 0.1, 3.0).name('透明度全局缩放');
+        shaderFolder.add(devParams, 'noiseThreshold', 0, 50).name('降噪阈值 (过滤暗角)').onChange(v => {
+            postMaterial.uniforms.noiseThreshold.value = v / 255;
+        });
+        shaderFolder.add(devParams, 'alphaMultiplier', 0.1, 3.0).name('透明度全局缩放').onChange(v => {
+            postMaterial.uniforms.alphaMultiplier.value = v;
+        });
 
         // ==========================================
         // 3. 地图与场景生成 (调整了材质颜色，形成分层)
         // ==========================================
-        const levelMap = [
-            "111111111111111",
-            "100010000000201",
-            "104010111110101",
-            "100000140000101",
-            "111011101110101",
-            "120000000010001",
-            "101110111011111",
-            "101300041000041",
-            "101011101011101",
-            "140000000000001",
-            "111111111111111"
-        ];
+        const TILE = {
+            WALL: '1',
+            EMPTY: '0',
+            AMMO: '2',
+            HEALTH: '3',
+            ENEMY: '4',
+            KEY: '5',
+            DOOR: '6',
+            CLUE: '7',
+            EXIT: '8'
+        };
+
+        function generateFacilityMap() {
+            const width = 21;
+            const height = 15;
+            const grid = Array.from({ length: height }, () => Array(width).fill(TILE.WALL));
+            const protectedCells = new Set();
+
+            const keyOf = (x, z) => `${x},${z}`;
+            const mark = (x, z) => protectedCells.add(keyOf(x, z));
+            const carve = (x, z) => {
+                if (x > 0 && x < width - 1 && z > 0 && z < height - 1) grid[z][x] = TILE.EMPTY;
+            };
+            const carveRect = (x1, z1, x2, z2) => {
+                for (let z = z1; z <= z2; z++) for (let x = x1; x <= x2; x++) carve(x, z);
+            };
+            const carveLine = (x1, z1, x2, z2) => {
+                const dx = Math.sign(x2 - x1);
+                const dz = Math.sign(z2 - z1);
+                for (let x = x1; x !== x2 + dx; x += dx || 1) carve(x, z1);
+                for (let z = z1; z !== z2 + dz; z += dz || 1) carve(x2, z);
+            };
+
+            carveRect(1, 1, 3, 3);
+            carveLine(3, 2, 10, 2);
+            carveRect(8, 1, 12, 4);
+            carveLine(10, 4, 10, 11);
+            carveLine(10, 11, 17, 11);
+            carveRect(15, 9, 18, 12);
+            carveLine(17, 12, 19, 13);
+            carveRect(14, 1, 18, 4);
+            grid[2][13] = TILE.DOOR;
+            grid[2][17] = TILE.CLUE;
+            grid[11][17] = TILE.KEY;
+            grid[13][19] = TILE.EXIT;
+
+            for (const [x, z] of [[1, 1], [2, 2], [13, 2], [17, 2], [17, 11], [19, 13]]) mark(x, z);
+
+            const branchSeeds = [
+                [5, 2], [10, 6], [12, 11], [16, 10], [9, 3]
+            ];
+            for (const [sx, sz] of branchSeeds) {
+                const length = 2 + Math.floor(Math.random() * 4);
+                const horizontal = Math.random() > 0.45;
+                const dir = Math.random() > 0.5 ? 1 : -1;
+                for (let i = 1; i <= length; i++) {
+                    const x = sx + (horizontal ? i * dir : 0);
+                    const z = sz + (horizontal ? 0 : i * dir);
+                    carve(x, z);
+                    if (Math.random() > 0.65) carve(x + (horizontal ? 0 : 1), z + (horizontal ? 1 : 0));
+                }
+            }
+
+            const emptyCells = [];
+            for (let z = 1; z < height - 1; z++) {
+                for (let x = 1; x < width - 1; x++) {
+                    if (grid[z][x] === TILE.EMPTY && !protectedCells.has(keyOf(x, z))) emptyCells.push([x, z]);
+                }
+            }
+
+            const place = (tile, count, minDistance = 0) => {
+                for (let i = emptyCells.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [emptyCells[i], emptyCells[j]] = [emptyCells[j], emptyCells[i]];
+                }
+                let placed = 0;
+                for (const [x, z] of emptyCells) {
+                    if (placed >= count) break;
+                    if (grid[z][x] !== TILE.EMPTY) continue;
+                    if (Math.hypot(x - 1, z - 1) < minDistance) continue;
+                    grid[z][x] = tile;
+                    placed++;
+                }
+            };
+
+            place(TILE.ENEMY, 7, 4);
+            place(TILE.AMMO, 5, 2);
+            place(TILE.HEALTH, 3, 3);
+
+            return grid.map((row) => row.join(''));
+        }
+
+        const levelMap = generateFacilityMap();
 
         const mapSize = 2; 
         const walls = [];
+        const wallGrid = new Map();
         const enemies = [];
         const items = [];
+        const doors = [];
+        const terminals = [];
+        const exits = [];
         const bullets = [];
 
         // 新增：特效与粒子全局变量
@@ -307,16 +641,47 @@
         const wallMat = new THREE.MeshStandardMaterial({ color: 0x446655, roughness: 0.9 }); // 灰绿色墙体
         const floorMat = new THREE.MeshStandardMaterial({ color: 0x112233, roughness: 1.0 }); // 暗蓝色地板
         const ceilMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 1.0 });  // 近黑天花板
+        const doorMat = new THREE.MeshStandardMaterial({ color: 0x223355, emissive: 0x001133, roughness: 0.65, metalness: 0.2 });
+
+        function gridKey(x, z) {
+            return `${x},${z}`;
+        }
+
+        function addWallCollider(box, x, z, ref = null) {
+            const collider = { box, x, z, active: true, ref };
+            walls.push(collider);
+            const key = gridKey(x, z);
+            if (!wallGrid.has(key)) wallGrid.set(key, []);
+            wallGrid.get(key).push(collider);
+            return collider;
+        }
+
+        function getNearbyWallColliders(pos, radius = 1) {
+            const gx = Math.round(pos.x / mapSize);
+            const gz = Math.round(pos.z / mapSize);
+            const found = [];
+            for (let z = gz - radius; z <= gz + radius; z++) {
+                for (let x = gx - radius; x <= gx + radius; x++) {
+                    const bucket = wallGrid.get(gridKey(x, z));
+                    if (bucket) found.push(...bucket);
+                }
+            }
+            return found;
+        }
 
         function buildLevel() {
-            const floorGeo = new THREE.PlaneGeometry(50, 50);
+            const worldWidth = levelMap[0].length * mapSize;
+            const worldDepth = levelMap.length * mapSize;
+            const floorGeo = new THREE.PlaneGeometry(worldWidth + mapSize, worldDepth + mapSize);
             const floor = new THREE.Mesh(floorGeo, floorMat);
             floor.rotation.x = -Math.PI / 2;
+            floor.position.set((worldWidth - mapSize) / 2, 0, (worldDepth - mapSize) / 2);
             floor.receiveShadow = true;
             scene.add(floor);
 
             const ceiling = new THREE.Mesh(floorGeo, ceilMat);
             ceiling.rotation.x = Math.PI / 2;
+            ceiling.position.set((worldWidth - mapSize) / 2, mapSize, (worldDepth - mapSize) / 2);
             ceiling.position.y = mapSize;
             scene.add(ceiling);
 
@@ -327,17 +692,25 @@
                     const posX = x * mapSize;
                     const posZ = z * mapSize;
 
-                    if (type === '1') {
+                    if (type === TILE.WALL) {
                         const wall = new THREE.Mesh(wallGeo, wallMat);
                         wall.position.set(posX, mapSize / 2, posZ);
                         wall.castShadow = true;
                         wall.receiveShadow = true;
                         scene.add(wall);
-                        walls.push({ box: new THREE.Box3().setFromObject(wall) });
-                    } else if (type === '2' || type === '3') {
-                        spawnItem(posX, posZ, type === '2' ? 'ammo' : 'health');
-                    } else if (type === '4') {
+                        addWallCollider(new THREE.Box3().setFromObject(wall), x, z);
+                    } else if (type === TILE.AMMO || type === TILE.HEALTH) {
+                        spawnItem(posX, posZ, type === TILE.AMMO ? 'ammo' : 'health');
+                    } else if (type === TILE.ENEMY) {
                         spawnEnemy(posX, posZ);
+                    } else if (type === TILE.KEY) {
+                        spawnItem(posX, posZ, 'key');
+                    } else if (type === TILE.DOOR) {
+                        spawnDoor(posX, posZ, x, z);
+                    } else if (type === TILE.CLUE) {
+                        spawnTerminal(posX, posZ);
+                    } else if (type === TILE.EXIT) {
+                        spawnExit(posX, posZ);
                     }
                 }
             }
@@ -347,17 +720,83 @@
         // 4. 复杂角色/实体系统
         // ==========================================
         function spawnItem(x, z, type) {
-            const geo = type === 'ammo' ? new THREE.BoxGeometry(0.4, 0.4, 0.4) : new THREE.OctahedronGeometry(0.3);
-            const mat = new THREE.MeshStandardMaterial({ color: type === 'ammo' ? 0x00ffff : 0x00ff00, emissive: 0x113311 });
+            const geo = type === 'ammo'
+                ? new THREE.BoxGeometry(0.4, 0.4, 0.4)
+                : type === 'key'
+                    ? new THREE.TorusGeometry(0.28, 0.07, 6, 16)
+                    : new THREE.OctahedronGeometry(0.3);
+            const color = type === 'ammo' ? 0x00ffff : type === 'key' ? 0xffdd55 : 0x00ff00;
+            const emissive = type === 'ammo' ? 0x003333 : type === 'key' ? 0x664400 : 0x113311;
+            const mat = new THREE.MeshStandardMaterial({ color, emissive, roughness: 0.42, metalness: type === 'key' ? 0.6 : 0 });
             const mesh = new THREE.Mesh(geo, mat);
             mesh.position.set(x, 0.5, z);
             mesh.castShadow = true;
             
-            const light = new THREE.PointLight(type === 'ammo' ? 0x00ffff : 0x00ff00, 0.6, 4);
+            const light = new THREE.PointLight(color, type === 'key' ? 1.2 : 0.6, type === 'key' ? 6 : 4);
             mesh.add(light);
 
             scene.add(mesh);
             items.push({ mesh, type, active: true });
+        }
+
+        function spawnDoor(x, z, gridX, gridZ) {
+            const geo = new THREE.BoxGeometry(mapSize, mapSize, 0.36);
+            const mesh = new THREE.Mesh(geo, doorMat);
+            mesh.position.set(x, mapSize / 2, z);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            const seam = new THREE.PointLight(0x3366ff, 0.8, 5);
+            seam.position.y = 0.4;
+            mesh.add(seam);
+            scene.add(mesh);
+            const door = { mesh, active: true, unlocked: false, gridX, gridZ, promptShown: false };
+            door.collider = addWallCollider(new THREE.Box3().setFromObject(mesh), gridX, gridZ, door);
+            doors.push(door);
+        }
+
+        function spawnTerminal(x, z) {
+            const terminalGroup = new THREE.Group();
+            terminalGroup.position.set(x, 0, z);
+
+            const body = new THREE.Mesh(
+                new THREE.BoxGeometry(0.9, 0.7, 0.35),
+                new THREE.MeshStandardMaterial({ color: 0x113333, emissive: 0x003333, roughness: 0.35 })
+            );
+            body.position.y = 0.75;
+            terminalGroup.add(body);
+
+            const screen = new THREE.Mesh(
+                new THREE.PlaneGeometry(0.68, 0.38),
+                new THREE.MeshBasicMaterial({ color: 0x66ff99 })
+            );
+            screen.position.set(0, 0.83, -0.181);
+            terminalGroup.add(screen);
+
+            const light = new THREE.PointLight(0x66ff99, 0.9, 4);
+            light.position.y = 0.9;
+            terminalGroup.add(light);
+
+            scene.add(terminalGroup);
+            terminals.push({ group: terminalGroup, read: false, promptShown: false });
+        }
+
+        function spawnExit(x, z) {
+            const exitGroup = new THREE.Group();
+            exitGroup.position.set(x, 0, z);
+
+            const frame = new THREE.Mesh(
+                new THREE.BoxGeometry(1.3, 1.8, 0.24),
+                new THREE.MeshStandardMaterial({ color: 0x335544, emissive: 0x002211, roughness: 0.5 })
+            );
+            frame.position.y = 0.9;
+            exitGroup.add(frame);
+
+            const light = new THREE.PointLight(0x88ffcc, 1.2, 7);
+            light.position.y = 1.2;
+            exitGroup.add(light);
+
+            scene.add(exitGroup);
+            exits.push({ group: exitGroup, promptShown: false });
         }
 
         function spawnEnemy(x, z) {
@@ -384,7 +823,7 @@
             enemyGroup.add(eyeLight);
 
             scene.add(enemyGroup);
-            enemies.push({ group: enemyGroup, health: 3, active: true, speed: 0.02 + Math.random() * 0.01, flashTimer: 0 });
+            enemies.push({ group: enemyGroup, health: 3, active: true, speed: 0.72 + Math.random() * 0.28, flashTimer: 0, attackTimer: 0 });
         }
 
         function spawnExplosion(pos) {
@@ -411,31 +850,61 @@
             effectLights.push({ light: burstLight, life: 10 });
         }
 
-        function shoot() {
-            if (gameState.isGameOver || gameState.ammo <= 0) return;
-            gameState.ammo--;
-            updateUI();
-
+        function spawnBullet(direction, weapon) {
             const bulletGeo = new THREE.SphereGeometry(0.1, 4, 4);
-            const bulletMat = new THREE.MeshBasicMaterial({ color: 0xffffaa });
+            const bulletMat = new THREE.MeshBasicMaterial({ color: weapon.lightColor });
             const bullet = new THREE.Mesh(bulletGeo, bulletMat);
-            
-            // 子弹携带亮黄色动态光源
-            const bulletLight = new THREE.PointLight(0xffdd55, 2.0, 7);
+
+            const bulletLight = new THREE.PointLight(weapon.lightColor, weapon.id === 'scatter' ? 1.35 : 2.0, 7);
             bullet.add(bulletLight);
 
             bullet.position.copy(player.position);
-            bullet.position.y += 0.8; 
-            
-            const direction = new THREE.Vector3();
-            camera.getWorldDirection(direction);
-            
+            bullet.position.y += 0.8;
+
             scene.add(bullet);
-            bullets.push({ mesh: bullet, dir: direction, life: 60 });
+            bullets.push({ mesh: bullet, dir: direction.normalize(), life: weapon.id === 'scatter' ? 34 : 60, damage: weapon.damage, speed: weapon.speed });
+        }
+
+        function shoot() {
+            if (gameState.isGameOver || gameState.escaped || gameState.isPaused) return;
+            const weapon = weapons[gameState.weaponIndex];
+            const now = performance.now();
+            if (now - lastShotAt < weapon.cooldown) return;
+            if (gameState.ammo < weapon.cost) {
+                playSfx('error');
+                pushLog(`${weapon.name} 弹药不足。`);
+                return;
+            }
+
+            lastShotAt = now;
+            gameState.ammo -= weapon.cost;
+            updateUI();
+
+            const baseDirection = new THREE.Vector3();
+            camera.getWorldDirection(baseDirection);
+            for (let i = 0; i < weapon.pellets; i++) {
+                const direction = baseDirection.clone();
+                if (weapon.spread > 0) {
+                    direction.x += (Math.random() - 0.5) * weapon.spread;
+                    direction.y += (Math.random() - 0.5) * weapon.spread * 0.55;
+                    direction.z += (Math.random() - 0.5) * weapon.spread;
+                }
+                spawnBullet(direction, weapon);
+            }
+            playSfx(weapon.id === 'scatter' ? 'shotgun' : 'shoot');
+        }
+
+        function switchWeapon(index) {
+            if (!weapons[index]) return;
+            gameState.weaponIndex = index;
+            playSfx('pickup');
+            pushLog(`武器切换：${weapons[index].name}`);
+            updateUI();
         }
 
         function takeDamage() {
             gameState.health -= 10;
+            playSfx('damage');
             updateUI();
             
             const flash = document.getElementById('damage-flash');
@@ -450,12 +919,152 @@
             }
         }
 
+        function distanceXZ(a, b) {
+            return Math.hypot(a.x - b.x, a.z - b.z);
+        }
+
+        function unlockDoor(door) {
+            if (!door || !door.active || door.unlocked) return;
+            door.unlocked = true;
+            door.active = false;
+            if (door.collider) door.collider.active = false;
+            scene.remove(door.mesh);
+            playSfx('door');
+            setObjective('进入隐藏房间，读取终端上的撤离密码。');
+            pushLog('钥匙认证通过，隐藏门已打开。');
+        }
+
+        function readTerminal(terminal) {
+            if (!terminal || terminal.read) return;
+            terminal.read = true;
+            gameState.foundCode = true;
+            gameState.score += 250;
+            playSfx('key');
+            setObjective('找到出口大门，输入撤离密码。');
+            pushLog(`终端线索：EXIT CODE :: ${EXIT_CODE}`);
+            updateUI();
+        }
+
+        function showPasswordPrompt() {
+            if (gameState.escaped || gameState.isGameOver || gameState.isPaused) return;
+            gameState.isPaused = true;
+            if (document.pointerLockElement) document.exitPointerLock();
+            const panel = document.getElementById('password-panel');
+            const input = document.getElementById('password-input');
+            panel.style.display = 'block';
+            input.value = '';
+            setTimeout(() => input.focus(), 0);
+        }
+
+        function hidePasswordPrompt() {
+            document.getElementById('password-panel').style.display = 'none';
+            gameState.isPaused = false;
+            updateUI();
+        }
+
+        function completeEscape() {
+            gameState.escaped = true;
+            gameState.isGameOver = true;
+            gameState.score += 1000;
+            playSfx('success');
+            if (document.pointerLockElement) document.exitPointerLock();
+            document.getElementById('password-panel').style.display = 'none';
+            document.getElementById('ending-text').textContent = [
+                '┌────────────────────────────────────────┐',
+                '│  FACILITY LOCKDOWN BYPASSED           │',
+                '│  SURVIVOR SIGNAL ACQUIRED             │',
+                `│  FINAL SCORE ${String(gameState.score).padStart(6, '0')}                  │`,
+                '└────────────────────────────────────────┘'
+            ].join('\n');
+            document.getElementById('ending-panel').style.display = 'block';
+            updateUI();
+        }
+
+        function submitPassword() {
+            const input = document.getElementById('password-input');
+            if (input.value.trim() === EXIT_CODE) {
+                completeEscape();
+            } else {
+                playSfx('error');
+                pushLog('密码错误。重新确认隐藏房间线索。');
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        function interact() {
+            if (gameState.isGameOver || gameState.isPaused) return;
+            for (const door of doors) {
+                if (door.active && distanceXZ(player.position, door.mesh.position) < 1.7) {
+                    if (gameState.hasKey) unlockDoor(door);
+                    else {
+                        playSfx('error');
+                        pushLog('隐藏门锁定：需要钥匙。');
+                    }
+                    return;
+                }
+            }
+            for (const terminal of terminals) {
+                if (distanceXZ(player.position, terminal.group.position) < 1.8) {
+                    readTerminal(terminal);
+                    return;
+                }
+            }
+            for (const exit of exits) {
+                if (distanceXZ(player.position, exit.group.position) < 1.9) {
+                    showPasswordPrompt();
+                    return;
+                }
+            }
+            pushLog('附近没有可交互目标。');
+        }
+
+        function updateNearbyAction() {
+            gameState.nearbyAction = '';
+            for (const door of doors) {
+                if (door.active && distanceXZ(player.position, door.mesh.position) < 2.2) {
+                    gameState.nearbyAction = gameState.hasKey ? '[E] OPEN HIDDEN DOOR' : '[E] LOCKED DOOR: KEY REQUIRED';
+                    return;
+                }
+            }
+            for (const terminal of terminals) {
+                if (!terminal.read && distanceXZ(player.position, terminal.group.position) < 2.2) {
+                    gameState.nearbyAction = '[E] READ TERMINAL';
+                    return;
+                }
+            }
+            for (const exit of exits) {
+                if (distanceXZ(player.position, exit.group.position) < 2.2) {
+                    gameState.nearbyAction = '[E] ENTER EXIT CODE';
+                    return;
+                }
+            }
+        }
+
         // ==========================================
         // 5. 隐藏式手势交互控制
         // ==========================================
         let touchLeft = null; let touchRight = null;
         let moveForward = 0; let moveRight = 0;
         let yaw = 0; let pitch = 0;
+        let mouseLookFallback = null;
+
+        function applyLookDelta(dx, dy, sensitivity = 0.002) {
+            yaw -= dx * sensitivity;
+            pitch -= dy * sensitivity;
+            pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, pitch));
+            player.rotation.y = yaw;
+            pitchObject.rotation.x = pitch;
+            document.body.dataset.lookState = JSON.stringify({ yaw, pitch });
+        }
+
+        function startMouseLookFallback(e) {
+            mouseLookFallback = {
+                lastX: e.clientX,
+                lastY: e.clientY,
+                moved: 0
+            };
+        }
 
         window.addEventListener('touchstart', (e) => {
             if (gameState.isGameOver) return;
@@ -521,8 +1130,17 @@
             
             if (document.pointerLockElement === document.body) {
                 if (e.button === 0) shoot(); // 锁定状态下：左键开火
+            } else if (typeof document.body.requestPointerLock === 'function') {
+                try {
+                    const lockRequest = document.body.requestPointerLock(); // 未锁定状态下：点击请求隐藏并锁定鼠标
+                    if (lockRequest && typeof lockRequest.catch === 'function') {
+                        lockRequest.catch(() => startMouseLookFallback(e));
+                    }
+                } catch {
+                    startMouseLookFallback(e);
+                }
             } else {
-                document.body.requestPointerLock(); // 未锁定状态下：点击请求隐藏并锁定鼠标
+                startMouseLookFallback(e);
             }
         });
 
@@ -533,18 +1151,38 @@
             if (gameState.isPaused) return; // 新增：暂停期间停止视角转动
             if (document.pointerLockElement === document.body) {
                 // 读取鼠标的物理相对位移 (movementX/Y)，实现真正的 FPS 视角
-                yaw -= e.movementX * 0.002; 
-                pitch -= e.movementY * 0.002;
-                pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, pitch));
-                player.rotation.y = yaw; 
-                pitchObject.rotation.x = pitch;
+                applyLookDelta(e.movementX, e.movementY);
+            } else if (mouseLookFallback) {
+                const dx = e.clientX - mouseLookFallback.lastX;
+                const dy = e.clientY - mouseLookFallback.lastY;
+                mouseLookFallback.lastX = e.clientX;
+                mouseLookFallback.lastY = e.clientY;
+                mouseLookFallback.moved += Math.abs(dx) + Math.abs(dy);
+                applyLookDelta(dx, dy, 0.005);
             }
         });
+        window.addEventListener('pointerup', e => {
+            if (!mouseLookFallback) return;
+            if (e.button === 0 && mouseLookFallback.moved < 8) shoot();
+            mouseLookFallback = null;
+        });
+        window.addEventListener('blur', () => {
+            mouseLookFallback = null;
+        });
+
+        document.getElementById('password-submit').addEventListener('click', submitPassword);
+        document.getElementById('password-cancel').addEventListener('click', hidePasswordPrompt);
 
         // 3. 更丝滑的 WASD 键盘记录（支持斜向移动）
         const keys = { w: false, a: false, s: false, d: false };
         window.addEventListener('keydown', e => {
             const k = e.key.toLowerCase();
+            const passwordVisible = document.getElementById('password-panel').style.display === 'block';
+            if (passwordVisible) {
+                if (k === 'enter') submitPassword();
+                if (k === 'escape') hidePasswordPrompt();
+                return;
+            }
             
             // 新增：P键控制开发者面板与游戏暂停
             if (k === 'p') {
@@ -563,6 +1201,22 @@
                 }
                 return;
             }
+            if (k === '1') {
+                switchWeapon(0);
+                return;
+            }
+            if (k === '2') {
+                switchWeapon(1);
+                return;
+            }
+            if (k === 'q') {
+                switchWeapon((gameState.weaponIndex + 1) % weapons.length);
+                return;
+            }
+            if (k === 'e') {
+                interact();
+                return;
+            }
 
             if (keys.hasOwnProperty(k)) keys[k] = true;
         });
@@ -577,7 +1231,8 @@
         // ==========================================
         function checkWallCollision(newPos) {
             const playerRadius = 0.3;
-            for (const wall of walls) {
+            for (const wall of getNearbyWallColliders(newPos, 1)) {
+                if (!wall.active) continue;
                 if (newPos.x + playerRadius > wall.box.min.x && newPos.x - playerRadius < wall.box.max.x &&
                     newPos.z + playerRadius > wall.box.min.z && newPos.z - playerRadius < wall.box.max.z) {
                     return true;
@@ -586,10 +1241,57 @@
             return false;
         }
 
+        function padLine(text, width) {
+            const clean = String(text).slice(0, width);
+            return `${clean}${' '.repeat(Math.max(0, width - clean.length))}`;
+        }
+
+        function drawBox(title, lines, width = 36) {
+            const label = ` ${title} `;
+            const top = `┌${label}${'─'.repeat(Math.max(0, width - label.length))}┐`;
+            const body = lines.map((line) => `│${padLine(line, width)}│`).join('\n');
+            const bottom = `└${'─'.repeat(width)}┘`;
+            return `${top}\n${body}\n${bottom}`;
+        }
+
+        function bar(value, max, width = 12) {
+            const filled = Math.max(0, Math.min(width, Math.round((value / max) * width)));
+            return `${'█'.repeat(filled)}${'░'.repeat(width - filled)}`;
+        }
+
+        function pushLog(text) {
+            messageLog.unshift(`> ${text}`);
+            messageLog.splice(5);
+            updateUI();
+        }
+
+        function setObjective(text) {
+            gameState.objective = text;
+            updateUI();
+        }
+
         function updateUI() {
             document.getElementById('health-val').innerText = gameState.health;
             document.getElementById('ammo-val').innerText = gameState.ammo;
             document.getElementById('score-val').innerText = gameState.score;
+
+            const weapon = weapons[gameState.weaponIndex];
+            document.getElementById('ui-layer').textContent = drawBox('OPS / STATUS', [
+                `HP   ${bar(gameState.health, 100)} ${String(gameState.health).padStart(3, '0')}`,
+                `AMMO ${String(gameState.ammo).padStart(3, '0')}    SCORE ${String(gameState.score).padStart(5, '0')}`,
+                `WEAP ${weapon.name.padEnd(8, ' ')} COST ${weapon.cost}`,
+                `KEY  ${gameState.hasKey ? 'YES' : 'NO '}    CODE ${gameState.foundCode ? EXIT_CODE : '----'}`
+            ]);
+
+            document.getElementById('mission-layer').textContent = drawBox('MISSION / LINK', [
+                gameState.objective,
+                gameState.nearbyAction || 'WASD move | mouse look | LMB fire',
+                '1 sidearm | 2 scatter | E interact'
+            ], 46);
+
+            document.getElementById('log-layer').textContent = drawBox('RADIO / LOG', messageLog.length ? messageLog : [
+                '> 活下来，找到钥匙并逃离设施。'
+            ], 50);
         }
 
         const clock = new THREE.Clock();
@@ -652,11 +1354,13 @@
 
             for (let i = bullets.length - 1; i >= 0; i--) {
                 const b = bullets[i];
-                b.mesh.position.add(b.dir.clone().multiplyScalar(20 * delta));
+                b.mesh.position.add(b.dir.clone().multiplyScalar(b.speed * delta));
                 b.life--;
 
                 let hit = false;
-                for (const wall of walls) if (wall.box.containsPoint(b.mesh.position)) hit = true;
+                for (const wall of getNearbyWallColliders(b.mesh.position, 1)) {
+                    if (wall.active && wall.box.containsPoint(b.mesh.position)) hit = true;
+                }
 
                 if (!hit) {
                     for (const enemy of enemies) {
@@ -664,7 +1368,7 @@
                         const distXZ = Math.hypot(b.mesh.position.x - enemy.group.position.x, b.mesh.position.z - enemy.group.position.z);
                         if (enemy.active && distXZ < 0.6) {
                             hit = true;
-                            enemy.health--;
+                            enemy.health -= b.damage;
                             
                             // 触发敌人全身受击高亮闪烁
                             enemy.flashTimer = 5;
@@ -675,6 +1379,7 @@
                                 enemy.active = false;
                                 scene.remove(enemy.group);
                                 gameState.score += 100;
+                                playSfx('enemyDown');
                                 updateUI();
                                 
                                 // 触发击杀特效：相机震动 + 爆炸粒子与强光
@@ -690,6 +1395,7 @@
 
             for (const enemy of enemies) {
                 if (!enemy.active) continue;
+                enemy.attackTimer = Math.max(0, enemy.attackTimer - delta);
                 
                 // 处理受击闪烁的颜色恢复
                 if (enemy.flashTimer > 0) {
@@ -707,9 +1413,10 @@
                     if (distXZ > 0.8) {
                         const dir = new THREE.Vector3().subVectors(player.position, enemy.group.position).normalize();
                         dir.y = 0;
-                        enemy.group.position.add(dir.multiplyScalar(enemy.speed));
-                    } else {
-                        if (Math.random() < 0.05) takeDamage();
+                        enemy.group.position.add(dir.multiplyScalar(enemy.speed * delta));
+                    } else if (enemy.attackTimer <= 0) {
+                        takeDamage();
+                        enemy.attackTimer = 0.75;
                     }
                 }
             }
@@ -720,18 +1427,33 @@
                 if (player.position.distanceTo(item.mesh.position) < 1.0) {
                     item.active = false;
                     scene.remove(item.mesh);
-                    if (item.type === 'ammo') gameState.ammo += 15;
-                    else gameState.health = Math.min(100, gameState.health + 30);
+                    if (item.type === 'ammo') {
+                        gameState.ammo += 15;
+                        playSfx('pickup');
+                        pushLog('拾取弹药 +15。');
+                    } else if (item.type === 'key') {
+                        gameState.hasKey = true;
+                        gameState.score += 150;
+                        playSfx('key');
+                        setObjective('返回隐藏门，使用钥匙进入控制室。');
+                        pushLog('取得钥匙。隐藏门认证已可用。');
+                    } else {
+                        gameState.health = Math.min(100, gameState.health + 30);
+                        playSfx('pickup');
+                        pushLog('医疗包恢复 +30。');
+                    }
                     updateUI();
                 }
             }
+
+            const previousAction = gameState.nearbyAction;
+            updateNearbyAction();
+            if (previousAction !== gameState.nearbyAction) updateUI();
         }
 
         // ==========================================
-        // 7. 全新架构：彩色 Canvas 2D ASCII 渲染引擎
+        // 7. WebGL 后处理 ASCII 渲染引擎
         // ==========================================
-        const asciiCanvas = document.getElementById('ascii-canvas');
-        const ctx = asciiCanvas.getContext('2d', { alpha: false }); // 优化性能
         
         function resizeRenderer() {
             // 等宽字体 Courier 的高宽比大概是 1 : 0.6
@@ -742,12 +1464,10 @@
             cols = Math.floor(window.innerWidth / CHAR_WIDTH);
             rows = Math.floor(window.innerHeight / CHAR_HEIGHT);
             
-            // WebGL 底层采样的分辨率
-            renderer.setSize(cols, rows, false);
-            
-            // 设置 Canvas 真实的显示尺寸
-            asciiCanvas.width = window.innerWidth;
-            asciiCanvas.height = window.innerHeight;
+            // WebGL 后处理：低分辨率场景纹理 + 全屏 shader 输出
+            renderTarget.setSize(cols, rows);
+            renderer.setSize(window.innerWidth, window.innerHeight, false);
+            postMaterial.uniforms.gridSize.value.set(cols, rows);
             
             // 核心修复：摄像机长宽比直接使用真实屏幕长宽比，抵消字符自身的非正方形拉伸！
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -756,54 +1476,14 @@
         window.addEventListener('resize', resizeRenderer);
         resizeRenderer(); 
 
-        let pixelBuffer = new Uint8Array(0);
-
         function renderAscii() {
-            // 1. 渲染 3D 场景到内存
+            // 1. 渲染 3D 场景到低分辨率纹理
+            renderer.setRenderTarget(renderTarget);
             renderer.render(scene, camera);
-            
-            // 2. 提取像素 RGB 数据
-            const gl = renderer.getContext();
-            const bufferSize = cols * rows * 4;
-            if (pixelBuffer.length !== bufferSize) pixelBuffer = new Uint8Array(bufferSize);
-            gl.readPixels(0, 0, cols, rows, gl.RGBA, gl.UNSIGNED_BYTE, pixelBuffer);
 
-            // 3. 清空 Canvas 准备重绘
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, asciiCanvas.width, asciiCanvas.height);
-
-            // 设置绘制字体
-            ctx.font = `bold ${PIXEL_SIZE}px 'Courier New', Courier, monospace`;
-            ctx.textBaseline = 'top';
-
-            // 4. 遍历像素并绘制彩色 ASCII
-            for (let y = 0; y < rows; y++) {
-                // WebGL 的 Y 轴是从下往上的，所以需要翻转 Y 轴读取
-                const glY = rows - 1 - y;
-                
-                for (let x = 0; x < cols; x++) {
-                    const i = (glY * cols + x) * 4;
-                    const r = pixelBuffer[i];
-                    const g = pixelBuffer[i+1];
-                    const b = pixelBuffer[i+2];
-                    
-                    // 计算灰度值决定字符密度
-                    const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-                    
-                    // 修改：使用开发者面板配置的降噪阈值
-                    if (luminance < devParams.noiseThreshold) continue; 
-                    
-                    const charIndex = Math.floor((luminance / 255) * (currentAsciiChars.length - 1));
-                    const char = currentAsciiChars[charIndex];
-
-                    // 修改：使用开发者面板配置的透明度缩放系数
-                    let alpha = Math.max(0.15, luminance / 255) * devParams.alphaMultiplier;
-                    alpha = Math.min(1.0, alpha).toFixed(2); // 确保 alpha 不超过 1
-
-                    ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
-                    ctx.fillText(char, x * CHAR_WIDTH, y * CHAR_HEIGHT);
-                }
-            }
+            // 2. 在 GPU fragment shader 中完成亮度到字符图集的映射
+            renderer.setRenderTarget(null);
+            renderer.render(postScene, postCamera);
         }
 
         // ==========================================
@@ -811,6 +1491,29 @@
         // ==========================================
         buildLevel();
         updateUI();
+        function getDebugSnapshot() {
+            return {
+                levelSize: { rows: levelMap.length, cols: levelMap[0].length },
+                tileCounts: levelMap.join('').split('').reduce((acc, ch) => {
+                    acc[ch] = (acc[ch] || 0) + 1;
+                    return acc;
+                }, {}),
+                wallCount: walls.length,
+                wallGridBuckets: wallGrid.size,
+                enemyCount: enemies.length,
+                itemTypes: items.reduce((acc, item) => {
+                    acc[item.type] = (acc[item.type] || 0) + 1;
+                    return acc;
+                }, {}),
+                doorCount: doors.length,
+                terminalCount: terminals.length,
+                exitCount: exits.length,
+                weapons: weapons.map((weapon) => ({ name: weapon.name, cost: weapon.cost, pellets: weapon.pellets })),
+                shaderPipeline: !!postMaterial && !!renderTarget
+            };
+        }
+        window.__ASCII_LABYRINTH_DEBUG__ = getDebugSnapshot;
+        document.body.dataset.debugSnapshot = JSON.stringify(getDebugSnapshot());
 
         function animate() {
             requestAnimationFrame(animate);
