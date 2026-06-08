@@ -4,7 +4,7 @@ ASCII Labyrinth is a deployable Vite + React shell around a preserved single-fil
 
 ## Overview
 
-The original gameplay runtime still lives in origin/index.html and is automatically synchronized into public/legacy before development and production builds.<br/>**原始玩法运行时仍保存在 origin/index.html 中，并会在开发与生产构建前自动同步到 public/legacy。**
+The original gameplay runtime still lives in origin/index.html and is automatically synchronized into public/runtime before development and production builds.<br/>**原始玩法运行时仍保存在 origin/index.html 中，并会在开发与生产构建前自动同步到 public/runtime。**
 
 This repository now provides a standard frontend entry, GitHub Pages-safe Vite routing, and a React presentation layer for delivery and future migration work.<br/>**当前仓库已经提供标准前端入口、适配 GitHub Pages 的 Vite 路由，以及用于交付和后续迁移的 React 表现层。**
 
@@ -18,7 +18,7 @@ This repository now provides a standard frontend entry, GitHub Pages-safe Vite r
 ## Architecture
 
 - src/data stores repository-level content and migration-facing project facts that should continue absorbing extracted gameplay constants and maps.<br/>**src/data 用于存放仓库级内容和迁移导向的项目信息，后续应继续吸收被抽离出的玩法常量与地图数据。**
-- src/logic/engine currently isolates legacy runtime addressing and marks the boundary where collision, AI, combat, and update loops should move next.<br/>**src/logic/engine 当前隔离了 legacy runtime 的接入边界，并标记出下一步应迁入的碰撞、AI、战斗与更新循环逻辑。**
+- src/logic/engine currently isolates runtime addressing and marks the boundary where collision, AI, combat, and update loops should move next.<br/>**src/logic/engine 当前隔离了运行时接入边界，并标记出下一步应迁入的碰撞、AI、战斗与更新循环逻辑。**
 - src/logic/hooks contains React-only orchestration such as runtime reload state and Pages-safe iframe URLs.<br/>**src/logic/hooks 负责仅属于 React 的编排逻辑，例如运行时重载状态和适配 Pages 的 iframe 地址。**
 - src/view renders the repository shell, status panels, and the gameplay viewport without interfering with the original high-frequency runtime loop.<br/>**src/view 负责渲染仓库壳层、状态面板和玩法视口，同时不干扰原始高频运行时循环。**
 

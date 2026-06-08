@@ -7,7 +7,7 @@ import {
   nextExtractionTargets,
   runtimePills,
 } from '../../data/gameContent';
-import { useLegacyGameFrame } from '../../logic/hooks/useLegacyGameFrame';
+import { useGameFrame } from '../../logic/hooks/useGameFrame';
 import { FeatureCard } from '../components/FeatureCard';
 import { GameViewport } from '../components/GameViewport';
 import { PanelSection } from '../components/PanelSection';
@@ -15,7 +15,7 @@ import { RuntimePill } from '../components/RuntimePill';
 
 export function LabyrinthScreen() {
   const { frameSrc, standaloneSrc, isFrameReady, markFrameReady, reloadFrame } =
-    useLegacyGameFrame();
+    useGameFrame();
 
   return (
     <main className="app-shell">

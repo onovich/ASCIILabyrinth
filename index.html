@@ -3,14 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="refresh" content="0; url=./legacy/index.html" />
     <title>ASCII Labyrinth</title>
-    <script>
-      window.location.replace(new URL('./legacy/index.html', window.location.href));
-    </script>
   </head>
   <body>
-    <p>Redirecting to the original runtime...</p>
-    <p><a href="./legacy/index.html">Open the original runtime</a></p>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

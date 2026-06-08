@@ -1,14 +1,14 @@
 import { startTransition, useState } from 'react';
 import {
-  buildLegacyRuntimeSrc,
+  buildRuntimeSrc,
   getStandaloneRuntimeSrc,
-} from '../engine/legacyRuntime';
+} from '../engine/runtimeAddressing';
 
-export function useLegacyGameFrame() {
+export function useGameFrame() {
   const [frameNonce, setFrameNonce] = useState(0);
   const [isFrameReady, setIsFrameReady] = useState(false);
 
-  const frameSrc = buildLegacyRuntimeSrc(import.meta.env.BASE_URL, frameNonce);
+  const frameSrc = buildRuntimeSrc(import.meta.env.BASE_URL, frameNonce);
   const standaloneSrc = getStandaloneRuntimeSrc(import.meta.env.BASE_URL);
 
   const reloadFrame = () => {

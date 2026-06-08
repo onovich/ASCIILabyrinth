@@ -6,5 +6,5 @@ Thumbs.db
 .env.*
 *.local
 .vscode/
-public/legacy/
+public/runtime/
 bgm/*.wav

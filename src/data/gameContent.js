@@ -1,5 +1,5 @@
 export const heroContent = {
-  eyebrow: 'ASCII 3D FPS / Legacy Runtime Preserved',
+  eyebrow: 'ASCII 3D FPS / Runtime Preserved',
   title: 'ASCII Labyrinth',
   description:
     'A chromatic terminal shooter preserved from the original single-file prototype and wrapped in a Vite + React delivery shell.',
@@ -9,7 +9,7 @@ export const heroContent = {
 
 export const runtimePills = [
   'Three.js ASCII renderer',
-  'Legacy runtime auto-synced',
+  'Runtime auto-synced',
   'GitHub Pages ready',
 ];
 
@@ -52,11 +52,11 @@ export const controlGroups = [
 export const architectureSlices = [
   {
     title: 'Data',
-    body: '项目说明、控制提示、迁移状态等仓库级数据已抽到 src/data，后续可以继续把地图、参数和实体配置从 legacy runtime 中分离。',
+    body: '项目说明、控制提示、迁移状态等仓库级数据已抽到 src/data，后续可以继续把地图、参数和实体配置从原始运行时中分离。',
   },
   {
     title: 'Logic',
-    body: 'src/logic 现在承载 legacy runtime 接入逻辑，并明确了后续应优先抽离的引擎入口，而不是继续把托管逻辑写死在视图层。',
+    body: 'src/logic 现在承载运行时接入逻辑，并明确了后续应优先抽离的引擎入口，而不是继续把托管逻辑写死在视图层。',
   },
   {
     title: 'View',
@@ -68,7 +68,7 @@ export const migrationStatus = {
   title: 'Current migration status',
   bullets: [
     '已建立标准前端入口、构建脚本与 GitHub Pages 所需 base 配置。',
-    '已保留 origin/index.html 作为单一 legacy 运行时来源，并在 dev/build 前自动同步到 public/legacy。',
+    '已保留 origin/index.html 作为单一运行时来源，并在 dev/build 前自动同步到 public/runtime。',
     '已建立 src/data、src/logic/engine、src/logic/hooks、src/view/screens、src/view/components 目录与最小实现。',
     '尚未把敌人 AI、碰撞、ASCII 采样和更新循环完整拆出单文件原型；当前阶段属于迁移准备完成，而非全量逻辑重构完成。',
   ],
