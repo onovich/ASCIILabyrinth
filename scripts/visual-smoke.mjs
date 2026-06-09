@@ -48,6 +48,7 @@ const pages = [
         'timestamps',
         'floorTools',
         'htmlEscapes',
+        'optionsHtml',
         'projectNormalizer'
       ])],
       ['editor levels', (snapshot) => Number(snapshot.levelCount) > 0],
@@ -71,6 +72,7 @@ const pages = [
         'jsonExport',
         'timestamps',
         'htmlEscapes',
+        'optionsHtml',
         'projectNormalizer'
       ])],
       ['model editor models', (snapshot) => Number(snapshot.modelCount) > 0],

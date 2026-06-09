@@ -190,6 +190,27 @@
     return `<option value="${escapeAttr(value)}"${selectedAttr}>${escapeHtml(label)}</option>`;
   }
 
+  function getOptionValue(item) {
+    if (Array.isArray(item)) return item[0];
+    if (item && typeof item === 'object') return item.value ?? item.id ?? item.key ?? '';
+    return item;
+  }
+
+  function getOptionLabel(item, value) {
+    if (Array.isArray(item)) return item[1] ?? item[0];
+    if (item && typeof item === 'object') return item.label ?? item.name ?? value;
+    return item;
+  }
+
+  function optionsHtml(items, selected, getValue, getLabel) {
+    const list = Array.isArray(items) ? items : [];
+    return list.map((item, index) => {
+      const value = typeof getValue === 'function' ? getValue(item, index) : getOptionValue(item);
+      const label = typeof getLabel === 'function' ? getLabel(item, index, value) : getOptionLabel(item, value);
+      return optionHtml(value, label, selected);
+    }).join('');
+  }
+
   function parseJson(raw) {
     return JSON.parse(raw);
   }
@@ -722,6 +743,7 @@
     escapeHtml,
     escapeAttr,
     optionHtml,
+    optionsHtml,
     parseJson,
     stringifyJson,
     createJsonExportName,

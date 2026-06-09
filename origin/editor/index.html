@@ -747,6 +747,11 @@
         .replaceAll("'", '&#039;'));
       const escapeAttr = SHARED_DATA.escapeAttr || escapeHtml;
       const optionHtml = SHARED_DATA.optionHtml || ((value, label, selected) => `<option value="${escapeAttr(value)}" ${String(value) === String(selected) ? 'selected' : ''}>${escapeHtml(label)}</option>`);
+      const optionsHtml = SHARED_DATA.optionsHtml || ((items, selected, getValue, getLabel) => (Array.isArray(items) ? items : []).map((item, index) => {
+        const value = typeof getValue === 'function' ? getValue(item, index) : (Array.isArray(item) ? item[0] : item?.value ?? item?.id ?? item?.key ?? item);
+        const label = typeof getLabel === 'function' ? getLabel(item, index, value) : (Array.isArray(item) ? item[1] ?? item[0] : item?.label ?? item?.name ?? value);
+        return optionHtml(value, label, selected);
+      }).join(''));
       const parseJson = SHARED_DATA.parseJson || JSON.parse;
       const stringifyJson = SHARED_DATA.stringifyJson || ((value) => JSON.stringify(value, null, 2));
       const createJsonExportName = SHARED_DATA.createJsonExportName || ((prefix) => `${prefix}-${new Date().toISOString().slice(0, 10)}.json`);
@@ -1290,6 +1295,7 @@
               && typeof SHARED_DATA.getMaxFloorSpan === 'function'
               && typeof SHARED_DATA.getAdjacentFloorId === 'function',
             htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
+            optionsHtml: typeof SHARED_DATA.optionsHtml === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeEditorProject === 'function'
           },
           levelCount: project.levels.length,
@@ -1482,7 +1488,7 @@
           return `
             <div class="grid-two">
               <label>敌人类型<select data-path="enemyKind">
-                ${ENEMY_KIND_OPTIONS.map(([value, label]) => option(value, label, object.enemyKind)).join('')}
+                ${optionsHtml(ENEMY_KIND_OPTIONS, object.enemyKind)}
               </select></label>
               <label>巡逻<select data-path="patrol">
                 ${option('idle', '固定', object.patrol)}
@@ -1587,7 +1593,7 @@
       }
 
       function floorOptions(value) {
-        return FLOORS.map((floor) => option(String(floor.id), floor.label, String(value))).join('');
+        return optionsHtml(FLOORS, String(value), (floor) => String(floor.id), (floor) => floor.label);
       }
 
       function floorSpanOptions(object) {
@@ -1599,12 +1605,12 @@
       }
 
       function levelOptions(value) {
-        return `<option value=""></option>${project.levels.map((level) => option(level.id, level.name, value)).join('')}`;
+        return `<option value=""></option>${optionsHtml(project.levels, value, (level) => level.id, (level) => level.name)}`;
       }
 
       function doorOptions(value) {
         const doors = allObjects().filter((object) => object.type === 'keyDoor' || object.type === 'hiddenDoor');
-        return `<option value=""></option>${doors.map((door) => option(door.doorId || door.id, door.label || door.doorId || door.id, value)).join('')}`;
+        return `<option value=""></option>${optionsHtml(doors, value, (door) => door.doorId || door.id, (door) => door.label || door.doorId || door.id)}`;
       }
 
       function option(value, label, selected) {

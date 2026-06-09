@@ -501,6 +501,11 @@
         .replaceAll("'", '&#039;'));
       const escapeAttr = SHARED_DATA.escapeAttr || escapeHtml;
       const optionHtml = SHARED_DATA.optionHtml || ((value, label, selected) => `<option value="${escapeAttr(value)}" ${String(value) === String(selected) ? 'selected' : ''}>${escapeHtml(label)}</option>`);
+      const optionsHtml = SHARED_DATA.optionsHtml || ((items, selected, getValue, getLabel) => (Array.isArray(items) ? items : []).map((item, index) => {
+        const value = typeof getValue === 'function' ? getValue(item, index) : (Array.isArray(item) ? item[0] : item?.value ?? item?.id ?? item?.key ?? item);
+        const label = typeof getLabel === 'function' ? getLabel(item, index, value) : (Array.isArray(item) ? item[1] ?? item[0] : item?.label ?? item?.name ?? value);
+        return optionHtml(value, label, selected);
+      }).join(''));
       const parseJson = SHARED_DATA.parseJson || JSON.parse;
       const stringifyJson = SHARED_DATA.stringifyJson || ((value) => JSON.stringify(value, null, 2));
       const createJsonExportName = SHARED_DATA.createJsonExportName || ((prefix) => `${prefix}-${new Date().toISOString().slice(0, 10)}.json`);
@@ -937,11 +942,8 @@
       }
 
       function renderTemplates() {
-        dom.templateSelect.innerHTML = TEMPLATE_IDS.map((id) => {
-          const model = createTemplateModel(id);
-          return option(id, model.name);
-        }).join('');
-        dom.shapeSelect.innerHTML = SHAPES.map((shape) => option(shape, shape)).join('');
+        dom.templateSelect.innerHTML = optionsHtml(TEMPLATE_IDS, undefined, (id) => id, (id) => createTemplateModel(id).name);
+        dom.shapeSelect.innerHTML = optionsHtml(SHAPES);
       }
 
       function renderLists() {
@@ -1006,7 +1008,7 @@
           </div>
           <label>名称<input data-part-field="name" value="${escapeAttr(partItem.name)}" /></label>
           <label>ID<input data-part-field="id" value="${escapeAttr(partItem.id)}" /></label>
-          <label>形状<select data-part-field="shape">${SHAPES.map((shape) => option(shape, shape, partItem.shape)).join('')}</select></label>
+          <label>形状<select data-part-field="shape">${optionsHtml(SHAPES, partItem.shape)}</select></label>
           <div class="grid-two">
             <label>填充色<input type="color" data-part-field="color" value="${escapeAttr(partItem.color)}" /></label>
             <label>边线色<input type="color" data-part-field="edgeColor" value="${escapeAttr(partItem.edgeColor)}" /></label>
@@ -1254,6 +1256,7 @@
             pathTools: typeof SHARED_DATA.setValueByPath === 'function',
             clamp: typeof SHARED_DATA.clamp === 'function',
             optionHtml: typeof SHARED_DATA.optionHtml === 'function',
+            optionsHtml: typeof SHARED_DATA.optionsHtml === 'function',
             parseJson: typeof SHARED_DATA.parseJson === 'function',
             jsonExport: typeof SHARED_DATA.stringifyJson === 'function' && typeof SHARED_DATA.createJsonExportName === 'function',
             timestamps: typeof SHARED_DATA.toIsoTimestamp === 'function' && typeof SHARED_DATA.touchProject === 'function',
