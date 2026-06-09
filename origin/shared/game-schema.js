@@ -672,6 +672,7 @@
     buildRuntimeLevelFromEditorProject,
     loadEditorProject,
     loadRuntimeLevelFromLocalStorage,
+    degreesToRadians,
     normalizeModelPart,
     normalizeModelProject,
     buildRuntimeModelProfilesFromModelProject,

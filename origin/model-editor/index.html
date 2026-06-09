@@ -506,6 +506,7 @@
         return acc;
       }, {}));
       const createSharedId = SHARED_DATA.createId || SHARED_DATA.createEditorId || ((prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`);
+      const degreesToRadians = SHARED_DATA.degreesToRadians || ((values) => (Array.isArray(values) ? values : [0, 0, 0]).map((value) => (Number(value) || 0) * Math.PI / 180));
 
       const dom = {
         templateSelect: document.getElementById('templateSelect'),
@@ -885,7 +886,7 @@
           group.add(edges);
         }
         group.position.set(...partItem.position);
-        group.rotation.set(...partItem.rotation.map(degToRad));
+        group.rotation.set(...degreesToRadians(partItem.rotation));
         group.scale.set(...partItem.scale);
         return group;
       }
@@ -909,10 +910,6 @@
           default:
             return new THREE.BoxGeometry(1, 1, 1);
         }
-      }
-
-      function degToRad(value) {
-        return (value * Math.PI) / 180;
       }
 
       function render() {

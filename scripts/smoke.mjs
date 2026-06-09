@@ -149,6 +149,8 @@ async function main() {
   schema.setValueByPath(pathTarget, 'parts.0.position.1', 7);
   assert(Array.isArray(pathTarget.parts) && Array.isArray(pathTarget.parts[0].position), 'shared path setter should create arrays for numeric segments');
   assert(schema.getValueByPath(pathTarget, 'parts.0.position.1') === 7, 'shared path getter should read nested array values');
+  assert(Math.abs(schema.degreesToRadians([0, 90, 'bad'])[1] - Math.PI / 2) < 0.0001, 'shared angle helper should convert degrees to radians');
+  assert(schema.degreesToRadians(null).every((value) => value === 0), 'shared angle helper should repair missing vectors');
   assert(schema.escapeHtml("<tag class=\"x\">&'") === '&lt;tag class=&quot;x&quot;&gt;&amp;&#039;', 'shared html escape should encode inspector text');
   const editorObject = schema.createEditorObject('weapon', 1, 2, 0, { weaponKind: 'rail' }, { makeId: (prefix) => `${prefix}-fixed` });
   assert(editorObject.id === 'weapon-fixed', 'shared editor object factory should accept injected ids');
