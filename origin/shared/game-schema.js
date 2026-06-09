@@ -115,6 +115,16 @@
     return floors.find((floor) => floor.id === floorId)?.label || String(floorId);
   }
 
+  function hasFloor(floorId, floors = FLOORS) {
+    return floors.some((floor) => floor.id === floorId);
+  }
+
+  function getAdjacentFloorId(currentFloor, direction, floors = FLOORS) {
+    const index = floors.findIndex((floor) => floor.id === currentFloor);
+    if (index < 0) return null;
+    return floors[index + direction]?.id ?? null;
+  }
+
   function setValueByPath(object, path, value) {
     const parts = String(path).split('.');
     let cursor = object;
@@ -677,6 +687,8 @@
     WEAPON_DEFS,
     OBJECT_TO_TILE,
     getFloorLabel,
+    hasFloor,
+    getAdjacentFloorId,
     setValueByPath,
     getValueByPath,
     countBy,

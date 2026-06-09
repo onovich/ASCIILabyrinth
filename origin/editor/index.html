@@ -767,6 +767,11 @@
         return floorId >= baseFloor && floorId < baseFloor + objectFloorSpanOf(object);
       });
       const getFloorLabel = SHARED_DATA.getFloorLabel || ((floorId, floors = FLOORS) => floors.find((floor) => floor.id === floorId)?.label || String(floorId));
+      const hasFloor = SHARED_DATA.hasFloor || ((floorId, floors = FLOORS) => floors.some((floor) => floor.id === floorId));
+      const getAdjacentFloorId = SHARED_DATA.getAdjacentFloorId || ((floorId, direction, floors = FLOORS) => {
+        const index = floors.findIndex((floor) => floor.id === floorId);
+        return floors[index + direction]?.id ?? null;
+      });
       const createSharedId = SHARED_DATA.createId || SHARED_DATA.createEditorId || ((prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`);
 
       const ENEMY_KIND_OPTIONS = SHARED_DATA.ENEMY_KIND_OPTIONS || [
@@ -976,12 +981,11 @@
       }
 
       function adjacentFloorId(direction) {
-        const index = FLOORS.findIndex((floor) => floor.id === currentFloor);
-        return FLOORS[index + direction]?.id ?? null;
+        return getAdjacentFloorId(currentFloor, direction, FLOORS);
       }
 
       function floorExists(floorId) {
-        return FLOORS.some((floor) => floor.id === floorId);
+        return hasFloor(floorId, FLOORS);
       }
 
       function objectOnFloor(object, floorId = currentFloor) {
@@ -1266,7 +1270,7 @@
             optionHtml: typeof SHARED_DATA.optionHtml === 'function',
             parseJson: typeof SHARED_DATA.parseJson === 'function',
             jsonExport: typeof SHARED_DATA.stringifyJson === 'function' && typeof SHARED_DATA.createJsonExportName === 'function',
-            floorLabels: typeof SHARED_DATA.getFloorLabel === 'function',
+            floorTools: typeof SHARED_DATA.getFloorLabel === 'function' && typeof SHARED_DATA.hasFloor === 'function' && typeof SHARED_DATA.getAdjacentFloorId === 'function',
             htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeEditorProject === 'function'
           },
