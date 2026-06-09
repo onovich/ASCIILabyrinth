@@ -320,3 +320,71 @@
   color: var(--muted, var(--al-color-muted));
   font-size: 12px;
 }
+
+.al-tool-page :where(.section) {
+  padding: var(--al-space-3);
+  border-bottom: 1px solid var(--line-soft, var(--al-color-line-soft));
+}
+
+.al-tool-page :where(.section-title) {
+  margin: 0 0 10px;
+  color: #f0ede5;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.al-tool-page :where(.stack) {
+  display: grid;
+  gap: var(--al-space-2);
+}
+
+.al-tool-page :where(.grid-two) {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--al-space-2);
+}
+
+.al-tool-page :where(.grid-three) {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--al-space-2);
+}
+
+.al-tool-page :where(.pill) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 2px 8px;
+  border: 1px solid var(--line, var(--al-color-line));
+  border-radius: 999px;
+  background: #15191d;
+  color: var(--muted, var(--al-color-muted));
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.al-tool-page :where(.empty) {
+  padding: var(--al-space-3);
+  border: 1px dashed var(--line, var(--al-color-line));
+  border-radius: var(--al-radius-md);
+  color: var(--muted, var(--al-color-muted));
+  font-size: 13px;
+}
+
+.al-tool-page :where(.statusbar) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--al-space-3);
+  padding: 0 var(--al-space-3);
+  border-top: 1px solid var(--line, var(--al-color-line));
+  background: #15181b;
+  color: var(--muted, var(--al-color-muted));
+  font-size: 12px;
+}
+
+.al-tool-page :where(.file-input) {
+  display: none;
+}
