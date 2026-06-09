@@ -47,6 +47,29 @@
   text-shadow: var(--al-text-glow);
 }
 
+.al-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  pointer-events: none;
+  color: rgba(140, 255, 154, 0.78);
+  font-size: 18px;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(140, 255, 154, 0.6);
+}
+
+.al-damage-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background-color: var(--al-color-danger);
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
 .al-panel {
   --al-panel-accent: var(--al-color-green);
   box-sizing: border-box;

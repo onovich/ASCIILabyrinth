@@ -60,34 +60,6 @@
             box-shadow: 0 0 18px rgba(255, 209, 102, 0.16);
         }
 
-        /* 准星 */
-        #crosshair {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10;
-            pointer-events: none;
-            color: rgba(140, 255, 154, 0.78);
-            font-weight: bold;
-            font-size: 18px;
-            text-shadow: 0 0 10px rgba(140, 255, 154, 0.6);
-        }
-
-        /* 伤害闪烁 */
-        #damage-flash {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: red;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 5;
-            transition: opacity 0.1s;
-        }
-
     </style>
 </head>
 <body>
@@ -102,8 +74,8 @@
         <span id="score-val">0</span>
     </div>
     
-    <div id="crosshair">┼</div>
-    <div id="damage-flash"></div>
+    <div id="crosshair" class="al-crosshair">┼</div>
+    <div id="damage-flash" class="al-damage-flash"></div>
     
     <!-- 替换为 Canvas 作为 ASCII 输出载体 -->
     <canvas id="ascii-canvas"></canvas>
@@ -1762,6 +1734,10 @@
                     status: window.ASCIIUI?.getPanelState?.('ui-layer') || { exists: false },
                     mission: window.ASCIIUI?.getPanelState?.('mission-layer') || { exists: false },
                     log: window.ASCIIUI?.getPanelState?.('log-layer') || { exists: false }
+                },
+                screenUi: {
+                    crosshair: getUiClassState('crosshair', ['al-crosshair']),
+                    damageFlash: getUiClassState('damage-flash', ['al-damage-flash'])
                 },
                 modalUi: {
                     passwordPanel: getUiClassState('password-panel', ['terminal-modal', 'al-modal', 'al-modal-centered']),
