@@ -182,6 +182,29 @@ async function assertSyncedFiles() {
   }
 }
 
+async function assertSharedCssContract() {
+  const requiredSelectors = [
+    '.al-panel',
+    '.al-modal',
+    '.al-tool-page',
+    '.al-tool-page :where(.app)',
+    '.al-tool-page :where(.workspace)',
+    '.al-tool-page :where(.canvas-shell, .preview-shell)',
+    '.al-tool-page :where(.palette-item, .model-row, .part-row)'
+  ];
+  const files = [
+    'origin/shared/ui-system.css',
+    'public/runtime/shared/ui-system.css'
+  ];
+
+  for (const file of files) {
+    const css = await readFile(resolve(projectRoot, file), 'utf8');
+    for (const selector of requiredSelectors) {
+      assert(css.includes(selector), `${file} should include shared UI selector ${selector}`);
+    }
+  }
+}
+
 async function main() {
   const schema = await loadSharedData();
   const { ui, elements } = await loadSharedUi();
@@ -319,8 +342,9 @@ async function main() {
   assert(staleModels === null, 'stale model schemas should be ignored by runtime conversion');
 
   await assertSyncedFiles();
+  await assertSharedCssContract();
 
-  console.log('smoke ok: shared schema, runtime conversion, model conversion, synced assets');
+  console.log('smoke ok: shared schema, runtime conversion, model conversion, shared UI CSS, synced assets');
 }
 
 await main();
