@@ -752,6 +752,7 @@
         const label = typeof getLabel === 'function' ? getLabel(item, index, value) : (Array.isArray(item) ? item[1] ?? item[0] : item?.label ?? item?.name ?? value);
         return optionHtml(value, label, selected);
       }).join(''));
+      const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml || ((items, selected, getValue, getLabel) => `<option value=""></option>${optionsHtml(items, selected, getValue, getLabel)}`);
       const parseJson = SHARED_DATA.parseJson || JSON.parse;
       const stringifyJson = SHARED_DATA.stringifyJson || ((value) => JSON.stringify(value, null, 2));
       const createJsonExportName = SHARED_DATA.createJsonExportName || ((prefix) => `${prefix}-${new Date().toISOString().slice(0, 10)}.json`);
@@ -1296,6 +1297,7 @@
               && typeof SHARED_DATA.getAdjacentFloorId === 'function',
             htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
             optionsHtml: typeof SHARED_DATA.optionsHtml === 'function',
+            optionsWithEmptyHtml: typeof SHARED_DATA.optionsWithEmptyHtml === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeEditorProject === 'function'
           },
           levelCount: project.levels.length,
@@ -1605,12 +1607,12 @@
       }
 
       function levelOptions(value) {
-        return `<option value=""></option>${optionsHtml(project.levels, value, (level) => level.id, (level) => level.name)}`;
+        return optionsWithEmptyHtml(project.levels, value, (level) => level.id, (level) => level.name);
       }
 
       function doorOptions(value) {
         const doors = allObjects().filter((object) => object.type === 'keyDoor' || object.type === 'hiddenDoor');
-        return `<option value=""></option>${optionsHtml(doors, value, (door) => door.doorId || door.id, (door) => door.label || door.doorId || door.id)}`;
+        return optionsWithEmptyHtml(doors, value, (door) => door.doorId || door.id, (door) => door.label || door.doorId || door.id);
       }
 
       function option(value, label, selected) {

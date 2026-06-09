@@ -161,6 +161,7 @@ async function main() {
   assert(schema.escapeHtml("<tag class=\"x\">&'") === '&lt;tag class=&quot;x&quot;&gt;&amp;&#039;', 'shared html escape should encode inspector text');
   assert(schema.optionHtml('a&b', '<Pick>', 'a&b') === '<option value="a&amp;b" selected>&lt;Pick&gt;</option>', 'shared option helper should escape and select matching options');
   assert(schema.optionsHtml([['a&b', '<Pick>']], 'a&b') === '<option value="a&amp;b" selected>&lt;Pick&gt;</option>', 'shared options helper should render escaped option lists');
+  assert(schema.optionsWithEmptyHtml([['door-a', 'Door A']], '') === '<option value=""></option><option value="door-a">Door A</option>', 'shared optional options helper should prepend an empty choice');
   assert(schema.parseJson('{"ok":true}').ok === true, 'shared json parser should parse import payloads');
   assert(schema.stringifyJson({ ok: true }) === '{\n  "ok": true\n}', 'shared json stringifier should keep export formatting');
   assert(schema.createJsonExportName('ascii-test', new Date('2026-06-10T00:00:00Z')) === 'ascii-test-2026-06-10.json', 'shared export names should include stable date stamps');

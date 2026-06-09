@@ -211,6 +211,10 @@
     }).join('');
   }
 
+  function optionsWithEmptyHtml(items, selected, getValue, getLabel) {
+    return `<option value=""></option>${optionsHtml(items, selected, getValue, getLabel)}`;
+  }
+
   function parseJson(raw) {
     return JSON.parse(raw);
   }
@@ -744,6 +748,7 @@
     escapeAttr,
     optionHtml,
     optionsHtml,
+    optionsWithEmptyHtml,
     parseJson,
     stringifyJson,
     createJsonExportName,
