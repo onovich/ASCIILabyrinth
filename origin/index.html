@@ -1431,7 +1431,17 @@
             panel.dataset.title = title;
             if (tone) panel.dataset.tone = tone;
             else panel.removeAttribute('data-tone');
-            panel.textContent = lines.join('\n');
+            panel.replaceChildren();
+
+            const container = document.createElement('div');
+            container.className = 'al-panel-lines';
+            lines.forEach((line) => {
+                const entry = document.createElement('div');
+                entry.className = 'al-panel-line';
+                entry.textContent = line && typeof line === 'object' ? String(line.text ?? '') : String(line ?? '');
+                container.appendChild(entry);
+            });
+            panel.appendChild(container);
         }
 
         function bar(value, max, width = 12) {
