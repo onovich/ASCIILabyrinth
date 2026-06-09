@@ -3,14 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="refresh" content="0; url=./runtime/index.html" />
     <title>ASCII Labyrinth</title>
     <script>
-      window.location.replace(new URL('./runtime/index.html', window.location.href));
+      const baseMarker = '/ASCIILabyrinth/';
+      const path = window.location.pathname;
+      const baseIndex = path.indexOf(baseMarker);
+      const basePath =
+        baseIndex >= 0
+          ? path.slice(0, baseIndex + baseMarker.length)
+          : new URL('./', window.location.href).pathname;
+      const target = /\/model-editor\/?$/.test(path)
+        ? 'model-editor/index.html'
+        : /\/editor\/?$/.test(path)
+          ? 'editor/index.html'
+          : 'runtime/index.html';
+      window.location.replace(new URL(`${basePath}${target}`, window.location.origin));
     </script>
   </head>
   <body>
     <p>Opening ASCII Labyrinth...</p>
-    <p><a href="./runtime/index.html">Open ASCII Labyrinth</a></p>
+    <p><a href="/ASCIILabyrinth/runtime/index.html">Open ASCII Labyrinth</a></p>
+    <p><a href="/ASCIILabyrinth/editor/index.html">Open Level Editor</a></p>
+    <p><a href="/ASCIILabyrinth/model-editor/index.html">Open Model Editor</a></p>
   </body>
 </html>

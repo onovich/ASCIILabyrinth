@@ -1,0 +1,1663 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ASCII Labyrinth Level Editor</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #101214;
+        --panel: #181b1f;
+        --panel-strong: #20242a;
+        --line: #313840;
+        --line-soft: #252a30;
+        --text: #e6e1d6;
+        --muted: #a5acb3;
+        --accent: #61d394;
+        --warn: #e4b15b;
+        --danger: #e06f6b;
+        --blue: #6ba6f6;
+        --cyan: #50d6cf;
+        --cell: 32px;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #22272d;
+        color: var(--text);
+        cursor: pointer;
+        min-height: 32px;
+      }
+
+      button:hover,
+      button:focus-visible {
+        border-color: var(--accent);
+        outline: none;
+      }
+
+      button.primary {
+        background: #254d3a;
+        border-color: #3e8867;
+      }
+
+      button.warn {
+        background: #4e3920;
+        border-color: #88663a;
+      }
+
+      button.danger {
+        background: #4d2525;
+        border-color: #8a4848;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #111418;
+        color: var(--text);
+        min-height: 32px;
+        padding: 6px 8px;
+      }
+
+      textarea {
+        min-height: 84px;
+        resize: vertical;
+        line-height: 1.4;
+      }
+
+      input[type='checkbox'] {
+        width: auto;
+        min-height: auto;
+      }
+
+      label {
+        display: grid;
+        gap: 4px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .app {
+        display: grid;
+        grid-template-rows: 52px 1fr 32px;
+        width: 100%;
+        height: 100%;
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: minmax(180px, 260px) 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--line);
+        background: #15181b;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .mark {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        background: #23332b;
+        color: var(--accent);
+        font-family: "Courier New", monospace;
+        font-weight: 700;
+      }
+
+      .brand strong {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 15px;
+      }
+
+      .brand span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .toolbar select {
+        max-width: 210px;
+      }
+
+      .toolbar button {
+        min-width: 34px;
+        padding: 0 10px;
+      }
+
+      .segmented {
+        display: inline-grid;
+        grid-auto-flow: column;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        overflow: hidden;
+      }
+
+      .segmented button {
+        border: 0;
+        border-radius: 0;
+        min-width: 42px;
+        background: #171b20;
+      }
+
+      .segmented button.active {
+        background: #31533f;
+        color: #ffffff;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: 250px minmax(360px, 1fr) 318px;
+        min-height: 0;
+      }
+
+      .sidebar,
+      .inspector {
+        min-height: 0;
+        overflow: auto;
+        background: var(--panel);
+      }
+
+      .sidebar {
+        border-right: 1px solid var(--line);
+      }
+
+      .inspector {
+        border-left: 1px solid var(--line);
+      }
+
+      .section {
+        padding: 12px;
+        border-bottom: 1px solid var(--line-soft);
+      }
+
+      .section-title {
+        margin: 0 0 10px;
+        color: #f0ede5;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      .palette {
+        display: grid;
+        gap: 7px;
+      }
+
+      .palette-item {
+        display: grid;
+        grid-template-columns: 34px 1fr auto;
+        gap: 8px;
+        align-items: center;
+        min-height: 42px;
+        padding: 6px 8px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #15191d;
+        cursor: grab;
+        user-select: none;
+      }
+
+      .palette-item.active {
+        border-color: var(--accent);
+        background: #1b2a22;
+      }
+
+      .palette-icon {
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        border: 1px solid currentColor;
+        border-radius: 5px;
+        font-family: "Courier New", monospace;
+        font-weight: 700;
+      }
+
+      .palette-item span {
+        display: block;
+        min-width: 0;
+      }
+
+      .palette-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .palette-code {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .canvas-shell {
+        display: grid;
+        grid-template-rows: 38px 1fr;
+        min-width: 0;
+        min-height: 0;
+        background: #0d0f11;
+      }
+
+      .scene-strip {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 7px 10px;
+        border-bottom: 1px solid var(--line);
+        background: #14171a;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .scene-strip strong {
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .canvas-wrap {
+        position: relative;
+        min-width: 0;
+        min-height: 0;
+        overflow: auto;
+        background: #0b0d0f;
+      }
+
+      #mapCanvas {
+        display: block;
+        margin: 18px;
+        border: 1px solid var(--line);
+        background: #151812;
+        image-rendering: pixelated;
+        cursor: crosshair;
+      }
+
+      .grid-two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .grid-three {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .stack {
+        display: grid;
+        gap: 8px;
+      }
+
+      .row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .row button {
+        flex: 1;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 2px 8px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #15191d;
+        color: var(--muted);
+        font-size: 12px;
+        text-decoration: none;
+      }
+
+      .object-list {
+        display: grid;
+        gap: 6px;
+        max-height: 220px;
+        overflow: auto;
+      }
+
+      .object-row {
+        display: grid;
+        grid-template-columns: 24px 1fr auto;
+        gap: 7px;
+        align-items: center;
+        padding: 6px;
+        border: 1px solid var(--line-soft);
+        border-radius: 6px;
+        background: #14181c;
+        color: var(--text);
+        font-size: 12px;
+      }
+
+      .object-row.active {
+        border-color: var(--accent);
+        background: #1a2821;
+      }
+
+      .swatch {
+        width: 18px;
+        height: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+      }
+
+      .statusbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0 12px;
+        border-top: 1px solid var(--line);
+        background: #15181b;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .file-input {
+        display: none;
+      }
+
+      .empty {
+        padding: 12px;
+        border: 1px dashed var(--line);
+        border-radius: 8px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 1100px) {
+        .workspace {
+          grid-template-columns: 220px minmax(300px, 1fr) 280px;
+        }
+      }
+
+      @media (max-width: 860px) {
+        .app {
+          grid-template-rows: auto 1fr 32px;
+        }
+
+        .topbar {
+          grid-template-columns: 1fr;
+        }
+
+        .workspace {
+          grid-template-columns: 1fr;
+          grid-template-rows: 190px 1fr 280px;
+        }
+
+        .sidebar,
+        .inspector {
+          border: 0;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .sidebar {
+          display: grid;
+          grid-auto-flow: column;
+          grid-auto-columns: 250px;
+          overflow-x: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="mark">AL</div>
+          <div>
+            <strong>ASCII Labyrinth 地编</strong>
+            <span id="projectMeta">Level config</span>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <select id="levelSelect" title="关卡"></select>
+          <button id="addLevelBtn" title="新增关卡">+</button>
+          <button id="duplicateLevelBtn" title="复制关卡">⧉</button>
+          <button id="deleteLevelBtn" class="danger" title="删除关卡">×</button>
+          <div class="segmented" id="floorSwitch" aria-label="楼层"></div>
+        </div>
+
+        <div class="toolbar">
+          <button id="saveBtn" class="primary" title="保存到本机">保存</button>
+          <button id="loadBtn" title="读取本机存档">读取</button>
+          <button id="exportBtn" title="导出 JSON">导出</button>
+          <button id="importBtn" title="导入 JSON">导入</button>
+          <input id="importFile" class="file-input" type="file" accept="application/json,.json" />
+          <a href="../model-editor/index.html" class="pill">模型</a>
+          <a href="../runtime/index.html" class="pill">运行</a>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <aside class="sidebar" id="palettePanel"></aside>
+
+        <section class="canvas-shell">
+          <div class="scene-strip">
+            <span><strong id="sceneName"></strong> <span id="sceneStats"></span></span>
+            <span id="cursorReadout">x 0 / y 0</span>
+          </div>
+          <div class="canvas-wrap" id="canvasWrap">
+            <canvas id="mapCanvas"></canvas>
+          </div>
+        </section>
+
+        <aside class="inspector">
+          <div class="section">
+            <h2 class="section-title">关卡</h2>
+            <div id="levelInspector" class="stack"></div>
+          </div>
+          <div class="section">
+            <h2 class="section-title">对象</h2>
+            <div id="objectInspector" class="stack"></div>
+          </div>
+          <div class="section">
+            <h2 class="section-title">列表</h2>
+            <div id="objectList" class="object-list"></div>
+          </div>
+        </aside>
+      </section>
+
+      <footer class="statusbar">
+        <span id="statusText">Ready</span>
+        <span id="schemaText">schema v1</span>
+      </footer>
+    </main>
+
+    <script>
+      const STORAGE_KEY = 'ascii-labyrinth-editor-v1';
+      const CELL_SIZE = 32;
+      const FLOORS = [
+        { id: 0, label: 'B1' },
+        { id: 1, label: '1F' }
+      ];
+
+      const TYPE_META = {
+        wall: { group: '结构', name: '墙壁', icon: 'W', color: '#718078', default: { w: 1, h: 1, blocking: true } },
+        keyDoor: { group: '结构', name: '钥匙门', icon: 'D', color: '#6ba6f6', default: { w: 1, h: 1, doorId: 'door-a', requiredKeyId: 'key-a', locked: true } },
+        hiddenDoor: { group: '结构', name: '隐藏门', icon: 'H', color: '#a889dc', default: { w: 1, h: 1, doorId: 'hidden-a', requiredKeyId: 'key-a', locked: true, hidden: true } },
+        ramp: { group: '结构', name: '斜坡', icon: 'R', color: '#d2a24f', default: { w: 2, h: 1, floorFrom: 0, floorTo: 1, direction: 'east' } },
+        entrance: { group: '场景', name: '入口', icon: 'IN', color: '#67d68c', default: { w: 1, h: 1, entranceId: 'entry-a' } },
+        exit: { group: '场景', name: '出口', icon: 'EX', color: '#50d6cf', default: { w: 1, h: 1, exitId: 'exit-a', targetLevelId: '', targetEntranceId: '' } },
+        key: { group: '物品', name: '钥匙', icon: 'K', color: '#f1d36d', default: { w: 1, h: 1, keyId: 'key-a', boundDoorId: 'door-a' } },
+        terminal: { group: '物品', name: '终端', icon: 'T', color: '#66d99c', default: { w: 1, h: 1, message: 'EXIT CODE :: 3142', interaction: defaultInteraction('dialog') } },
+        enemy: { group: '单位', name: '敌人', icon: 'E', color: '#e06f6b', default: { w: 1, h: 1, enemyKind: 'scout', patrol: 'idle' } },
+        npc: { group: '单位', name: 'NPC', icon: 'N', color: '#c6c0a5', default: { w: 1, h: 1, npcId: 'npc-a', interaction: defaultInteraction('dialog') } },
+        ammo: { group: '补给', name: '弹药', icon: 'A', color: '#71c7ff', default: { w: 1, h: 1, amount: 15 } },
+        medkit: { group: '补给', name: '医疗包', icon: '+', color: '#72d47e', default: { w: 1, h: 1, amount: 30 } },
+        weapon: { group: '补给', name: '武器', icon: 'G', color: '#f08f59', default: { w: 1, h: 1, weaponKind: 'scatter', ammo: 6 } },
+        trigger: { group: '逻辑', name: '触发器', icon: 'TR', color: '#e4b15b', default: { w: 3, h: 2, triggerId: 'trigger-a', once: true, effect: defaultEffect('dialog') } },
+        eraser: { group: '工具', name: '橡皮', icon: '⌫', color: '#b8b8b8', default: {} }
+      };
+
+      const PALETTE_ORDER = [
+        'wall',
+        'keyDoor',
+        'hiddenDoor',
+        'ramp',
+        'entrance',
+        'exit',
+        'key',
+        'terminal',
+        'enemy',
+        'npc',
+        'ammo',
+        'medkit',
+        'weapon',
+        'trigger',
+        'eraser'
+      ];
+
+      const ENEMY_KIND_OPTIONS = [
+        ['scout', '棱镜侦察体'],
+        ['brute', '熔核冲锋兽'],
+        ['spine', '裂脊潜伏体'],
+        ['warden', '幽环守望者'],
+        ['crawler', '蛛行切割者'],
+        ['spore', '孢群增殖体'],
+        ['screamer', '尖啸信标体'],
+        ['boss', '深层门卫核心']
+      ];
+
+      const dom = {
+        levelSelect: document.getElementById('levelSelect'),
+        addLevelBtn: document.getElementById('addLevelBtn'),
+        duplicateLevelBtn: document.getElementById('duplicateLevelBtn'),
+        deleteLevelBtn: document.getElementById('deleteLevelBtn'),
+        floorSwitch: document.getElementById('floorSwitch'),
+        saveBtn: document.getElementById('saveBtn'),
+        loadBtn: document.getElementById('loadBtn'),
+        exportBtn: document.getElementById('exportBtn'),
+        importBtn: document.getElementById('importBtn'),
+        importFile: document.getElementById('importFile'),
+        palettePanel: document.getElementById('palettePanel'),
+        mapCanvas: document.getElementById('mapCanvas'),
+        canvasWrap: document.getElementById('canvasWrap'),
+        levelInspector: document.getElementById('levelInspector'),
+        objectInspector: document.getElementById('objectInspector'),
+        objectList: document.getElementById('objectList'),
+        sceneName: document.getElementById('sceneName'),
+        sceneStats: document.getElementById('sceneStats'),
+        cursorReadout: document.getElementById('cursorReadout'),
+        statusText: document.getElementById('statusText'),
+        projectMeta: document.getElementById('projectMeta'),
+        schemaText: document.getElementById('schemaText')
+      };
+
+      const ctx = dom.mapCanvas.getContext('2d');
+      let project = createStarterProject();
+      let currentLevelId = project.levels[0].id;
+      let currentFloor = 0;
+      let selectedId = null;
+      let activeTool = 'wall';
+      let dragState = null;
+
+      function defaultEffect(type) {
+        return {
+          type,
+          healAmount: 20,
+          dialog: '无线电短句',
+          targetLevelId: '',
+          targetEntranceId: '',
+          targetFloor: 0,
+          doorId: '',
+          weaponKind: 'scatter'
+        };
+      }
+
+      function defaultInteraction(type) {
+        return {
+          mode: 'interact',
+          once: true,
+          effect: defaultEffect(type)
+        };
+      }
+
+      function createStarterProject() {
+        return {
+          version: 1,
+          updatedAt: new Date().toISOString(),
+          settings: { cellSize: CELL_SIZE },
+          levels: [
+            createStarterLevel(),
+            createLevel('upper-archive', '上层档案室', 24, 14, true)
+          ]
+        };
+      }
+
+      function createStarterLevel() {
+        const level = createLevel('facility-a', '当前关卡：设施 A', 25, 17, false);
+        const add = (type, x, y, floor, extra = {}) => {
+          level.objects.push(createObject(type, x, y, floor, extra));
+        };
+
+        for (let x = 0; x < level.width; x++) {
+          add('wall', x, 0, 0);
+          add('wall', x, level.height - 1, 0);
+        }
+        for (let y = 1; y < level.height - 1; y++) {
+          add('wall', 0, y, 0);
+          add('wall', level.width - 1, y, 0);
+        }
+        for (let x = 4; x <= 18; x++) if (![8, 14].includes(x)) add('wall', x, 5, 0);
+        for (let y = 5; y <= 13; y++) if (![8, 11].includes(y)) add('wall', 14, y, 0);
+        for (let x = 14; x <= 22; x++) if (x !== 20) add('wall', x, 10, 0);
+
+        add('entrance', 2, 2, 0, { label: '入口 A', entranceId: 'entry-a' });
+        add('keyDoor', 8, 5, 0, { label: '钥匙门 A', doorId: 'door-a', requiredKeyId: 'key-a' });
+        add('hiddenDoor', 20, 10, 0, { label: '隐藏门 A', doorId: 'hidden-a', requiredKeyId: 'key-a' });
+        add('key', 17, 13, 0, { label: '钥匙 A', keyId: 'key-a', boundDoorId: 'door-a' });
+        add('terminal', 21, 8, 0, { label: '密码终端', message: 'EXIT CODE :: 3142' });
+        add('exit', 22, 14, 0, { label: '去上层', exitId: 'exit-upper', targetLevelId: 'upper-archive', targetEntranceId: 'entry-upper', targetFloor: 1 });
+        add('ramp', 11, 8, 0, { label: '上层斜坡', floorFrom: 0, floorTo: 1, direction: 'east' });
+        add('weapon', 6, 3, 0, { weaponKind: 'scatter' });
+        add('ammo', 5, 8, 0);
+        add('ammo', 16, 11, 0);
+        add('medkit', 10, 12, 0);
+        add('enemy', 12, 3, 0, { label: '侦察体', enemyKind: 'scout' });
+        add('enemy', 18, 7, 0, { label: '冲锋兽', enemyKind: 'brute' });
+        add('npc', 3, 12, 0, {
+          label: '幸存者',
+          npcId: 'survivor-a',
+          interaction: {
+            mode: 'interact',
+            once: false,
+            effect: { ...defaultEffect('dialog'), dialog: '门后面有一台终端。' }
+          }
+        });
+        level.triggers.push(createObject('trigger', 2, 10, 0, {
+          label: '医疗触发区',
+          triggerId: 'heal-zone-a',
+          once: false,
+          effect: { ...defaultEffect('heal'), type: 'heal', healAmount: 15 }
+        }));
+        level.triggers.push(createObject('trigger', 19, 13, 0, {
+          label: '出口提示',
+          triggerId: 'exit-dialog-a',
+          once: true,
+          effect: { ...defaultEffect('dialog'), dialog: '出口需要终端给出的密码。' }
+        }));
+
+        for (let x = 9; x <= 13; x++) add('wall', x, 3, 1);
+        for (let y = 3; y <= 7; y++) add('wall', 13, y, 1);
+        add('entrance', 11, 7, 1, { label: '上层入口', entranceId: 'entry-ramp' });
+        add('ammo', 10, 4, 1);
+        add('enemy', 12, 6, 1, { label: '守望者', enemyKind: 'warden' });
+        return level;
+      }
+
+      function createLevel(id, name, width = 24, height = 16, upperStart = false) {
+        const level = {
+          id,
+          name,
+          width,
+          height,
+          floors: [0, 1],
+          objects: [],
+          triggers: [],
+          notes: ''
+        };
+        if (upperStart) {
+          level.objects.push(createObject('entrance', 2, 2, 1, { label: '上层入口', entranceId: 'entry-upper' }));
+          level.objects.push(createObject('exit', 20, 11, 1, { label: '返回设施 A', exitId: 'exit-back', targetLevelId: 'facility-a', targetEntranceId: 'entry-a', targetFloor: 0 }));
+          level.objects.push(createObject('terminal', 8, 5, 1, { label: '档案终端', message: 'ARCHIVE LINK ONLINE' }));
+          level.objects.push(createObject('weapon', 5, 8, 1, { weaponKind: 'sidearm' }));
+          for (let x = 0; x < width; x++) {
+            level.objects.push(createObject('wall', x, 0, 1));
+            level.objects.push(createObject('wall', x, height - 1, 1));
+          }
+          for (let y = 1; y < height - 1; y++) {
+            level.objects.push(createObject('wall', 0, y, 1));
+            level.objects.push(createObject('wall', width - 1, y, 1));
+          }
+        }
+        return level;
+      }
+
+      function createObject(type, x, y, floor = currentFloor, extra = {}) {
+        const meta = TYPE_META[type];
+        const base = structuredClone(meta.default);
+        return {
+          id: makeId(type),
+          type,
+          label: meta.name,
+          x,
+          y,
+          floor,
+          ...base,
+          ...extra
+        };
+      }
+
+      function makeId(prefix) {
+        return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+      }
+
+      function getLevel() {
+        return project.levels.find((level) => level.id === currentLevelId) || project.levels[0];
+      }
+
+      function getCollectionForObject(level, object) {
+        return object.type === 'trigger' ? level.triggers : level.objects;
+      }
+
+      function allObjects(level = getLevel()) {
+        return [...level.objects, ...level.triggers];
+      }
+
+      function findObject(id) {
+        return allObjects().find((object) => object.id === id) || null;
+      }
+
+      function visibleOnFloor(object) {
+        if (object.type === 'ramp') {
+          return object.floorFrom === currentFloor || object.floorTo === currentFloor || object.floor === currentFloor;
+        }
+        return object.floor === currentFloor;
+      }
+
+      function clampObject(object, level = getLevel()) {
+        object.x = Math.max(0, Math.min(level.width - Math.max(1, object.w || 1), Number(object.x) || 0));
+        object.y = Math.max(0, Math.min(level.height - Math.max(1, object.h || 1), Number(object.y) || 0));
+        object.w = Math.max(1, Math.min(level.width, Number(object.w) || 1));
+        object.h = Math.max(1, Math.min(level.height, Number(object.h) || 1));
+      }
+
+      function render() {
+        const level = getLevel();
+        const ratio = window.devicePixelRatio || 1;
+        const width = level.width * CELL_SIZE;
+        const height = level.height * CELL_SIZE;
+        dom.mapCanvas.style.width = `${width}px`;
+        dom.mapCanvas.style.height = `${height}px`;
+        dom.mapCanvas.width = Math.floor(width * ratio);
+        dom.mapCanvas.height = Math.floor(height * ratio);
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        drawScene(level, width, height);
+        renderMeta();
+        renderLevelControls();
+        renderInspector();
+        renderObjectList();
+        renderPalette();
+        document.body.dataset.editorSnapshot = JSON.stringify(getDebugSnapshot());
+      }
+
+      function drawScene(level, width, height) {
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = currentFloor === 0 ? '#151812' : '#17171c';
+        ctx.fillRect(0, 0, width, height);
+        drawGrid(level);
+
+        const objects = allObjects(level).filter(visibleOnFloor);
+        const floors = objects.filter((object) => object.type === 'ramp');
+        const triggers = objects.filter((object) => object.type === 'trigger');
+        const regular = objects.filter((object) => object.type !== 'trigger' && object.type !== 'ramp');
+        floors.forEach(drawObject);
+        triggers.forEach(drawObject);
+        regular.forEach(drawObject);
+      }
+
+      function drawGrid(level) {
+        ctx.save();
+        ctx.strokeStyle = '#293039';
+        ctx.lineWidth = 1;
+        for (let x = 0; x <= level.width; x++) {
+          ctx.beginPath();
+          ctx.moveTo(x * CELL_SIZE + 0.5, 0);
+          ctx.lineTo(x * CELL_SIZE + 0.5, level.height * CELL_SIZE);
+          ctx.stroke();
+        }
+        for (let y = 0; y <= level.height; y++) {
+          ctx.beginPath();
+          ctx.moveTo(0, y * CELL_SIZE + 0.5);
+          ctx.lineTo(level.width * CELL_SIZE, y * CELL_SIZE + 0.5);
+          ctx.stroke();
+        }
+        ctx.fillStyle = 'rgba(255,255,255,0.18)';
+        ctx.font = '10px ui-monospace, SFMono-Regular, Consolas, monospace';
+        for (let x = 0; x < level.width; x += 4) ctx.fillText(String(x), x * CELL_SIZE + 4, 12);
+        for (let y = 0; y < level.height; y += 4) ctx.fillText(String(y), 4, y * CELL_SIZE + 28);
+        ctx.restore();
+      }
+
+      function drawObject(object) {
+        const meta = TYPE_META[object.type];
+        const x = object.x * CELL_SIZE;
+        const y = object.y * CELL_SIZE;
+        const w = Math.max(1, object.w || 1) * CELL_SIZE;
+        const h = Math.max(1, object.h || 1) * CELL_SIZE;
+        const selected = object.id === selectedId;
+        ctx.save();
+
+        if (object.type === 'trigger') {
+          ctx.fillStyle = hexToRgba(meta.color, 0.18);
+          ctx.strokeStyle = selected ? '#ffffff' : meta.color;
+          ctx.setLineDash([6, 5]);
+          ctx.lineWidth = selected ? 3 : 2;
+          ctx.fillRect(x + 3, y + 3, w - 6, h - 6);
+          ctx.strokeRect(x + 3, y + 3, w - 6, h - 6);
+        } else {
+          ctx.fillStyle = object.type === 'wall' ? '#66736d' : hexToRgba(meta.color, 0.82);
+          ctx.strokeStyle = selected ? '#ffffff' : shade(meta.color, -24);
+          ctx.lineWidth = selected ? 3 : 1.5;
+          roundRect(ctx, x + 4, y + 4, w - 8, h - 8, 5);
+          ctx.fill();
+          ctx.stroke();
+
+          if (object.type === 'ramp') {
+            ctx.strokeStyle = '#392812';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            if (object.direction === 'west' || object.direction === 'east') {
+              ctx.moveTo(x + 8, y + h - 10);
+              ctx.lineTo(x + w - 8, y + 10);
+            } else {
+              ctx.moveTo(x + 8, y + 8);
+              ctx.lineTo(x + w - 8, y + h - 8);
+            }
+            ctx.stroke();
+          }
+        }
+
+        const label = object.type === 'wall' ? '' : meta.icon;
+        if (label) {
+          ctx.fillStyle = '#101214';
+          ctx.font = '700 12px ui-monospace, SFMono-Regular, Consolas, monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(label, x + w / 2, y + h / 2);
+        }
+
+        if (selected) {
+          ctx.setLineDash([]);
+          ctx.strokeStyle = '#61d394';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+        }
+        ctx.restore();
+      }
+
+      function roundRect(context, x, y, width, height, radius) {
+        const r = Math.min(radius, width / 2, height / 2);
+        context.beginPath();
+        context.moveTo(x + r, y);
+        context.lineTo(x + width - r, y);
+        context.quadraticCurveTo(x + width, y, x + width, y + r);
+        context.lineTo(x + width, y + height - r);
+        context.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+        context.lineTo(x + r, y + height);
+        context.quadraticCurveTo(x, y + height, x, y + height - r);
+        context.lineTo(x, y + r);
+        context.quadraticCurveTo(x, y, x + r, y);
+      }
+
+      function hexToRgba(hex, alpha) {
+        const value = hex.replace('#', '');
+        const r = parseInt(value.slice(0, 2), 16);
+        const g = parseInt(value.slice(2, 4), 16);
+        const b = parseInt(value.slice(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+
+      function shade(hex, amount) {
+        const value = hex.replace('#', '');
+        const channels = [0, 2, 4]
+          .map((index) => parseInt(value.slice(index, index + 2), 16))
+          .map((channel) => Math.max(0, Math.min(255, channel + amount)));
+        return `#${channels.map((channel) => channel.toString(16).padStart(2, '0')).join('')}`;
+      }
+
+      function renderMeta() {
+        const level = getLevel();
+        const counts = allObjects(level).reduce((acc, object) => {
+          acc[object.type] = (acc[object.type] || 0) + 1;
+          return acc;
+        }, {});
+        dom.sceneName.textContent = `${level.name} / ${FLOORS.find((floor) => floor.id === currentFloor).label}`;
+        dom.sceneStats.textContent = `${level.width}x${level.height} / ${Object.values(counts).reduce((a, b) => a + b, 0)} objects`;
+        dom.projectMeta.textContent = `${project.levels.length} levels`;
+        dom.schemaText.textContent = `schema v${project.version}`;
+      }
+
+      function getDebugSnapshot() {
+        const level = getLevel();
+        const objects = allObjects(level);
+        return {
+          version: project.version,
+          levelCount: project.levels.length,
+          currentLevelId,
+          currentFloor,
+          activeTool,
+          selectedId,
+          canvas: {
+            width: dom.mapCanvas.width,
+            height: dom.mapCanvas.height
+          },
+          level: {
+            id: level.id,
+            name: level.name,
+            width: level.width,
+            height: level.height,
+            visibleCount: objects.filter(visibleOnFloor).length,
+            counts: objects.reduce((acc, object) => {
+              acc[object.type] = (acc[object.type] || 0) + 1;
+              return acc;
+            }, {})
+          },
+          hasLocalSave: Boolean(localStorage.getItem(STORAGE_KEY))
+        };
+      }
+
+      function renderLevelControls() {
+        dom.levelSelect.innerHTML = project.levels
+          .map((level) => `<option value="${escapeHtml(level.id)}">${escapeHtml(level.name)}</option>`)
+          .join('');
+        dom.levelSelect.value = currentLevelId;
+
+        dom.floorSwitch.innerHTML = FLOORS.map(
+          (floor) =>
+            `<button type="button" data-floor="${floor.id}" class="${floor.id === currentFloor ? 'active' : ''}">${floor.label}</button>`
+        ).join('');
+
+        const level = getLevel();
+        dom.levelInspector.innerHTML = `
+          <label>名称<input data-level-field="name" value="${escapeAttr(level.name)}" /></label>
+          <div class="grid-two">
+            <label>宽<input type="number" min="8" max="80" data-level-field="width" value="${level.width}" /></label>
+            <label>高<input type="number" min="8" max="80" data-level-field="height" value="${level.height}" /></label>
+          </div>
+          <label>ID<input data-level-field="id" value="${escapeAttr(level.id)}" /></label>
+          <label>备注<textarea data-level-field="notes">${escapeHtml(level.notes || '')}</textarea></label>
+        `;
+      }
+
+      function renderPalette() {
+        const groups = new Map();
+        for (const type of PALETTE_ORDER) {
+          const meta = TYPE_META[type];
+          if (!groups.has(meta.group)) groups.set(meta.group, []);
+          groups.get(meta.group).push({ type, meta });
+        }
+        dom.palettePanel.innerHTML = [...groups.entries()]
+          .map(
+            ([group, entries]) => `
+            <div class="section">
+              <h2 class="section-title">${escapeHtml(group)}</h2>
+              <div class="palette">
+                ${entries
+                  .map(
+                    ({ type, meta }) => `
+                    <div class="palette-item ${activeTool === type ? 'active' : ''}" draggable="true" data-tool="${type}">
+                      <span class="palette-icon" style="color:${meta.color}">${escapeHtml(meta.icon)}</span>
+                      <span>
+                        <span class="palette-name">${escapeHtml(meta.name)}</span>
+                        <span class="palette-code">${escapeHtml(type)}</span>
+                      </span>
+                      <span class="swatch" style="background:${meta.color}"></span>
+                    </div>`
+                  )
+                  .join('')}
+              </div>
+            </div>`
+          )
+          .join('');
+      }
+
+      function renderInspector() {
+        const object = findObject(selectedId);
+        if (!object) {
+          dom.objectInspector.innerHTML = `<div class="empty">未选择对象</div>`;
+          return;
+        }
+
+        const meta = TYPE_META[object.type];
+        const common = `
+          <div class="row">
+            <span class="pill">${escapeHtml(meta.name)}</span>
+            <button id="cloneObjectBtn" title="复制对象">⧉</button>
+            <button id="deleteObjectBtn" class="danger" title="删除对象">×</button>
+          </div>
+          <label>标签<input data-path="label" value="${escapeAttr(object.label || '')}" /></label>
+          <label>ID<input data-path="id" value="${escapeAttr(object.id)}" /></label>
+          <div class="grid-three">
+            <label>X<input type="number" data-path="x" value="${object.x}" /></label>
+            <label>Y<input type="number" data-path="y" value="${object.y}" /></label>
+            <label>层<select data-path="floor">${floorOptions(object.floor)}</select></label>
+          </div>
+          <div class="grid-two">
+            <label>宽<input type="number" min="1" data-path="w" value="${object.w || 1}" /></label>
+            <label>高<input type="number" min="1" data-path="h" value="${object.h || 1}" /></label>
+          </div>
+        `;
+        dom.objectInspector.innerHTML = common + renderTypeFields(object);
+
+        document.getElementById('deleteObjectBtn')?.addEventListener('click', deleteSelected);
+        document.getElementById('cloneObjectBtn')?.addEventListener('click', cloneSelected);
+      }
+
+      function renderTypeFields(object) {
+        if (object.type === 'keyDoor' || object.type === 'hiddenDoor') {
+          return `
+            <div class="grid-two">
+              <label>门 ID<input data-path="doorId" value="${escapeAttr(object.doorId || '')}" /></label>
+              <label>钥匙 ID<input data-path="requiredKeyId" value="${escapeAttr(object.requiredKeyId || '')}" /></label>
+            </div>
+            <label class="row"><input type="checkbox" data-path="locked" ${object.locked ? 'checked' : ''} /> 锁定</label>
+            ${renderInteractionFields(object)}
+          `;
+        }
+        if (object.type === 'key') {
+          return `
+            <div class="grid-two">
+              <label>钥匙 ID<input data-path="keyId" value="${escapeAttr(object.keyId || '')}" /></label>
+              <label>绑定门<select data-path="boundDoorId">${doorOptions(object.boundDoorId)}</select></label>
+            </div>
+          `;
+        }
+        if (object.type === 'terminal') {
+          return `
+            <label>终端文本<textarea data-path="message">${escapeHtml(object.message || '')}</textarea></label>
+            ${renderInteractionFields(object)}
+          `;
+        }
+        if (object.type === 'npc') {
+          return `
+            <label>NPC ID<input data-path="npcId" value="${escapeAttr(object.npcId || '')}" /></label>
+            ${renderInteractionFields(object)}
+          `;
+        }
+        if (object.type === 'exit') {
+          return `
+            <label>出口 ID<input data-path="exitId" value="${escapeAttr(object.exitId || '')}" /></label>
+            <div class="grid-two">
+              <label>目标关卡<select data-path="targetLevelId">${levelOptions(object.targetLevelId)}</select></label>
+              <label>目标入口<input data-path="targetEntranceId" value="${escapeAttr(object.targetEntranceId || '')}" /></label>
+            </div>
+            <label>目标楼层<select data-path="targetFloor">${floorOptions(object.targetFloor ?? currentFloor)}</select></label>
+          `;
+        }
+        if (object.type === 'entrance') {
+          return `<label>入口 ID<input data-path="entranceId" value="${escapeAttr(object.entranceId || '')}" /></label>`;
+        }
+        if (object.type === 'ramp') {
+          return `
+            <div class="grid-two">
+              <label>底层<select data-path="floorFrom">${floorOptions(object.floorFrom)}</select></label>
+              <label>高层<select data-path="floorTo">${floorOptions(object.floorTo)}</select></label>
+            </div>
+            <label>方向<select data-path="direction">
+              ${option('north', '北', object.direction)}
+              ${option('east', '东', object.direction)}
+              ${option('south', '南', object.direction)}
+              ${option('west', '西', object.direction)}
+            </select></label>
+          `;
+        }
+        if (object.type === 'enemy') {
+          return `
+            <div class="grid-two">
+              <label>敌人类型<select data-path="enemyKind">
+                ${ENEMY_KIND_OPTIONS.map(([value, label]) => option(value, label, object.enemyKind)).join('')}
+              </select></label>
+              <label>巡逻<select data-path="patrol">
+                ${option('idle', '固定', object.patrol)}
+                ${option('loop', '循环', object.patrol)}
+                ${option('area', '区域', object.patrol)}
+              </select></label>
+            </div>
+          `;
+        }
+        if (object.type === 'ammo' || object.type === 'medkit') {
+          return `<label>数量<input type="number" min="1" data-path="amount" value="${object.amount || 1}" /></label>`;
+        }
+        if (object.type === 'weapon') {
+          return `
+            <div class="grid-two">
+              <label>武器<select data-path="weaponKind">
+                ${option('sidearm', 'SIDEARM', object.weaponKind)}
+                ${option('scatter', 'SCATTER', object.weaponKind)}
+                ${option('rail', 'RAIL', object.weaponKind)}
+              </select></label>
+              <label>附带弹药<input type="number" min="0" data-path="ammo" value="${object.ammo || 0}" /></label>
+            </div>
+          `;
+        }
+        if (object.type === 'trigger') {
+          return renderTriggerFields(object);
+        }
+        return '';
+      }
+
+      function renderInteractionFields(object) {
+        object.interaction ||= defaultInteraction('dialog');
+        object.interaction.effect ||= defaultEffect('dialog');
+        return `
+          <h2 class="section-title">交互触发</h2>
+          <div class="grid-two">
+            <label>方式<select data-path="interaction.mode">
+              ${option('interact', '按键', object.interaction.mode)}
+              ${option('touch', '进入', object.interaction.mode)}
+            </select></label>
+            <label>次数<select data-path="interaction.once">
+              ${option('true', '一次', String(object.interaction.once))}
+              ${option('false', '重复', String(object.interaction.once))}
+            </select></label>
+          </div>
+          ${renderEffectFields('interaction.effect', object.interaction.effect)}
+        `;
+      }
+
+      function renderTriggerFields(object) {
+        object.effect ||= defaultEffect('dialog');
+        return `
+          <div class="grid-two">
+            <label>触发器 ID<input data-path="triggerId" value="${escapeAttr(object.triggerId || '')}" /></label>
+            <label>次数<select data-path="once">
+              ${option('true', '一次', String(object.once))}
+              ${option('false', '重复', String(object.once))}
+            </select></label>
+          </div>
+          ${renderEffectFields('effect', object.effect)}
+        `;
+      }
+
+      function renderEffectFields(prefix, effect) {
+        effect ||= defaultEffect('dialog');
+        const valuePath = (field) => `${prefix}.${field}`;
+        const type = effect.type || 'dialog';
+        let extra = '';
+        if (type === 'heal') {
+          extra = `<label>回血<input type="number" min="1" data-path="${valuePath('healAmount')}" value="${effect.healAmount || 20}" /></label>`;
+        } else if (type === 'dialog') {
+          extra = `<label>对话<textarea data-path="${valuePath('dialog')}">${escapeHtml(effect.dialog || '')}</textarea></label>`;
+        } else if (type === 'teleport') {
+          extra = `
+            <div class="grid-two">
+              <label>目标关卡<select data-path="${valuePath('targetLevelId')}">${levelOptions(effect.targetLevelId)}</select></label>
+              <label>目标入口<input data-path="${valuePath('targetEntranceId')}" value="${escapeAttr(effect.targetEntranceId || '')}" /></label>
+            </div>
+            <label>目标楼层<select data-path="${valuePath('targetFloor')}">${floorOptions(effect.targetFloor ?? currentFloor)}</select></label>
+          `;
+        } else if (type === 'openDoor') {
+          extra = `<label>打开门<select data-path="${valuePath('doorId')}">${doorOptions(effect.doorId)}</select></label>`;
+        } else if (type === 'giveWeapon') {
+          extra = `
+            <label>武器<select data-path="${valuePath('weaponKind')}">
+              ${option('sidearm', 'SIDEARM', effect.weaponKind)}
+              ${option('scatter', 'SCATTER', effect.weaponKind)}
+              ${option('rail', 'RAIL', effect.weaponKind)}
+            </select></label>
+          `;
+        }
+        return `
+          <label>效果<select data-path="${valuePath('type')}">
+            ${option('dialog', '对话', type)}
+            ${option('heal', '回血', type)}
+            ${option('teleport', '传送', type)}
+            ${option('openDoor', '开门', type)}
+            ${option('giveWeapon', '给武器', type)}
+          </select></label>
+          ${extra}
+        `;
+      }
+
+      function floorOptions(value) {
+        return FLOORS.map((floor) => option(String(floor.id), floor.label, String(value))).join('');
+      }
+
+      function levelOptions(value) {
+        return `<option value=""></option>${project.levels.map((level) => option(level.id, level.name, value)).join('')}`;
+      }
+
+      function doorOptions(value) {
+        const doors = allObjects().filter((object) => object.type === 'keyDoor' || object.type === 'hiddenDoor');
+        return `<option value=""></option>${doors.map((door) => option(door.doorId || door.id, door.label || door.doorId || door.id, value)).join('')}`;
+      }
+
+      function option(value, label, selected) {
+        return `<option value="${escapeAttr(value)}" ${String(value) === String(selected) ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+      }
+
+      function renderObjectList() {
+        const level = getLevel();
+        const objects = allObjects(level).filter(visibleOnFloor);
+        if (!objects.length) {
+          dom.objectList.innerHTML = `<div class="empty">当前楼层为空</div>`;
+          return;
+        }
+        dom.objectList.innerHTML = objects
+          .map((object) => {
+            const meta = TYPE_META[object.type];
+            return `
+              <button class="object-row ${object.id === selectedId ? 'active' : ''}" data-object-id="${object.id}">
+                <span class="swatch" style="background:${meta.color}"></span>
+                <span>${escapeHtml(object.label || meta.name)}</span>
+                <span class="muted">${object.x},${object.y}</span>
+              </button>
+            `;
+          })
+          .join('');
+      }
+
+      function canvasPoint(event) {
+        const rect = dom.mapCanvas.getBoundingClientRect();
+        const x = Math.floor((event.clientX - rect.left) / CELL_SIZE);
+        const y = Math.floor((event.clientY - rect.top) / CELL_SIZE);
+        return {
+          x: Math.max(0, Math.min(getLevel().width - 1, x)),
+          y: Math.max(0, Math.min(getLevel().height - 1, y))
+        };
+      }
+
+      function hitTest(point) {
+        const objects = allObjects()
+          .filter(visibleOnFloor)
+          .slice()
+          .reverse();
+        return (
+          objects.find(
+            (object) =>
+              point.x >= object.x &&
+              point.x < object.x + Math.max(1, object.w || 1) &&
+              point.y >= object.y &&
+              point.y < object.y + Math.max(1, object.h || 1)
+          ) || null
+        );
+      }
+
+      function placeTool(type, point) {
+        const level = getLevel();
+        if (type === 'eraser') {
+          const hit = hitTest(point);
+          if (hit) {
+            selectedId = hit.id;
+            deleteSelected();
+          }
+          return;
+        }
+
+        if (type === 'wall') {
+          const existing = level.objects.find(
+            (object) => object.type === 'wall' && object.floor === currentFloor && object.x === point.x && object.y === point.y
+          );
+          if (existing) {
+            selectedId = existing.id;
+            render();
+            return;
+          }
+        }
+
+        const object = createObject(type, point.x, point.y, currentFloor);
+        if (type === 'trigger') level.triggers.push(object);
+        else level.objects.push(object);
+        selectedId = object.id;
+        clampObject(object, level);
+        touchProject();
+        setStatus(`${TYPE_META[type].name} placed at ${point.x}, ${point.y}`);
+        render();
+      }
+
+      function selectObject(id) {
+        selectedId = id;
+        render();
+      }
+
+      function deleteSelected() {
+        const level = getLevel();
+        const object = findObject(selectedId);
+        if (!object) return;
+        const collection = getCollectionForObject(level, object);
+        const index = collection.findIndex((entry) => entry.id === selectedId);
+        if (index >= 0) collection.splice(index, 1);
+        selectedId = null;
+        touchProject();
+        setStatus('Object deleted');
+        render();
+      }
+
+      function cloneSelected() {
+        const level = getLevel();
+        const object = findObject(selectedId);
+        if (!object) return;
+        const clone = structuredClone(object);
+        clone.id = makeId(object.type);
+        clone.label = `${object.label || TYPE_META[object.type].name} copy`;
+        clone.x = Math.min(level.width - Math.max(1, clone.w || 1), clone.x + 1);
+        clone.y = Math.min(level.height - Math.max(1, clone.h || 1), clone.y + 1);
+        getCollectionForObject(level, clone).push(clone);
+        selectedId = clone.id;
+        touchProject();
+        render();
+      }
+
+      function setStatus(message) {
+        dom.statusText.textContent = message;
+      }
+
+      function touchProject() {
+        project.updatedAt = new Date().toISOString();
+      }
+
+      function saveProject() {
+        touchProject();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
+        setStatus(`Saved ${new Date().toLocaleTimeString()}`);
+      }
+
+      function loadProject() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          setStatus('No local save');
+          return;
+        }
+        loadFromJson(raw, 'Local save loaded');
+      }
+
+      function loadFromJson(raw, message) {
+        try {
+          const next = JSON.parse(raw);
+          validateProject(next);
+          project = next;
+          currentLevelId = project.levels[0].id;
+          currentFloor = project.levels[0].floors?.[0] ?? 0;
+          selectedId = null;
+          setStatus(message);
+          render();
+        } catch (error) {
+          setStatus(`Import failed: ${error.message}`);
+        }
+      }
+
+      function validateProject(data) {
+        if (!data || typeof data !== 'object') throw new Error('invalid data');
+        if (!Array.isArray(data.levels) || !data.levels.length) throw new Error('missing levels');
+        for (const level of data.levels) {
+          if (!level.id || !level.name) throw new Error('invalid level');
+          level.objects ||= [];
+          level.triggers ||= [];
+          level.floors ||= [0, 1];
+          level.width = Number(level.width) || 24;
+          level.height = Number(level.height) || 16;
+        }
+        data.version ||= 1;
+        data.settings ||= { cellSize: CELL_SIZE };
+      }
+
+      function exportProject() {
+        touchProject();
+        const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `ascii-labyrinth-levels-${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+        setStatus('JSON exported');
+      }
+
+      function addLevel() {
+        const id = `level-${project.levels.length + 1}`;
+        const level = createLevel(id, `关卡 ${project.levels.length + 1}`, 24, 16, false);
+        level.objects.push(createObject('entrance', 2, 2, 0, { entranceId: `entry-${project.levels.length + 1}` }));
+        project.levels.push(level);
+        currentLevelId = level.id;
+        selectedId = null;
+        touchProject();
+        render();
+      }
+
+      function duplicateLevel() {
+        const source = getLevel();
+        const clone = structuredClone(source);
+        clone.id = makeId('level');
+        clone.name = `${source.name} copy`;
+        clone.objects.forEach((object) => (object.id = makeId(object.type)));
+        clone.triggers.forEach((object) => (object.id = makeId(object.type)));
+        project.levels.push(clone);
+        currentLevelId = clone.id;
+        selectedId = null;
+        touchProject();
+        render();
+      }
+
+      function deleteLevel() {
+        if (project.levels.length <= 1) {
+          setStatus('At least one level is required');
+          return;
+        }
+        const index = project.levels.findIndex((level) => level.id === currentLevelId);
+        if (index >= 0) project.levels.splice(index, 1);
+        currentLevelId = project.levels[0].id;
+        selectedId = null;
+        touchProject();
+        render();
+      }
+
+      function updateLevelField(target) {
+        const level = getLevel();
+        const field = target.dataset.levelField;
+        const oldId = level.id;
+        let value = target.value;
+        if (field === 'width' || field === 'height') value = Math.max(8, Math.min(80, Number(value) || 8));
+        if (field === 'id') value = String(value).trim() || oldId;
+        level[field] = value;
+        if (field === 'id') {
+          project.levels.forEach((candidate) => {
+            if (candidate !== level) {
+              candidate.objects.forEach((object) => {
+                if (object.targetLevelId === oldId) object.targetLevelId = value;
+              });
+              candidate.triggers.forEach((trigger) => {
+                if (trigger.effect?.targetLevelId === oldId) trigger.effect.targetLevelId = value;
+              });
+            }
+          });
+          currentLevelId = value;
+        }
+        allObjects(level).forEach((object) => clampObject(object, level));
+        touchProject();
+        render();
+      }
+
+      function updateObjectField(target) {
+        const object = findObject(selectedId);
+        if (!object) return;
+        const path = target.dataset.path;
+        let value = target.type === 'checkbox' ? target.checked : target.value;
+        const lastPart = path.split('.').at(-1);
+        const numericFields = new Set(['x', 'y', 'w', 'h', 'floor', 'floorFrom', 'floorTo', 'targetFloor', 'amount', 'ammo', 'healAmount']);
+        if (target.type === 'number' || numericFields.has(lastPart)) value = Number(value);
+        if (value === 'true') value = true;
+        if (value === 'false') value = false;
+        setByPath(object, path, value);
+        if (path.endsWith('.type')) {
+          const effectPath = path.replace(/\.type$/, '');
+          const effect = getByPath(object, effectPath);
+          Object.assign(effect, defaultEffect(value), { type: value });
+        }
+        clampObject(object);
+        touchProject();
+        render();
+      }
+
+      function setByPath(object, path, value) {
+        const parts = path.split('.');
+        let cursor = object;
+        for (let i = 0; i < parts.length - 1; i++) {
+          cursor[parts[i]] ||= {};
+          cursor = cursor[parts[i]];
+        }
+        cursor[parts.at(-1)] = value;
+      }
+
+      function getByPath(object, path) {
+        return path.split('.').reduce((cursor, part) => cursor?.[part], object);
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
+
+      function escapeAttr(value) {
+        return escapeHtml(value);
+      }
+
+      dom.palettePanel.addEventListener('click', (event) => {
+        const item = event.target.closest('[data-tool]');
+        if (!item) return;
+        activeTool = item.dataset.tool;
+        renderPalette();
+        setStatus(`${TYPE_META[activeTool].name} selected`);
+      });
+
+      dom.palettePanel.addEventListener('dragstart', (event) => {
+        const item = event.target.closest('[data-tool]');
+        if (!item) return;
+        event.dataTransfer.setData('application/x-ascii-tool', item.dataset.tool);
+        event.dataTransfer.effectAllowed = 'copy';
+      });
+
+      dom.mapCanvas.addEventListener('dragover', (event) => {
+        event.preventDefault();
+      });
+
+      dom.mapCanvas.addEventListener('drop', (event) => {
+        event.preventDefault();
+        const type = event.dataTransfer.getData('application/x-ascii-tool');
+        if (!TYPE_META[type]) return;
+        placeTool(type, canvasPoint(event));
+      });
+
+      dom.mapCanvas.addEventListener('pointerdown', (event) => {
+        dom.mapCanvas.setPointerCapture(event.pointerId);
+        const point = canvasPoint(event);
+        const hit = hitTest(point);
+        if (hit && activeTool !== 'eraser') {
+          if (event.shiftKey) {
+            selectedId = hit.id;
+            cloneSelected();
+          } else {
+            selectedId = hit.id;
+          }
+          const object = findObject(selectedId);
+          dragState = {
+            mode: 'move',
+            id: selectedId,
+            startPoint: point,
+            startX: object.x,
+            startY: object.y
+          };
+          render();
+          return;
+        }
+        placeTool(activeTool, point);
+        if (activeTool === 'wall' || activeTool === 'eraser') {
+          dragState = { mode: activeTool, last: point };
+        }
+      });
+
+      dom.mapCanvas.addEventListener('pointermove', (event) => {
+        const point = canvasPoint(event);
+        dom.cursorReadout.textContent = `x ${point.x} / y ${point.y}`;
+        if (!dragState) return;
+        if (dragState.mode === 'move') {
+          const object = findObject(dragState.id);
+          if (!object) return;
+          object.x = dragState.startX + point.x - dragState.startPoint.x;
+          object.y = dragState.startY + point.y - dragState.startPoint.y;
+          clampObject(object);
+          touchProject();
+          render();
+        } else if ((dragState.mode === 'wall' || dragState.mode === 'eraser') && (dragState.last.x !== point.x || dragState.last.y !== point.y)) {
+          placeTool(dragState.mode, point);
+          dragState.last = point;
+        }
+      });
+
+      dom.mapCanvas.addEventListener('pointerup', (event) => {
+        dom.mapCanvas.releasePointerCapture(event.pointerId);
+        dragState = null;
+      });
+
+      dom.levelSelect.addEventListener('change', (event) => {
+        currentLevelId = event.target.value;
+        selectedId = null;
+        render();
+      });
+
+      dom.floorSwitch.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-floor]');
+        if (!button) return;
+        currentFloor = Number(button.dataset.floor);
+        selectedId = null;
+        render();
+      });
+
+      dom.levelInspector.addEventListener('change', (event) => {
+        if (event.target.matches('[data-level-field]')) updateLevelField(event.target);
+      });
+
+      dom.objectInspector.addEventListener('change', (event) => {
+        if (event.target.matches('[data-path]')) updateObjectField(event.target);
+      });
+
+      dom.objectList.addEventListener('click', (event) => {
+        const row = event.target.closest('[data-object-id]');
+        if (row) selectObject(row.dataset.objectId);
+      });
+
+      dom.addLevelBtn.addEventListener('click', addLevel);
+      dom.duplicateLevelBtn.addEventListener('click', duplicateLevel);
+      dom.deleteLevelBtn.addEventListener('click', deleteLevel);
+      dom.saveBtn.addEventListener('click', saveProject);
+      dom.loadBtn.addEventListener('click', loadProject);
+      dom.exportBtn.addEventListener('click', exportProject);
+      dom.importBtn.addEventListener('click', () => dom.importFile.click());
+      dom.importFile.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        loadFromJson(await file.text(), `${file.name} imported`);
+        event.target.value = '';
+      });
+
+      window.addEventListener('keydown', (event) => {
+        if (event.key === 'Delete' || event.key === 'Backspace') {
+          if (document.activeElement.matches('input, textarea, select')) return;
+          deleteSelected();
+        }
+        if (event.key === 'Escape') {
+          selectedId = null;
+          render();
+        }
+      });
+
+      window.addEventListener('resize', render);
+
+      window.__ASCII_EDITOR_DEBUG__ = getDebugSnapshot;
+
+      render();
+    </script>
+  </body>
+</html>

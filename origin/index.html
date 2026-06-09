@@ -799,31 +799,145 @@
             exits.push({ group: exitGroup, promptShown: false });
         }
 
+        const enemyProfiles = [
+            {
+                id: 'scout',
+                name: '棱镜侦察体',
+                health: 2,
+                speed: 1.05,
+                light: 0xff806b,
+                parts: [
+                    ['core', 'octahedron', 0xe46f61, 0x301012, [0, 0.58, 0], [0, 0, 0], [0.56, 0.56, 0.56]],
+                    ['ring', 'torus', 0xffd166, 0x332000, [0, 0.58, 0], [Math.PI / 2, 0, 0], [0.88, 0.88, 0.16]],
+                    ['eye', 'sphere', 0xfff4ad, 0x554000, [0, 0.6, 0.31], [0, 0, 0], [0.16, 0.16, 0.16]]
+                ]
+            },
+            {
+                id: 'brute',
+                name: '熔核冲锋兽',
+                health: 6,
+                speed: 0.68,
+                light: 0xff5522,
+                parts: [
+                    ['body', 'cylinder', 0xa63735, 0x2f0909, [0, 0.48, 0], [0, 0, 0], [0.76, 0.78, 0.76]],
+                    ['cap', 'cone', 0xf08b4f, 0x4a1606, [0, 0.95, 0], [0, 0, 0], [0.46, 0.42, 0.46]],
+                    ['left-guard', 'box', 0x742020, 0x210606, [-0.48, 0.55, 0], [0, 0, 0.2], [0.24, 0.38, 0.56]],
+                    ['right-guard', 'box', 0x742020, 0x210606, [0.48, 0.55, 0], [0, 0, -0.2], [0.24, 0.38, 0.56]]
+                ]
+            },
+            {
+                id: 'spine',
+                name: '裂脊潜伏体',
+                health: 4,
+                speed: 0.92,
+                light: 0xc084fc,
+                parts: [
+                    ['spine', 'cone', 0x8b5cf6, 0x241036, [0, 0.58, 0], [0, 0, 0], [0.72, 1.15, 0.72]],
+                    ['ring', 'torus', 0xd8b4fe, 0x3b1d55, [0, 0.35, 0], [Math.PI / 2, 0, 0], [0.76, 0.76, 0.12]],
+                    ['fin', 'cone', 0x6d28d9, 0x1e0b32, [0, 0.34, -0.36], [Math.PI / 2, 0, 0], [0.25, 0.45, 0.25]]
+                ]
+            },
+            {
+                id: 'warden',
+                name: '幽环守望者',
+                health: 5,
+                speed: 0.78,
+                light: 0x5eead4,
+                parts: [
+                    ['hub', 'icosahedron', 0x2dd4bf, 0x073b3a, [0, 0.62, 0], [0, 0, 0], [0.5, 0.5, 0.5]],
+                    ['halo-h', 'torus', 0x99f6e4, 0x12403e, [0, 0.62, 0], [Math.PI / 2, 0, 0], [0.98, 0.98, 0.16]],
+                    ['halo-v', 'torus', 0x5eead4, 0x12403e, [0, 0.62, 0], [0, Math.PI / 2, 0], [0.72, 0.72, 0.12]]
+                ]
+            },
+            {
+                id: 'crawler',
+                name: '蛛行切割者',
+                health: 3,
+                speed: 1.0,
+                light: 0xfb923c,
+                parts: [
+                    ['body', 'sphere', 0xc2410c, 0x351008, [0, 0.35, 0], [0, 0, 0], [0.82, 0.36, 0.56]],
+                    ['head', 'cone', 0xfb923c, 0x3a1207, [0, 0.4, 0.42], [Math.PI / 2, 0, 0], [0.35, 0.46, 0.35]],
+                    ['leg-l1', 'box', 0x7c2d12, 0x1c0703, [-0.52, 0.25, 0.34], [0, 0, 0.44], [0.62, 0.08, 0.08]],
+                    ['leg-r1', 'box', 0x7c2d12, 0x1c0703, [0.52, 0.25, 0.34], [0, 0, -0.44], [0.62, 0.08, 0.08]],
+                    ['leg-l2', 'box', 0x7c2d12, 0x1c0703, [-0.5, 0.25, -0.26], [0, 0, -0.31], [0.56, 0.08, 0.08]],
+                    ['leg-r2', 'box', 0x7c2d12, 0x1c0703, [0.5, 0.25, -0.26], [0, 0, 0.31], [0.56, 0.08, 0.08]]
+                ]
+            },
+            {
+                id: 'screamer',
+                name: '尖啸信标体',
+                health: 3,
+                speed: 0.96,
+                light: 0xa5b4fc,
+                parts: [
+                    ['mast', 'cylinder', 0x4f46e5, 0x151142, [0, 0.58, 0], [0, 0, 0], [0.28, 1.05, 0.28]],
+                    ['mouth', 'torus', 0xc4b5fd, 0x342765, [0, 0.92, 0.3], [0, 0, 0], [0.5, 0.5, 0.16]],
+                    ['fin-l', 'cone', 0x818cf8, 0x251b55, [-0.35, 0.78, 0], [0, 0, 1.66], [0.22, 0.44, 0.22]],
+                    ['fin-r', 'cone', 0x818cf8, 0x251b55, [0.35, 0.78, 0], [0, 0, -1.66], [0.22, 0.44, 0.22]]
+                ]
+            }
+        ];
+
+        function createEnemyGeometry(shape) {
+            if (shape === 'sphere') return new THREE.SphereGeometry(0.5, 16, 12);
+            if (shape === 'cylinder') return new THREE.CylinderGeometry(0.5, 0.5, 1, 16);
+            if (shape === 'cone') return new THREE.ConeGeometry(0.5, 1, 16);
+            if (shape === 'torus') return new THREE.TorusGeometry(0.5, 0.08, 8, 24);
+            if (shape === 'octahedron') return new THREE.OctahedronGeometry(0.5, 0);
+            if (shape === 'icosahedron') return new THREE.IcosahedronGeometry(0.5, 0);
+            if (shape === 'dodecahedron') return new THREE.DodecahedronGeometry(0.5, 0);
+            return new THREE.BoxGeometry(1, 1, 1);
+        }
+
+        function createEnemyPart(part) {
+            const [, shape, color, emissive, position, rotation, scale] = part;
+            const mesh = new THREE.Mesh(
+                createEnemyGeometry(shape),
+                new THREE.MeshStandardMaterial({ color, emissive, roughness: 0.58, metalness: shape === 'torus' ? 0.25 : 0.05 })
+            );
+            mesh.position.set(...position);
+            mesh.rotation.set(...rotation);
+            mesh.scale.set(...scale);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            mesh.userData.baseEmissive = emissive;
+            return mesh;
+        }
+
+        function setEnemyFlash(enemy, flashing) {
+            enemy.group.traverse((child) => {
+                if (!child.isMesh || !child.material?.emissive) return;
+                child.material.emissive.setHex(flashing ? 0xffaaaa : (child.userData.baseEmissive || 0x000000));
+            });
+        }
+
+        function buildEnemyModel(profile) {
+            const group = new THREE.Group();
+            for (const part of profile.parts) {
+                group.add(createEnemyPart(part));
+            }
+            const light = new THREE.PointLight(profile.light, 0.9, 5);
+            light.position.y = 0.9;
+            group.add(light);
+            group.userData.enemyKind = profile.id;
+            return group;
+        }
+
         function spawnEnemy(x, z) {
-            const enemyGroup = new THREE.Group();
+            const profile = enemyProfiles[Math.floor(Math.random() * enemyProfiles.length)];
+            const enemyGroup = buildEnemyModel(profile);
             enemyGroup.position.set(x, 0, z);
-
-            const bodyGeo = new THREE.CylinderGeometry(0.3, 0.3, 1.2, 8);
-            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xaa0000, emissive: 0x000000 }); // 显式设置自发光以备闪烁
-            const body = new THREE.Mesh(bodyGeo, bodyMat);
-            body.position.y = 0.6;
-            body.castShadow = true;
-            body.receiveShadow = true;
-            enemyGroup.add(body);
-
-            const headGeo = new THREE.SphereGeometry(0.25, 8, 8);
-            const headMat = new THREE.MeshStandardMaterial({ color: 0xff3333, emissive: 0x660000 }); // 高亮发光红头
-            const head = new THREE.Mesh(headGeo, headMat);
-            head.position.y = 1.4;
-            head.castShadow = true;
-            enemyGroup.add(head);
-
-            const eyeLight = new THREE.PointLight(0xff2200, 1.0, 5);
-            eyeLight.position.y = 1.4;
-            enemyGroup.add(eyeLight);
-
             scene.add(enemyGroup);
-            enemies.push({ group: enemyGroup, health: 3, active: true, speed: 0.72 + Math.random() * 0.28, flashTimer: 0, attackTimer: 0 });
+            enemies.push({
+                group: enemyGroup,
+                kind: profile.id,
+                health: profile.health,
+                active: true,
+                speed: profile.speed + Math.random() * 0.12,
+                flashTimer: 0,
+                attackTimer: 0
+            });
         }
 
         function spawnExplosion(pos) {
@@ -1372,8 +1486,7 @@
                             
                             // 触发敌人全身受击高亮闪烁
                             enemy.flashTimer = 5;
-                            enemy.group.children[0].material.emissive.setHex(0xffaaaa); 
-                            enemy.group.children[1].material.emissive.setHex(0xffffff); 
+                            setEnemyFlash(enemy, true);
                             
                             if (enemy.health <= 0) {
                                 enemy.active = false;
@@ -1401,8 +1514,7 @@
                 if (enemy.flashTimer > 0) {
                     enemy.flashTimer--;
                     if (enemy.flashTimer <= 0) {
-                        enemy.group.children[0].material.emissive.setHex(0x000000); 
-                        enemy.group.children[1].material.emissive.setHex(0x660000); 
+                        setEnemyFlash(enemy, false);
                     }
                 }
 
@@ -1501,6 +1613,10 @@
                 wallCount: walls.length,
                 wallGridBuckets: wallGrid.size,
                 enemyCount: enemies.length,
+                enemyKinds: enemies.reduce((acc, enemy) => {
+                    acc[enemy.kind || 'unknown'] = (acc[enemy.kind || 'unknown'] || 0) + 1;
+                    return acc;
+                }, {}),
                 itemTypes: items.reduce((acc, item) => {
                     acc[item.type] = (acc[item.type] || 0) + 1;
                     return acc;

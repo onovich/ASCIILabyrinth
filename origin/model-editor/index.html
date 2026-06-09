@@ -1,0 +1,1330 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ASCII Labyrinth Model Editor</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #101214;
+        --panel: #181b1f;
+        --panel-strong: #20242a;
+        --line: #303740;
+        --line-soft: #252b32;
+        --text: #e8e3d8;
+        --muted: #a4adb5;
+        --accent: #69d391;
+        --cyan: #57d3d0;
+        --amber: #dfad57;
+        --danger: #df6b68;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        min-height: 32px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #22272d;
+        color: var(--text);
+        cursor: pointer;
+      }
+
+      button:hover,
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      textarea:focus-visible {
+        border-color: var(--accent);
+        outline: none;
+      }
+
+      button.primary {
+        background: #244d38;
+        border-color: #3e8867;
+      }
+
+      button.warn {
+        background: #4d3921;
+        border-color: #88663a;
+      }
+
+      button.danger {
+        background: #4d2525;
+        border-color: #8a4747;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        min-height: 32px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #111418;
+        color: var(--text);
+        padding: 6px 8px;
+      }
+
+      input[type='color'] {
+        padding: 2px;
+      }
+
+      textarea {
+        min-height: 72px;
+        resize: vertical;
+        line-height: 1.4;
+      }
+
+      label {
+        display: grid;
+        gap: 4px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .app {
+        display: grid;
+        grid-template-rows: 52px 1fr 32px;
+        width: 100%;
+        height: 100%;
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: minmax(220px, 300px) 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--line);
+        background: #15181b;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .mark {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        background: #22322a;
+        color: var(--accent);
+        font-family: "Courier New", monospace;
+        font-weight: 700;
+      }
+
+      .brand strong,
+      .model-row strong,
+      .part-row strong {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .brand strong {
+        display: block;
+        font-size: 15px;
+      }
+
+      .brand span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .toolbar select {
+        max-width: 240px;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: 290px minmax(360px, 1fr) 338px;
+        min-height: 0;
+      }
+
+      .sidebar,
+      .inspector {
+        min-height: 0;
+        overflow: auto;
+        background: var(--panel);
+      }
+
+      .sidebar {
+        border-right: 1px solid var(--line);
+      }
+
+      .inspector {
+        border-left: 1px solid var(--line);
+      }
+
+      .section {
+        padding: 12px;
+        border-bottom: 1px solid var(--line-soft);
+      }
+
+      .section-title {
+        margin: 0 0 10px;
+        color: #f0ede5;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      .stack {
+        display: grid;
+        gap: 8px;
+      }
+
+      .row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .row > * {
+        flex: 1;
+      }
+
+      .grid-two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .grid-three {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 2px 8px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #15191d;
+        color: var(--muted);
+        font-size: 12px;
+        text-decoration: none;
+      }
+
+      .model-list,
+      .part-list {
+        display: grid;
+        gap: 7px;
+      }
+
+      .model-row,
+      .part-row {
+        display: grid;
+        gap: 8px;
+        align-items: center;
+        width: 100%;
+        padding: 8px;
+        text-align: left;
+        background: #15191d;
+      }
+
+      .model-row {
+        grid-template-columns: 30px 1fr auto;
+      }
+
+      .part-row {
+        grid-template-columns: 22px 1fr auto;
+      }
+
+      .model-row.active,
+      .part-row.active {
+        border-color: var(--accent);
+        background: #1a2821;
+      }
+
+      .swatch {
+        width: 22px;
+        height: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.32);
+        border-radius: 5px;
+      }
+
+      .tiny {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .preview-shell {
+        display: grid;
+        grid-template-rows: 38px 1fr;
+        min-width: 0;
+        min-height: 0;
+        background: #0b0d0f;
+      }
+
+      .preview-strip {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 7px 10px;
+        border-bottom: 1px solid var(--line);
+        background: #14171a;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .preview-strip strong {
+        color: var(--text);
+      }
+
+      .preview-wrap {
+        position: relative;
+        min-width: 0;
+        min-height: 0;
+      }
+
+      #previewCanvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: #0b0d0f;
+        cursor: grab;
+      }
+
+      #previewCanvas:active {
+        cursor: grabbing;
+      }
+
+      .empty {
+        padding: 12px;
+        border: 1px dashed var(--line);
+        border-radius: 8px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .statusbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0 12px;
+        border-top: 1px solid var(--line);
+        background: #15181b;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .file-input {
+        display: none;
+      }
+
+      @media (max-width: 1100px) {
+        .workspace {
+          grid-template-columns: 250px minmax(300px, 1fr) 300px;
+        }
+      }
+
+      @media (max-width: 860px) {
+        .app {
+          grid-template-rows: auto 1fr 32px;
+        }
+
+        .topbar {
+          grid-template-columns: 1fr;
+        }
+
+        .workspace {
+          grid-template-columns: 1fr;
+          grid-template-rows: 220px 1fr 340px;
+        }
+
+        .sidebar,
+        .inspector {
+          border: 0;
+          border-bottom: 1px solid var(--line);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="mark">3D</div>
+          <div>
+            <strong>敌人/物品模型编辑器</strong>
+            <span id="modelMeta">shape assemblies</span>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <select id="templateSelect" title="模板"></select>
+          <button id="applyTemplateBtn" class="primary" title="套用模板">套用模板</button>
+          <button id="newModelBtn" title="新增模型">+</button>
+          <button id="duplicateModelBtn" title="复制模型">⧉</button>
+          <button id="deleteModelBtn" class="danger" title="删除模型">×</button>
+        </div>
+
+        <div class="toolbar">
+          <button id="saveBtn" class="primary" title="保存到本机">保存</button>
+          <button id="loadBtn" title="读取本机">读取</button>
+          <button id="exportBtn" title="导出 JSON">导出</button>
+          <button id="importBtn" title="导入 JSON">导入</button>
+          <input id="importFile" class="file-input" type="file" accept="application/json,.json" />
+          <a href="../editor/index.html" class="pill">地编</a>
+          <a href="../runtime/index.html" class="pill">运行</a>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <aside class="sidebar">
+          <div class="section">
+            <h2 class="section-title">模型</h2>
+            <div id="modelList" class="model-list"></div>
+          </div>
+          <div class="section">
+            <h2 class="section-title">部件</h2>
+            <div class="row">
+              <select id="shapeSelect" title="形状"></select>
+              <button id="addPartBtn" title="添加部件">添加</button>
+            </div>
+            <div id="partList" class="part-list" style="margin-top: 8px"></div>
+          </div>
+        </aside>
+
+        <section class="preview-shell">
+          <div class="preview-strip">
+            <span><strong id="previewName"></strong> <span id="previewStats"></span></span>
+            <span>左键拖动旋转 / 滚轮缩放</span>
+          </div>
+          <div class="preview-wrap">
+            <canvas id="previewCanvas"></canvas>
+          </div>
+        </section>
+
+        <aside class="inspector">
+          <div class="section">
+            <h2 class="section-title">模型属性</h2>
+            <div id="modelInspector" class="stack"></div>
+          </div>
+          <div class="section">
+            <h2 class="section-title">部件属性</h2>
+            <div id="partInspector" class="stack"></div>
+          </div>
+          <div class="section">
+            <h2 class="section-title">JSON 摘要</h2>
+            <textarea id="jsonPreview" readonly></textarea>
+          </div>
+        </aside>
+      </section>
+
+      <footer class="statusbar">
+        <span id="statusText">Ready</span>
+        <span id="schemaText">schema v1</span>
+      </footer>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+      const STORAGE_KEY = 'ascii-labyrinth-model-editor-v1';
+      const SHAPES = ['box', 'sphere', 'cylinder', 'cone', 'torus', 'octahedron', 'icosahedron', 'dodecahedron'];
+      const TEMPLATE_IDS = [
+        'enemy-scout',
+        'enemy-brute',
+        'enemy-spine',
+        'enemy-warden',
+        'enemy-crawler',
+        'enemy-spore',
+        'enemy-screamer',
+        'enemy-boss',
+        'item-ammo',
+        'item-medkit',
+        'item-key',
+        'item-scatter'
+      ];
+
+      const dom = {
+        templateSelect: document.getElementById('templateSelect'),
+        applyTemplateBtn: document.getElementById('applyTemplateBtn'),
+        newModelBtn: document.getElementById('newModelBtn'),
+        duplicateModelBtn: document.getElementById('duplicateModelBtn'),
+        deleteModelBtn: document.getElementById('deleteModelBtn'),
+        saveBtn: document.getElementById('saveBtn'),
+        loadBtn: document.getElementById('loadBtn'),
+        exportBtn: document.getElementById('exportBtn'),
+        importBtn: document.getElementById('importBtn'),
+        importFile: document.getElementById('importFile'),
+        modelList: document.getElementById('modelList'),
+        partList: document.getElementById('partList'),
+        shapeSelect: document.getElementById('shapeSelect'),
+        addPartBtn: document.getElementById('addPartBtn'),
+        modelInspector: document.getElementById('modelInspector'),
+        partInspector: document.getElementById('partInspector'),
+        jsonPreview: document.getElementById('jsonPreview'),
+        previewName: document.getElementById('previewName'),
+        previewStats: document.getElementById('previewStats'),
+        previewCanvas: document.getElementById('previewCanvas'),
+        modelMeta: document.getElementById('modelMeta'),
+        schemaText: document.getElementById('schemaText'),
+        statusText: document.getElementById('statusText')
+      };
+
+      let project;
+      let selectedModelId;
+      let selectedPartId;
+      let scene;
+      let camera;
+      let renderer;
+      let modelRoot;
+      let selectedBox;
+      let controls = { yaw: -0.65, pitch: -0.45, distance: 4.2, dragging: false, lastX: 0, lastY: 0 };
+
+      function createDefaultProject() {
+        return {
+          version: 1,
+          updatedAt: new Date().toISOString(),
+          models: TEMPLATE_IDS.map((id) => createTemplateModel(id))
+        };
+      }
+
+      function createTemplateModel(templateId) {
+        const model = templateFactories[templateId]();
+        model.id ||= templateId;
+        model.notes ||= '';
+        model.parts.forEach(normalizePart);
+        return model;
+      }
+
+      const templateFactories = {
+        'enemy-scout': () => ({
+          id: 'scout',
+          name: '棱镜侦察体',
+          category: 'enemy',
+          role: 'fast',
+          stats: { hp: 2, damage: 8, speed: 1.25, reward: 120 },
+          parts: [
+            part('core', '核心', 'octahedron', '#e46f61', '#301012', [0, 0.58, 0], [0, 0, 0], [0.56, 0.56, 0.56]),
+            part('ring', '扫描环', 'torus', '#ffd166', '#332000', [0, 0.58, 0], [90, 0, 0], [0.88, 0.88, 0.16]),
+            part('eye', '前眼', 'sphere', '#fff4ad', '#554000', [0, 0.6, 0.31], [0, 0, 0], [0.16, 0.16, 0.16])
+          ]
+        }),
+        'enemy-brute': () => ({
+          id: 'brute',
+          name: '熔核冲锋兽',
+          category: 'enemy',
+          role: 'tank',
+          stats: { hp: 7, damage: 16, speed: 0.72, reward: 210 },
+          parts: [
+            part('body', '重甲躯干', 'cylinder', '#a63735', '#2f0909', [0, 0.48, 0], [0, 0, 0], [0.76, 0.78, 0.76]),
+            part('cap', '撞角头冠', 'cone', '#f08b4f', '#4a1606', [0, 0.95, 0], [0, 0, 0], [0.46, 0.42, 0.46]),
+            part('left-guard', '左肩甲', 'box', '#742020', '#210606', [-0.48, 0.55, 0], [0, 0, 12], [0.24, 0.38, 0.56]),
+            part('right-guard', '右肩甲', 'box', '#742020', '#210606', [0.48, 0.55, 0], [0, 0, -12], [0.24, 0.38, 0.56])
+          ]
+        }),
+        'enemy-spine': () => ({
+          id: 'spine',
+          name: '裂脊潜伏体',
+          category: 'enemy',
+          role: 'ambush',
+          stats: { hp: 4, damage: 13, speed: 0.98, reward: 160 },
+          parts: [
+            part('spine', '主脊刺', 'cone', '#8b5cf6', '#241036', [0, 0.58, 0], [0, 0, 0], [0.72, 1.15, 0.72]),
+            part('lower-ring', '低频环', 'torus', '#d8b4fe', '#3b1d55', [0, 0.35, 0], [90, 0, 0], [0.76, 0.76, 0.12]),
+            part('rear-fin', '尾鳍', 'cone', '#6d28d9', '#1e0b32', [0, 0.34, -0.36], [90, 0, 0], [0.25, 0.45, 0.25])
+          ]
+        }),
+        'enemy-warden': () => ({
+          id: 'warden',
+          name: '幽环守望者',
+          category: 'enemy',
+          role: 'sentinel',
+          stats: { hp: 5, damage: 11, speed: 0.82, reward: 190 },
+          parts: [
+            part('hub', '守望核心', 'icosahedron', '#2dd4bf', '#073b3a', [0, 0.62, 0], [0, 0, 0], [0.5, 0.5, 0.5]),
+            part('halo-horizontal', '水平幽环', 'torus', '#99f6e4', '#12403e', [0, 0.62, 0], [90, 0, 0], [0.98, 0.98, 0.16]),
+            part('halo-vertical', '垂直幽环', 'torus', '#5eead4', '#12403e', [0, 0.62, 0], [0, 90, 0], [0.72, 0.72, 0.12])
+          ]
+        }),
+        'enemy-crawler': () => ({
+          id: 'crawler',
+          name: '蛛行切割者',
+          category: 'enemy',
+          role: 'flanker',
+          stats: { hp: 3, damage: 10, speed: 1.18, reward: 150 },
+          parts: [
+            part('body', '低伏躯体', 'sphere', '#c2410c', '#351008', [0, 0.35, 0], [0, 0, 0], [0.82, 0.36, 0.56]),
+            part('head', '刀口头部', 'cone', '#fb923c', '#3a1207', [0, 0.4, 0.42], [90, 0, 0], [0.35, 0.46, 0.35]),
+            part('leg-l1', '左前足', 'box', '#7c2d12', '#1c0703', [-0.52, 0.25, 0.34], [0, 0, 25], [0.62, 0.08, 0.08]),
+            part('leg-r1', '右前足', 'box', '#7c2d12', '#1c0703', [0.52, 0.25, 0.34], [0, 0, -25], [0.62, 0.08, 0.08]),
+            part('leg-l2', '左后足', 'box', '#7c2d12', '#1c0703', [-0.5, 0.25, -0.26], [0, 0, -18], [0.56, 0.08, 0.08]),
+            part('leg-r2', '右后足', 'box', '#7c2d12', '#1c0703', [0.5, 0.25, -0.26], [0, 0, 18], [0.56, 0.08, 0.08])
+          ]
+        }),
+        'enemy-spore': () => ({
+          id: 'spore',
+          name: '孢群增殖体',
+          category: 'enemy',
+          role: 'swarm',
+          stats: { hp: 2, damage: 6, speed: 0.9, reward: 110 },
+          parts: [
+            part('pod', '母囊', 'sphere', '#84cc16', '#1f3a08', [0, 0.48, 0], [0, 0, 0], [0.58, 0.58, 0.58]),
+            part('cap', '孢帽', 'dodecahedron', '#bef264', '#33480d', [0, 0.92, 0], [0, 0, 0], [0.5, 0.32, 0.5]),
+            part('spore-a', '孢子 A', 'sphere', '#ecfccb', '#405810', [-0.38, 0.72, 0.22], [0, 0, 0], [0.18, 0.18, 0.18]),
+            part('spore-b', '孢子 B', 'sphere', '#d9f99d', '#405810', [0.36, 0.68, -0.22], [0, 0, 0], [0.15, 0.15, 0.15])
+          ]
+        }),
+        'enemy-screamer': () => ({
+          id: 'screamer',
+          name: '尖啸信标体',
+          category: 'enemy',
+          role: 'alarm',
+          stats: { hp: 3, damage: 7, speed: 1.05, reward: 175 },
+          parts: [
+            part('mast', '信号柱', 'cylinder', '#4f46e5', '#151142', [0, 0.58, 0], [0, 0, 0], [0.28, 1.05, 0.28]),
+            part('mouth', '尖啸口', 'torus', '#c4b5fd', '#342765', [0, 0.92, 0.3], [0, 0, 0], [0.5, 0.5, 0.16]),
+            part('fin-l', '左声鳍', 'cone', '#818cf8', '#251b55', [-0.35, 0.78, 0], [0, 0, 95], [0.22, 0.44, 0.22]),
+            part('fin-r', '右声鳍', 'cone', '#818cf8', '#251b55', [0.35, 0.78, 0], [0, 0, -95], [0.22, 0.44, 0.22])
+          ]
+        }),
+        'enemy-boss': () => ({
+          id: 'boss',
+          name: '深层门卫核心',
+          category: 'enemy',
+          role: 'boss',
+          stats: { hp: 18, damage: 22, speed: 0.62, reward: 650 },
+          parts: [
+            part('core', '主核心', 'dodecahedron', '#f59e0b', '#4b2603', [0, 0.72, 0], [0, 0, 0], [0.78, 0.78, 0.78]),
+            part('outer-ring', '外环', 'torus', '#fef08a', '#5f3705', [0, 0.72, 0], [90, 0, 0], [1.28, 1.28, 0.22]),
+            part('inner-ring', '内环', 'torus', '#fdba74', '#5f3705', [0, 0.72, 0], [0, 90, 0], [0.94, 0.94, 0.14]),
+            part('shard-0', '碎片 0', 'box', '#fed7aa', '#5f3705', [0.78, 0.72, 0], [0, 0, 25], [0.16, 0.42, 0.16]),
+            part('shard-1', '碎片 1', 'box', '#fed7aa', '#5f3705', [-0.78, 0.72, 0], [0, 0, -25], [0.16, 0.42, 0.16]),
+            part('shard-2', '碎片 2', 'box', '#fed7aa', '#5f3705', [0, 0.92, 0.72], [25, 0, 0], [0.16, 0.42, 0.16]),
+            part('shard-3', '碎片 3', 'box', '#fed7aa', '#5f3705', [0, 0.52, -0.72], [-25, 0, 0], [0.16, 0.42, 0.16])
+          ]
+        }),
+        'item-ammo': () => ({
+          id: 'ammo-pack',
+          name: '青色弹药盒',
+          category: 'item',
+          role: 'ammo',
+          stats: { hp: 0, damage: 0, speed: 0, reward: 0 },
+          parts: [
+            part('case', '弹药盒', 'box', '#57c7ff', '#103447', [0, 0.28, 0], [0, 0, 0], [0.58, 0.36, 0.46]),
+            part('stripe', '补给条', 'box', '#c8f3ff', '#1b475e', [0, 0.49, 0.01], [0, 0, 0], [0.62, 0.08, 0.48])
+          ]
+        }),
+        'item-medkit': () => ({
+          id: 'medkit',
+          name: '绿色医疗包',
+          category: 'item',
+          role: 'heal',
+          stats: { hp: 0, damage: 0, speed: 0, reward: 0 },
+          parts: [
+            part('body', '包体', 'box', '#72d47e', '#12331a', [0, 0.28, 0], [0, 0, 0], [0.58, 0.34, 0.48]),
+            part('cross-a', '十字横', 'box', '#f0fff2', '#2a5530', [0, 0.49, 0], [0, 0, 0], [0.45, 0.06, 0.09]),
+            part('cross-b', '十字竖', 'box', '#f0fff2', '#2a5530', [0, 0.5, 0], [0, 0, 0], [0.09, 0.07, 0.35])
+          ]
+        }),
+        'item-key': () => ({
+          id: 'key',
+          name: '金色钥匙',
+          category: 'item',
+          role: 'key',
+          stats: { hp: 0, damage: 0, speed: 0, reward: 0 },
+          parts: [
+            part('ring', '钥匙环', 'torus', '#f1d36d', '#5b4208', [0, 0.48, 0], [90, 0, 0], [0.5, 0.5, 0.12]),
+            part('stem', '钥匙柄', 'box', '#f1d36d', '#5b4208', [0.36, 0.48, 0], [0, 0, 0], [0.52, 0.12, 0.12]),
+            part('tooth', '齿', 'box', '#ffe9a3', '#5b4208', [0.62, 0.36, 0], [0, 0, 0], [0.12, 0.2, 0.12])
+          ]
+        }),
+        'item-scatter': () => ({
+          id: 'scatter-weapon',
+          name: 'SCATTER 武器',
+          category: 'item',
+          role: 'weapon',
+          stats: { hp: 0, damage: 0, speed: 0, reward: 0 },
+          parts: [
+            part('barrel', '枪管', 'cylinder', '#f08f59', '#452011', [0.2, 0.4, 0], [0, 0, 90], [0.15, 0.78, 0.15]),
+            part('grip', '握把', 'box', '#7f3b1d', '#2a1008', [-0.25, 0.28, 0], [0, 0, -18], [0.18, 0.5, 0.22]),
+            part('core', '能量芯', 'sphere', '#ffd2aa', '#553010', [0.05, 0.4, 0], [0, 0, 0], [0.2, 0.2, 0.2])
+          ]
+        })
+      };
+
+      function part(id, name, shape, color, edgeColor, position, rotation, scale) {
+        return {
+          id,
+          name,
+          shape,
+          color,
+          edgeColor,
+          emissive: '#000000',
+          opacity: 1,
+          position,
+          rotation,
+          scale,
+          wire: true
+        };
+      }
+
+      function normalizePart(raw) {
+        raw.id ||= makeId('part');
+        raw.name ||= raw.id;
+        raw.shape = SHAPES.includes(raw.shape) ? raw.shape : 'box';
+        raw.color = normalizeHex(raw.color, '#d8d0c0');
+        raw.edgeColor = normalizeHex(raw.edgeColor, '#111111');
+        raw.emissive = normalizeHex(raw.emissive, '#000000');
+        raw.opacity = clamp(Number(raw.opacity ?? 1), 0.1, 1);
+        raw.position = normalizeVector(raw.position, [0, 0.5, 0]);
+        raw.rotation = normalizeVector(raw.rotation, [0, 0, 0]);
+        raw.scale = normalizeVector(raw.scale, [0.4, 0.4, 0.4]).map((value) => clamp(value, 0.03, 4));
+        raw.wire = raw.wire !== false;
+        return raw;
+      }
+
+      function normalizeVector(value, fallback) {
+        if (!Array.isArray(value)) return [...fallback];
+        return [0, 1, 2].map((index) => Number.isFinite(Number(value[index])) ? Number(value[index]) : fallback[index]);
+      }
+
+      function normalizeHex(value, fallback) {
+        return /^#[0-9a-f]{6}$/i.test(String(value)) ? String(value) : fallback;
+      }
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function makeId(prefix) {
+        return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+      }
+
+      function getModel() {
+        return project.models.find((model) => model.id === selectedModelId) || project.models[0];
+      }
+
+      function getPart() {
+        return getModel().parts.find((partItem) => partItem.id === selectedPartId) || null;
+      }
+
+      function initThree() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0b0d0f);
+        camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        renderer = new THREE.WebGLRenderer({ canvas: dom.previewCanvas, antialias: true, alpha: false });
+        renderer.setPixelRatio(window.devicePixelRatio || 1);
+        renderer.shadowMap.enabled = true;
+
+        const ambient = new THREE.AmbientLight(0xb8c5cc, 0.55);
+        const key = new THREE.DirectionalLight(0xffffff, 1.15);
+        key.position.set(3, 4, 2);
+        key.castShadow = true;
+        scene.add(ambient, key);
+
+        const grid = new THREE.GridHelper(5, 10, 0x40505a, 0x1e272d);
+        grid.position.y = 0;
+        scene.add(grid);
+
+        const floor = new THREE.Mesh(
+          new THREE.PlaneGeometry(5, 5),
+          new THREE.MeshStandardMaterial({ color: 0x101418, roughness: 1, metalness: 0 })
+        );
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        modelRoot = new THREE.Group();
+        scene.add(modelRoot);
+
+        selectedBox = new THREE.BoxHelper(new THREE.Object3D(), 0x69d391);
+        selectedBox.visible = false;
+        scene.add(selectedBox);
+
+        resizePreview();
+        requestAnimationFrame(animate);
+      }
+
+      function resizePreview() {
+        const rect = dom.previewCanvas.getBoundingClientRect();
+        const width = Math.max(320, rect.width);
+        const height = Math.max(280, rect.height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height, false);
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const target = new THREE.Vector3(0, 0.62, 0);
+        const x = Math.cos(controls.pitch) * Math.sin(controls.yaw) * controls.distance;
+        const y = Math.sin(-controls.pitch) * controls.distance + 1.0;
+        const z = Math.cos(controls.pitch) * Math.cos(controls.yaw) * controls.distance;
+        camera.position.set(x, y, z);
+        camera.lookAt(target);
+        modelRoot.rotation.y += 0.0025;
+        const selectedObject = modelRoot.children.find((child) => child.userData.partId === selectedPartId);
+        if (selectedObject) {
+          selectedBox.setFromObject(selectedObject);
+          selectedBox.visible = true;
+        }
+        renderer.render(scene, camera);
+      }
+
+      function buildPreview() {
+        while (modelRoot.children.length) {
+          const child = modelRoot.children.pop();
+          child.traverse?.((node) => {
+            node.geometry?.dispose?.();
+            node.material?.dispose?.();
+          });
+        }
+
+        const model = getModel();
+        for (const partItem of model.parts) {
+          const group = createPartObject(partItem);
+          modelRoot.add(group);
+        }
+
+        const selectedObject = modelRoot.children.find((child) => child.userData.partId === selectedPartId);
+        if (selectedObject) {
+          selectedBox.setFromObject(selectedObject);
+          selectedBox.visible = true;
+        } else {
+          selectedBox.visible = false;
+        }
+      }
+
+      function createPartObject(partItem) {
+        const geometry = createGeometry(partItem.shape);
+        const material = new THREE.MeshStandardMaterial({
+          color: partItem.color,
+          emissive: partItem.emissive,
+          roughness: 0.62,
+          metalness: partItem.shape === 'torus' ? 0.28 : 0.08,
+          transparent: partItem.opacity < 1,
+          opacity: partItem.opacity
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+
+        const group = new THREE.Group();
+        group.userData.partId = partItem.id;
+        group.add(mesh);
+        if (partItem.wire) {
+          const edges = new THREE.LineSegments(
+            new THREE.EdgesGeometry(geometry),
+            new THREE.LineBasicMaterial({ color: partItem.edgeColor, transparent: true, opacity: 0.9 })
+          );
+          group.add(edges);
+        }
+        group.position.set(...partItem.position);
+        group.rotation.set(...partItem.rotation.map(degToRad));
+        group.scale.set(...partItem.scale);
+        return group;
+      }
+
+      function createGeometry(shape) {
+        switch (shape) {
+          case 'sphere':
+            return new THREE.SphereGeometry(0.5, 24, 16);
+          case 'cylinder':
+            return new THREE.CylinderGeometry(0.5, 0.5, 1, 24);
+          case 'cone':
+            return new THREE.ConeGeometry(0.5, 1, 24);
+          case 'torus':
+            return new THREE.TorusGeometry(0.5, 0.09, 12, 32);
+          case 'octahedron':
+            return new THREE.OctahedronGeometry(0.5, 0);
+          case 'icosahedron':
+            return new THREE.IcosahedronGeometry(0.5, 0);
+          case 'dodecahedron':
+            return new THREE.DodecahedronGeometry(0.5, 0);
+          default:
+            return new THREE.BoxGeometry(1, 1, 1);
+        }
+      }
+
+      function degToRad(value) {
+        return (value * Math.PI) / 180;
+      }
+
+      function render() {
+        project.models.forEach((model) => {
+          model.parts.forEach(normalizePart);
+          model.stats ||= { hp: 0, damage: 0, speed: 0, reward: 0 };
+        });
+        if (!getPart()) selectedPartId = getModel().parts[0]?.id || null;
+        renderTemplates();
+        renderLists();
+        renderInspectors();
+        renderMeta();
+        buildPreview();
+        document.body.dataset.modelEditorSnapshot = JSON.stringify(getDebugSnapshot());
+      }
+
+      function renderTemplates() {
+        dom.templateSelect.innerHTML = TEMPLATE_IDS.map((id) => {
+          const model = createTemplateModel(id);
+          return `<option value="${escapeAttr(id)}">${escapeHtml(model.name)}</option>`;
+        }).join('');
+        dom.shapeSelect.innerHTML = SHAPES.map((shape) => `<option value="${shape}">${shape}</option>`).join('');
+      }
+
+      function renderLists() {
+        dom.modelList.innerHTML = project.models.map((model) => {
+          const color = model.parts[0]?.color || '#777777';
+          return `
+            <button class="model-row ${model.id === selectedModelId ? 'active' : ''}" data-model-id="${escapeAttr(model.id)}">
+              <span class="swatch" style="background:${color}"></span>
+              <span>
+                <strong>${escapeHtml(model.name)}</strong>
+                <span class="tiny">${escapeHtml(model.category)} / ${escapeHtml(model.role)} / ${model.parts.length} parts</span>
+              </span>
+              <span class="tiny">${escapeHtml(model.id)}</span>
+            </button>`;
+        }).join('');
+
+        dom.partList.innerHTML = getModel().parts.map((partItem) => `
+          <button class="part-row ${partItem.id === selectedPartId ? 'active' : ''}" data-part-id="${escapeAttr(partItem.id)}">
+            <span class="swatch" style="background:${partItem.color}"></span>
+            <span>
+              <strong>${escapeHtml(partItem.name)}</strong>
+              <span class="tiny">${escapeHtml(partItem.shape)}</span>
+            </span>
+            <span class="tiny">${partItem.position.map((value) => Number(value).toFixed(1)).join(',')}</span>
+          </button>`).join('');
+      }
+
+      function renderInspectors() {
+        const model = getModel();
+        dom.modelInspector.innerHTML = `
+          <label>名称<input data-model-field="name" value="${escapeAttr(model.name)}" /></label>
+          <label>ID<input data-model-field="id" value="${escapeAttr(model.id)}" /></label>
+          <div class="grid-two">
+            <label>类别<select data-model-field="category">
+              ${option('enemy', '敌人', model.category)}
+              ${option('item', '物品', model.category)}
+              ${option('prop', '场景物件', model.category)}
+            </select></label>
+            <label>角色<input data-model-field="role" value="${escapeAttr(model.role)}" /></label>
+          </div>
+          <div class="grid-two">
+            <label>HP<input type="number" step="1" data-model-field="stats.hp" value="${model.stats.hp || 0}" /></label>
+            <label>伤害<input type="number" step="1" data-model-field="stats.damage" value="${model.stats.damage || 0}" /></label>
+          </div>
+          <div class="grid-two">
+            <label>速度<input type="number" step="0.01" data-model-field="stats.speed" value="${model.stats.speed || 0}" /></label>
+            <label>奖励<input type="number" step="1" data-model-field="stats.reward" value="${model.stats.reward || 0}" /></label>
+          </div>
+          <label>备注<textarea data-model-field="notes">${escapeHtml(model.notes || '')}</textarea></label>
+        `;
+
+        const partItem = getPart();
+        if (!partItem) {
+          dom.partInspector.innerHTML = `<div class="empty">当前模型没有部件</div>`;
+          return;
+        }
+
+        dom.partInspector.innerHTML = `
+          <div class="row">
+            <button id="duplicatePartBtn" title="复制部件">复制</button>
+            <button id="deletePartBtn" class="danger" title="删除部件">删除</button>
+          </div>
+          <label>名称<input data-part-field="name" value="${escapeAttr(partItem.name)}" /></label>
+          <label>ID<input data-part-field="id" value="${escapeAttr(partItem.id)}" /></label>
+          <label>形状<select data-part-field="shape">${SHAPES.map((shape) => option(shape, shape, partItem.shape)).join('')}</select></label>
+          <div class="grid-two">
+            <label>填充色<input type="color" data-part-field="color" value="${escapeAttr(partItem.color)}" /></label>
+            <label>边线色<input type="color" data-part-field="edgeColor" value="${escapeAttr(partItem.edgeColor)}" /></label>
+          </div>
+          <div class="grid-two">
+            <label>自发光<input type="color" data-part-field="emissive" value="${escapeAttr(partItem.emissive)}" /></label>
+            <label>透明度<input type="number" min="0.1" max="1" step="0.05" data-part-field="opacity" value="${partItem.opacity}" /></label>
+          </div>
+          <div class="grid-three">
+            ${vectorInput('position', '位置', partItem.position, 0.05)}
+          </div>
+          <div class="grid-three">
+            ${vectorInput('rotation', '旋转', partItem.rotation, 5)}
+          </div>
+          <div class="grid-three">
+            ${vectorInput('scale', '缩放', partItem.scale, 0.05)}
+          </div>
+          <label>边线<select data-part-field="wire">
+            ${option('true', '显示', String(partItem.wire))}
+            ${option('false', '隐藏', String(partItem.wire))}
+          </select></label>
+        `;
+        dom.jsonPreview.value = JSON.stringify(model, null, 2);
+      }
+
+      function vectorInput(path, label, values, step) {
+        return ['x', 'y', 'z'].map((axis, index) =>
+          `<label>${label}.${axis}<input type="number" step="${step}" data-part-field="${path}.${index}" value="${values[index]}" /></label>`
+        ).join('');
+      }
+
+      function renderMeta() {
+        const model = getModel();
+        dom.previewName.textContent = model.name;
+        dom.previewStats.textContent = `${model.category} / ${model.role} / ${model.parts.length} parts`;
+        dom.modelMeta.textContent = `${project.models.length} models`;
+        dom.schemaText.textContent = `schema v${project.version}`;
+      }
+
+      function option(value, label, selected) {
+        return `<option value="${escapeAttr(value)}" ${String(value) === String(selected) ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+      }
+
+      function updateModelField(target) {
+        const model = getModel();
+        const field = target.dataset.modelField;
+        const oldId = model.id;
+        let value = target.type === 'number' ? Number(target.value) : target.value;
+        if (field === 'id') value = String(value).trim() || oldId;
+        setByPath(model, field, value);
+        if (field === 'id') selectedModelId = value;
+        touchProject();
+        render();
+      }
+
+      function updatePartField(target) {
+        const partItem = getPart();
+        if (!partItem) return;
+        const field = target.dataset.partField;
+        const oldId = partItem.id;
+        let value = target.value;
+        if (target.type === 'number') value = Number(value);
+        if (value === 'true') value = true;
+        if (value === 'false') value = false;
+        setByPath(partItem, field, value);
+        normalizePart(partItem);
+        if (field === 'id') selectedPartId = partItem.id || oldId;
+        touchProject();
+        render();
+      }
+
+      function setByPath(object, path, value) {
+        const parts = path.split('.');
+        let cursor = object;
+        for (let i = 0; i < parts.length - 1; i++) {
+          const key = parts[i];
+          cursor[key] ||= Number.isInteger(Number(parts[i + 1])) ? [] : {};
+          cursor = cursor[key];
+        }
+        cursor[parts.at(-1)] = value;
+      }
+
+      function applyTemplate() {
+        const template = createTemplateModel(dom.templateSelect.value);
+        const index = project.models.findIndex((model) => model.id === selectedModelId);
+        const next = structuredClone(template);
+        if (index >= 0) project.models.splice(index, 1, next);
+        else project.models.push(next);
+        selectedModelId = next.id;
+        selectedPartId = next.parts[0]?.id || null;
+        touchProject();
+        setStatus(`Template loaded: ${next.name}`);
+        render();
+      }
+
+      function newModel() {
+        const model = {
+          id: makeId('model'),
+          name: '新模型',
+          category: 'enemy',
+          role: 'custom',
+          stats: { hp: 3, damage: 8, speed: 1, reward: 100 },
+          notes: '',
+          parts: [part('core', '核心', 'box', '#d8d0c0', '#222222', [0, 0.5, 0], [0, 0, 0], [0.5, 0.5, 0.5])]
+        };
+        project.models.push(model);
+        selectedModelId = model.id;
+        selectedPartId = model.parts[0].id;
+        touchProject();
+        render();
+      }
+
+      function duplicateModel() {
+        const clone = structuredClone(getModel());
+        clone.id = makeId(clone.id || 'model');
+        clone.name = `${clone.name} copy`;
+        project.models.push(clone);
+        selectedModelId = clone.id;
+        selectedPartId = clone.parts[0]?.id || null;
+        touchProject();
+        render();
+      }
+
+      function deleteModel() {
+        if (project.models.length <= 1) {
+          setStatus('At least one model is required');
+          return;
+        }
+        const index = project.models.findIndex((model) => model.id === selectedModelId);
+        if (index >= 0) project.models.splice(index, 1);
+        selectedModelId = project.models[0].id;
+        selectedPartId = project.models[0].parts[0]?.id || null;
+        touchProject();
+        render();
+      }
+
+      function addPart() {
+        const model = getModel();
+        const shape = dom.shapeSelect.value;
+        const partItem = part(makeId(shape), `${shape} 部件`, shape, '#d8d0c0', '#222222', [0, 0.5, 0], [0, 0, 0], [0.4, 0.4, 0.4]);
+        model.parts.push(partItem);
+        selectedPartId = partItem.id;
+        touchProject();
+        render();
+      }
+
+      function duplicatePart() {
+        const model = getModel();
+        const partItem = getPart();
+        if (!partItem) return;
+        const clone = structuredClone(partItem);
+        clone.id = makeId(partItem.id || 'part');
+        clone.name = `${partItem.name} copy`;
+        clone.position = [clone.position[0] + 0.16, clone.position[1], clone.position[2] + 0.16];
+        model.parts.push(clone);
+        selectedPartId = clone.id;
+        touchProject();
+        render();
+      }
+
+      function deletePart() {
+        const model = getModel();
+        if (model.parts.length <= 1) {
+          setStatus('At least one part is required');
+          return;
+        }
+        const index = model.parts.findIndex((partItem) => partItem.id === selectedPartId);
+        if (index >= 0) model.parts.splice(index, 1);
+        selectedPartId = model.parts[0]?.id || null;
+        touchProject();
+        render();
+      }
+
+      function saveProject() {
+        touchProject();
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
+        setStatus('Saved locally');
+        render();
+      }
+
+      function loadProject() {
+        const raw = window.localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          setStatus('No local save');
+          return;
+        }
+        loadFromJson(raw, 'Local save loaded');
+      }
+
+      function loadFromJson(raw, message) {
+        try {
+          const next = JSON.parse(raw);
+          validateProject(next);
+          project = next;
+          selectedModelId = project.models[0].id;
+          selectedPartId = project.models[0].parts[0]?.id || null;
+          setStatus(message);
+          render();
+        } catch (error) {
+          setStatus(`Import failed: ${error.message}`);
+        }
+      }
+
+      function validateProject(data) {
+        if (!data || typeof data !== 'object') throw new Error('invalid project');
+        if (!Array.isArray(data.models) || data.models.length === 0) throw new Error('missing models');
+        data.version ||= 1;
+        data.models.forEach((model) => {
+          model.id ||= makeId('model');
+          model.name ||= model.id;
+          model.category ||= 'enemy';
+          model.role ||= 'custom';
+          model.stats ||= { hp: 0, damage: 0, speed: 0, reward: 0 };
+          if (!Array.isArray(model.parts) || model.parts.length === 0) model.parts = [part('core', '核心', 'box', '#d8d0c0', '#222222', [0, 0.5, 0], [0, 0, 0], [0.5, 0.5, 0.5])];
+          model.parts.forEach(normalizePart);
+        });
+      }
+
+      function exportProject() {
+        touchProject();
+        const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `ascii-labyrinth-models-${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+        setStatus('JSON exported');
+      }
+
+      function touchProject() {
+        project.updatedAt = new Date().toISOString();
+      }
+
+      function setStatus(message) {
+        dom.statusText.textContent = message;
+      }
+
+      function getDebugSnapshot() {
+        const model = getModel();
+        return {
+          version: project.version,
+          modelCount: project.models.length,
+          selectedModelId,
+          selectedPartId,
+          model: {
+            id: model.id,
+            name: model.name,
+            category: model.category,
+            role: model.role,
+            partCount: model.parts.length,
+            shapes: model.parts.reduce((acc, partItem) => {
+              acc[partItem.shape] = (acc[partItem.shape] || 0) + 1;
+              return acc;
+            }, {})
+          },
+          hasLocalSave: Boolean(window.localStorage.getItem(STORAGE_KEY))
+        };
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
+
+      function escapeAttr(value) {
+        return escapeHtml(value);
+      }
+
+      dom.modelList.addEventListener('click', (event) => {
+        const row = event.target.closest('[data-model-id]');
+        if (!row) return;
+        selectedModelId = row.dataset.modelId;
+        selectedPartId = getModel().parts[0]?.id || null;
+        render();
+      });
+
+      dom.partList.addEventListener('click', (event) => {
+        const row = event.target.closest('[data-part-id]');
+        if (!row) return;
+        selectedPartId = row.dataset.partId;
+        render();
+      });
+
+      dom.modelInspector.addEventListener('change', (event) => {
+        if (event.target.matches('[data-model-field]')) updateModelField(event.target);
+      });
+
+      dom.partInspector.addEventListener('change', (event) => {
+        if (event.target.matches('[data-part-field]')) updatePartField(event.target);
+      });
+
+      dom.partInspector.addEventListener('click', (event) => {
+        if (event.target.id === 'duplicatePartBtn') duplicatePart();
+        if (event.target.id === 'deletePartBtn') deletePart();
+      });
+
+      dom.applyTemplateBtn.addEventListener('click', applyTemplate);
+      dom.newModelBtn.addEventListener('click', newModel);
+      dom.duplicateModelBtn.addEventListener('click', duplicateModel);
+      dom.deleteModelBtn.addEventListener('click', deleteModel);
+      dom.addPartBtn.addEventListener('click', addPart);
+      dom.saveBtn.addEventListener('click', saveProject);
+      dom.loadBtn.addEventListener('click', loadProject);
+      dom.exportBtn.addEventListener('click', exportProject);
+      dom.importBtn.addEventListener('click', () => dom.importFile.click());
+      dom.importFile.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        loadFromJson(await file.text(), `${file.name} imported`);
+        event.target.value = '';
+      });
+
+      dom.previewCanvas.addEventListener('pointerdown', (event) => {
+        controls.dragging = true;
+        controls.lastX = event.clientX;
+        controls.lastY = event.clientY;
+        dom.previewCanvas.setPointerCapture(event.pointerId);
+      });
+
+      dom.previewCanvas.addEventListener('pointermove', (event) => {
+        if (!controls.dragging) return;
+        const dx = event.clientX - controls.lastX;
+        const dy = event.clientY - controls.lastY;
+        controls.lastX = event.clientX;
+        controls.lastY = event.clientY;
+        controls.yaw -= dx * 0.008;
+        controls.pitch = clamp(controls.pitch - dy * 0.006, -1.1, 0.72);
+      });
+
+      dom.previewCanvas.addEventListener('pointerup', (event) => {
+        controls.dragging = false;
+        dom.previewCanvas.releasePointerCapture(event.pointerId);
+      });
+
+      dom.previewCanvas.addEventListener('wheel', (event) => {
+        event.preventDefault();
+        controls.distance = clamp(controls.distance + Math.sign(event.deltaY) * 0.25, 2.2, 8);
+      }, { passive: false });
+
+      window.addEventListener('resize', resizePreview);
+
+      window.__ASCII_MODEL_EDITOR_DEBUG__ = getDebugSnapshot;
+
+      project = createDefaultProject();
+      selectedModelId = project.models[0].id;
+      selectedPartId = project.models[0].parts[0].id;
+
+      initThree();
+      render();
+    </script>
+  </body>
+</html>
