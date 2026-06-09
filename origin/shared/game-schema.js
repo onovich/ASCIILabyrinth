@@ -127,6 +127,16 @@
     return String(path).split('.').reduce((cursor, part) => cursor?.[part], object);
   }
 
+  function countBy(items, getKey) {
+    const list = Array.isArray(items) ? items : [];
+    return list.reduce((acc, item, index) => {
+      const key = typeof getKey === 'function' ? getKey(item, index) : item?.[getKey];
+      if (key === undefined || key === null || key === '') return acc;
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+  }
+
   function escapeHtml(value) {
     return String(value)
       .replaceAll('&', '&amp;')
@@ -634,6 +644,7 @@
     OBJECT_TO_TILE,
     setValueByPath,
     getValueByPath,
+    countBy,
     escapeHtml,
     escapeAttr,
     PALETTE_ORDER,

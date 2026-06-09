@@ -649,6 +649,11 @@
             acc[ch] = (acc[ch] || 0) + 1;
             return acc;
         }, {}));
+        const countBy = SHARED_DATA.countBy || ((items, getKey) => items.reduce((acc, item, index) => {
+            const key = typeof getKey === 'function' ? getKey(item, index) : item?.[getKey];
+            if (key) acc[key] = (acc[key] || 0) + 1;
+            return acc;
+        }, {}));
         const gridKey = SHARED_DATA.getCellKey || ((x, z) => `${x},${z}`);
 
         const mapSize = 2; 
@@ -1811,14 +1816,8 @@
                 wallCount: walls.length,
                 wallGridBuckets: wallGrid.size,
                 enemyCount: enemies.length,
-                enemyKinds: enemies.reduce((acc, enemy) => {
-                    acc[enemy.kind || 'unknown'] = (acc[enemy.kind || 'unknown'] || 0) + 1;
-                    return acc;
-                }, {}),
-                itemTypes: items.reduce((acc, item) => {
-                    acc[item.type] = (acc[item.type] || 0) + 1;
-                    return acc;
-                }, {}),
+                enemyKinds: countBy(enemies, (enemy) => enemy.kind || 'unknown'),
+                itemTypes: countBy(items, 'type'),
                 doorCount: doors.length,
                 terminalCount: terminals.length,
                 exitCount: exits.length,
