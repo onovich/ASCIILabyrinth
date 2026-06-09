@@ -22,87 +22,9 @@
         font-family: var(--al-font-ui);
       }
 
-      * {
-        box-sizing: border-box;
-      }
-
-      html,
-      body {
+      html {
         width: 100%;
         height: 100%;
-        margin: 0;
-        overflow: hidden;
-        background: var(--bg);
-        color: var(--text);
-      }
-
-      button,
-      input,
-      select,
-      textarea {
-        font: inherit;
-      }
-
-      button {
-        min-height: 32px;
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        background: #22272d;
-        color: var(--text);
-        cursor: pointer;
-      }
-
-      button:hover,
-      button:focus-visible,
-      input:focus-visible,
-      select:focus-visible,
-      textarea:focus-visible {
-        border-color: var(--accent);
-        outline: none;
-      }
-
-      button.primary {
-        background: #244d38;
-        border-color: #3e8867;
-      }
-
-      button.warn {
-        background: #4d3921;
-        border-color: #88663a;
-      }
-
-      button.danger {
-        background: #4d2525;
-        border-color: #8a4747;
-      }
-
-      input,
-      select,
-      textarea {
-        width: 100%;
-        min-height: 32px;
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        background: #111418;
-        color: var(--text);
-        padding: 6px 8px;
-      }
-
-      input[type='color'] {
-        padding: 2px;
-      }
-
-      textarea {
-        min-height: 72px;
-        resize: vertical;
-        line-height: 1.4;
-      }
-
-      label {
-        display: grid;
-        gap: 4px;
-        color: var(--muted);
-        font-size: 12px;
       }
 
       .app {
@@ -382,7 +304,7 @@
       }
     </style>
   </head>
-  <body>
+  <body class="al-tool-page">
     <main class="app">
       <header class="topbar">
         <div class="brand">
@@ -1261,6 +1183,9 @@
             timestamps: typeof SHARED_DATA.toIsoTimestamp === 'function' && typeof SHARED_DATA.touchProject === 'function',
             htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeModelProject === 'function'
+          },
+          toolUi: {
+            bodyClass: document.body.classList.contains('al-tool-page')
           },
           modelCount: project.models.length,
           selectedModelId,

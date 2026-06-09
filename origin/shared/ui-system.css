@@ -229,3 +229,94 @@
 .al-muted {
   color: var(--al-color-muted);
 }
+
+.al-tool-page,
+.al-tool-page * {
+  box-sizing: border-box;
+}
+
+.al-tool-page {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg, var(--al-color-bg));
+  color: var(--text, var(--al-color-text));
+  font-family: var(--al-font-ui);
+}
+
+.al-tool-page :where(button, input, select, textarea) {
+  font: inherit;
+}
+
+.al-tool-page :where(button) {
+  min-height: 32px;
+  border: 1px solid var(--line, var(--al-color-line));
+  border-radius: var(--al-radius-sm);
+  background: #22272d;
+  color: var(--text, var(--al-color-text));
+  cursor: pointer;
+}
+
+.al-tool-page :where(
+  button:hover,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible
+) {
+  border-color: var(--accent, var(--al-color-accent));
+  outline: none;
+}
+
+.al-tool-page :where(button:disabled) {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.al-tool-page :where(button.primary) {
+  background: #254d3a;
+  border-color: #3e8867;
+}
+
+.al-tool-page :where(button.warn) {
+  background: #4e3920;
+  border-color: #88663a;
+}
+
+.al-tool-page :where(button.danger) {
+  background: #4d2525;
+  border-color: #8a4848;
+}
+
+.al-tool-page :where(input, select, textarea) {
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 8px;
+  border: 1px solid var(--line, var(--al-color-line));
+  border-radius: var(--al-radius-sm);
+  background: #111418;
+  color: var(--text, var(--al-color-text));
+}
+
+.al-tool-page :where(textarea) {
+  min-height: 72px;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.al-tool-page :where(input[type='checkbox']) {
+  width: auto;
+  min-height: auto;
+}
+
+.al-tool-page :where(input[type='color']) {
+  padding: 2px;
+}
+
+.al-tool-page :where(label) {
+  display: grid;
+  gap: var(--al-space-1);
+  color: var(--muted, var(--al-color-muted));
+  font-size: 12px;
+}

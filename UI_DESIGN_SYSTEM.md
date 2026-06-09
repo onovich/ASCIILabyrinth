@@ -67,6 +67,7 @@ Preferred local patterns:
 
 - Panels use `.section` and `.section-title`, backed by shared colors.
 - Tool-page aliases such as `--bg`, `--panel`, `--line`, and `--text` should resolve to `--al-*` tokens.
+- Tool pages should put `.al-tool-page` on `<body>` so base form controls, buttons, labels, and focus states come from shared CSS.
 - Repeated command buttons should use familiar icon text or concise labels.
 - New major panel surfaces should be implemented with shared `--al-*` tokens first.
 

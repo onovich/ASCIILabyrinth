@@ -89,6 +89,7 @@ const pages = [
         'optionsWithEmptyHtml',
         'projectNormalizer'
       ])],
+      ['editor shared tool UI class', (snapshot) => snapshot.toolUi?.bodyClass === true],
       ['editor levels', (snapshot) => Number(snapshot.levelCount) > 0],
       ['editor canvas', (snapshot) => Number(snapshot.canvas?.width) > 0 && Number(snapshot.canvas?.height) > 0]
     ]
@@ -114,6 +115,7 @@ const pages = [
         'optionsWithEmptyHtml',
         'projectNormalizer'
       ])],
+      ['model editor shared tool UI class', (snapshot) => snapshot.toolUi?.bodyClass === true],
       ['model editor models', (snapshot) => Number(snapshot.modelCount) > 0],
       ['model editor selected model', (snapshot) => Boolean(snapshot.selectedModelId)]
     ]
