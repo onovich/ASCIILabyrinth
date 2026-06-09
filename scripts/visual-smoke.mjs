@@ -107,24 +107,20 @@ const pages = [
     path: '/editor/index.html?verify=visual-smoke',
     mustContain: ['ASCII Labyrinth Level Editor', 'data-editor-snapshot', 'mapCanvas'],
     snapshotAttr: 'data-editor-snapshot',
-    snapshotChecks: [
-      ['editor shared contract', (snapshot) => allTrue(snapshot.sharedContract, editorSharedContractKeys)],
-      ['editor shared tool UI class', (snapshot) => snapshot.toolUi?.bodyClass === true],
+    snapshotChecks: toolPageChecks('editor', editorSharedContractKeys, [
       ['editor levels', (snapshot) => Number(snapshot.levelCount) > 0],
       ['editor canvas', (snapshot) => Number(snapshot.canvas?.width) > 0 && Number(snapshot.canvas?.height) > 0]
-    ]
+    ])
   },
   {
     name: 'model-editor',
     path: '/model-editor/index.html?verify=visual-smoke',
     mustContain: ['ASCII Labyrinth Model Editor', 'data-model-editor-snapshot', 'previewCanvas'],
     snapshotAttr: 'data-model-editor-snapshot',
-    snapshotChecks: [
-      ['model editor shared contract', (snapshot) => allTrue(snapshot.sharedContract, modelEditorSharedContractKeys)],
-      ['model editor shared tool UI class', (snapshot) => snapshot.toolUi?.bodyClass === true],
+    snapshotChecks: toolPageChecks('model editor', modelEditorSharedContractKeys, [
       ['model editor models', (snapshot) => Number(snapshot.modelCount) > 0],
       ['model editor selected model', (snapshot) => Boolean(snapshot.selectedModelId)]
-    ]
+    ])
   }
 ];
 
@@ -134,6 +130,14 @@ function normalizeBase(value) {
 
 function allTrue(object, keys) {
   return keys.every((key) => object?.[key] === true);
+}
+
+function toolPageChecks(label, contractKeys, checks) {
+  return [
+    [`${label} shared contract`, (snapshot) => allTrue(snapshot.sharedContract, contractKeys)],
+    [`${label} shared tool UI class`, (snapshot) => snapshot.toolUi?.bodyClass === true],
+    ...checks
+  ];
 }
 
 function noBoxDrawingText(values) {
