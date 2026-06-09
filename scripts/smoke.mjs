@@ -155,6 +155,7 @@ async function main() {
   assert(schema.degreesToRadians(null).every((value) => value === 0), 'shared angle helper should repair missing vectors');
   assert(schema.escapeHtml("<tag class=\"x\">&'") === '&lt;tag class=&quot;x&quot;&gt;&amp;&#039;', 'shared html escape should encode inspector text');
   assert(schema.optionHtml('a&b', '<Pick>', 'a&b') === '<option value="a&amp;b" selected>&lt;Pick&gt;</option>', 'shared option helper should escape and select matching options');
+  assert(schema.parseJson('{"ok":true}').ok === true, 'shared json parser should parse import payloads');
   const editorObject = schema.createEditorObject('weapon', 1, 2, 0, { weaponKind: 'rail' }, { makeId: (prefix) => `${prefix}-fixed` });
   assert(editorObject.id === 'weapon-fixed', 'shared editor object factory should accept injected ids');
   assert(editorObject.ammo === 6 && editorObject.weaponKind === 'rail', 'shared editor object factory should merge defaults before overrides');

@@ -163,6 +163,10 @@
     return `<option value="${escapeAttr(value)}"${selectedAttr}>${escapeHtml(label)}</option>`;
   }
 
+  function parseJson(raw) {
+    return JSON.parse(raw);
+  }
+
   const PALETTE_ORDER = Object.freeze([
     'select',
     'wall',
@@ -439,7 +443,7 @@
     try {
       const raw = storage?.getItem(STORAGE_KEYS.editorProject);
       if (!raw) return null;
-      return normalizeEditorProject(JSON.parse(raw));
+      return normalizeEditorProject(parseJson(raw));
     } catch {
       return null;
     }
@@ -637,7 +641,7 @@
     try {
       const raw = storage?.getItem(STORAGE_KEYS.modelProject);
       if (!raw) return null;
-      return normalizeModelProject(JSON.parse(raw));
+      return normalizeModelProject(parseJson(raw));
     } catch {
       return null;
     }
@@ -666,6 +670,7 @@
     escapeHtml,
     escapeAttr,
     optionHtml,
+    parseJson,
     PALETTE_ORDER,
     createDefaultEffect,
     createDefaultInteraction,

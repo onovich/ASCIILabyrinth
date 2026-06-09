@@ -43,6 +43,7 @@ const pages = [
         'pathTools',
         'clamp',
         'optionHtml',
+        'parseJson',
         'htmlEscapes',
         'projectNormalizer'
       ])],
@@ -63,6 +64,7 @@ const pages = [
         'pathTools',
         'clamp',
         'optionHtml',
+        'parseJson',
         'htmlEscapes',
         'projectNormalizer'
       ])],

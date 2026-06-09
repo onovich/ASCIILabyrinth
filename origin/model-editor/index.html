@@ -501,6 +501,7 @@
         .replaceAll("'", '&#039;'));
       const escapeAttr = SHARED_DATA.escapeAttr || escapeHtml;
       const optionHtml = SHARED_DATA.optionHtml || ((value, label, selected) => `<option value="${escapeAttr(value)}" ${String(value) === String(selected) ? 'selected' : ''}>${escapeHtml(label)}</option>`);
+      const parseJson = SHARED_DATA.parseJson || JSON.parse;
       const countBy = SHARED_DATA.countBy || ((items, getKey) => (Array.isArray(items) ? items : []).reduce((acc, item, index) => {
         const key = typeof getKey === 'function' ? getKey(item, index) : item?.[getKey];
         if (key) acc[key] = (acc[key] || 0) + 1;
@@ -1179,7 +1180,7 @@
 
       function loadFromJson(raw, message) {
         try {
-          const next = validateProject(JSON.parse(raw));
+          const next = validateProject(parseJson(raw));
           project = next;
           selectedModelId = project.models[0].id;
           selectedPartId = project.models[0].parts[0]?.id || null;
@@ -1246,6 +1247,7 @@
             pathTools: typeof SHARED_DATA.setValueByPath === 'function',
             clamp: typeof SHARED_DATA.clamp === 'function',
             optionHtml: typeof SHARED_DATA.optionHtml === 'function',
+            parseJson: typeof SHARED_DATA.parseJson === 'function',
             htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeModelProject === 'function'
           },
