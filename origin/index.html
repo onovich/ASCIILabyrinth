@@ -94,13 +94,9 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 20;
-            color: var(--term-green);
             text-align: center;
             display: none;
-            background: rgba(0, 0, 0, 0.92);
             padding: 18px 22px;
-            border: 1px solid var(--term-green);
-            box-shadow: 0 0 24px rgba(140, 255, 154, 0.2);
             pointer-events: auto;
             min-width: min(88vw, 480px);
         }
@@ -118,7 +114,7 @@
             white-space: pre-wrap;
         }
 
-        .terminal-modal input {
+        .terminal-modal .al-input {
             width: 100%;
             margin: 6px 0 10px;
             padding: 9px 10px;
@@ -131,20 +127,16 @@
             outline: none;
         }
 
-        .terminal-modal button,
-        #game-over button {
+        .terminal-modal .al-button {
             margin: 6px 4px 0;
             padding: 9px 14px;
             background: #03140c;
             color: var(--term-green);
             border: 1px solid var(--term-green);
             font-weight: bold;
-            cursor: pointer;
-            font-family: inherit;
         }
 
-        .terminal-modal button:hover,
-        #game-over button:hover {
+        .terminal-modal .al-button:hover {
             background: var(--term-green);
             color: #000;
         }
@@ -1798,6 +1790,9 @@
             pushLog(`载入地编关卡：${runtimeLevel.levelName || runtimeLevel.levelId} / floor ${runtimeLevel.floor}`);
         } else {
             updateUI();
+        }
+        if (new URLSearchParams(window.location.search).get('debugModal') === 'password') {
+            document.getElementById('password-panel').style.display = 'block';
         }
         function getUiClassState(id, classNames) {
             return window.ASCIIUI?.getElementState?.(id, classNames) || { exists: false };

@@ -68,7 +68,7 @@
     (Array.isArray(classNames) ? classNames : []).forEach((name) => {
       classes[name] = element.classList?.contains(name) === true;
     });
-    return { exists: true, classes };
+    return { exists: true, classes, display: element.style?.display || '' };
   }
 
   function getPanelState(target) {

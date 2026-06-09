@@ -13,26 +13,38 @@ const chromePath = await findChrome();
 const devServerHost = process.env.VISUAL_SMOKE_DEV_HOST || baseUrlParts.hostname || '127.0.0.1';
 const devServerPort = Number(process.env.VISUAL_SMOKE_DEV_PORT || baseUrlParts.port || 5174);
 
+const runtimeSnapshotChecks = [
+  ['runtime shared contract', (snapshot) => allTrue(snapshot.sharedContract, ['clamp'])],
+  ['runtime shared UI contract', (snapshot) => allTrue(snapshot.sharedUiContract, ['formatMeter', 'renderPanel', 'setPanelLines', 'getElementState', 'getPanelState'])],
+  ['runtime HUD panels', (snapshot) => ['status', 'mission', 'log'].every((key) => {
+    const panel = snapshot.hudPanels?.[key];
+    return panel?.exists === true && panel.isPanel === true && Number(panel.lineCount) > 0;
+  })],
+  ['runtime modal UI classes', (snapshot) => Object.values(snapshot.modalUi || {}).every((state) =>
+    state?.exists === true && Object.values(state.classes || {}).every(Boolean)
+  )],
+  ['runtime level source', (snapshot) => Boolean(snapshot.runtimeLevel?.source)],
+  ['runtime level size', (snapshot) => Number(snapshot.levelSize?.rows) > 0 && Number(snapshot.levelSize?.cols) > 0],
+  ['runtime enemy profiles', (snapshot) => Number(snapshot.runtimeModels?.activeEnemyCount) > 0],
+  ['runtime shader pipeline', (snapshot) => snapshot.shaderPipeline === true]
+];
+
 const pages = [
   {
     name: 'runtime',
     path: '/runtime/index.html?verify=visual-smoke',
     mustContain: ['ASCII 3D FPS', 'data-debug-snapshot', 'ascii-canvas'],
     snapshotAttr: 'data-debug-snapshot',
+    snapshotChecks: runtimeSnapshotChecks
+  },
+  {
+    name: 'runtime-password-modal',
+    path: '/runtime/index.html?verify=visual-smoke&debugModal=password',
+    mustContain: ['ASCII 3D FPS', 'data-debug-snapshot', 'password-panel'],
+    snapshotAttr: 'data-debug-snapshot',
     snapshotChecks: [
-      ['runtime shared contract', (snapshot) => allTrue(snapshot.sharedContract, ['clamp'])],
-      ['runtime shared UI contract', (snapshot) => allTrue(snapshot.sharedUiContract, ['formatMeter', 'renderPanel', 'setPanelLines', 'getElementState', 'getPanelState'])],
-      ['runtime HUD panels', (snapshot) => ['status', 'mission', 'log'].every((key) => {
-        const panel = snapshot.hudPanels?.[key];
-        return panel?.exists === true && panel.isPanel === true && Number(panel.lineCount) > 0;
-      })],
-      ['runtime modal UI classes', (snapshot) => Object.values(snapshot.modalUi || {}).every((state) =>
-        state?.exists === true && Object.values(state.classes || {}).every(Boolean)
-      )],
-      ['runtime level source', (snapshot) => Boolean(snapshot.runtimeLevel?.source)],
-      ['runtime level size', (snapshot) => Number(snapshot.levelSize?.rows) > 0 && Number(snapshot.levelSize?.cols) > 0],
-      ['runtime enemy profiles', (snapshot) => Number(snapshot.runtimeModels?.activeEnemyCount) > 0],
-      ['runtime shader pipeline', (snapshot) => snapshot.shaderPipeline === true]
+      ...runtimeSnapshotChecks,
+      ['runtime password modal visible', (snapshot) => snapshot.modalUi?.passwordPanel?.display === 'block']
     ]
   },
   {
