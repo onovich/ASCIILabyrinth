@@ -264,12 +264,42 @@
     return normalizeVector(values, [0, 0, 0]).map((value) => (value * Math.PI) / 180);
   }
 
+  function createModelPart(id, name, shape, color, edgeColor, position, rotation, scale) {
+    return {
+      id,
+      name,
+      shape,
+      color,
+      edgeColor,
+      emissive: '#000000',
+      opacity: 1,
+      position,
+      rotation,
+      scale,
+      wire: true
+    };
+  }
+
+  function createDefaultModelProject(templateIds = MODEL_TEMPLATE_IDS, createTemplateModel) {
+    if (typeof createTemplateModel !== 'function') {
+      return null;
+    }
+
+    return {
+      version: 1,
+      modelSchema: MODEL_RUNTIME_SCHEMA,
+      updatedAt: new Date().toISOString(),
+      models: templateIds.map((id) => createTemplateModel(id))
+    };
+  }
+
   function normalizeModelPart(part) {
     const fallback = {
       id: 'part',
       name: 'part',
       shape: 'box',
       color: '#d8d0c0',
+      edgeColor: '#111111',
       emissive: '#000000',
       position: [0, 0.5, 0],
       rotation: [0, 0, 0],
@@ -282,11 +312,13 @@
       name: part?.name || part?.id || fallback.name,
       shape,
       color: normalizeHex(part?.color, fallback.color),
+      edgeColor: normalizeHex(part?.edgeColor, fallback.edgeColor),
       emissive: normalizeHex(part?.emissive, fallback.emissive),
       position: normalizeVector(part?.position, fallback.position),
       rotation: normalizeVector(part?.rotation, fallback.rotation),
       scale: normalizeVector(part?.scale, fallback.scale).map((value) => Math.max(0.03, Math.min(4, value))),
-      opacity: Math.max(0.1, Math.min(1, Number(part?.opacity ?? fallback.opacity)))
+      opacity: Math.max(0.1, Math.min(1, Number(part?.opacity ?? fallback.opacity))),
+      wire: part?.wire !== false
     };
   }
 
@@ -389,6 +421,8 @@
     MODEL_TEMPLATE_IDS,
     WEAPON_DEFS,
     OBJECT_TO_TILE,
+    createModelPart,
+    createDefaultModelProject,
     objectFloorSpan,
     objectOnFloor,
     allLevelObjects,
@@ -396,6 +430,7 @@
     buildRuntimeLevelFromEditorProject,
     loadEditorProject,
     loadRuntimeLevelFromLocalStorage,
+    normalizeModelPart,
     normalizeModelProject,
     buildRuntimeModelProfilesFromModelProject,
     loadModelProject,

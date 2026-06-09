@@ -149,6 +149,14 @@ async function main() {
   const schema = await loadSharedData();
   assert(schema?.TILE?.WEAPON === '9', 'shared tile contract should expose weapon tile');
   assert(schema.MODEL_RUNTIME_SCHEMA === 'indoor-horror-v1', 'model runtime schema should be stable');
+  const sharedPart = schema.createModelPart('p', 'Part', 'box', '#ffffff', '#111111', [0, 1, 0], [0, 0, 0], [1, 1, 1]);
+  assert(sharedPart.wire === true && sharedPart.opacity === 1, 'shared part factory should set editor defaults');
+  const normalizedPart = schema.normalizeModelPart({ shape: 'missing', color: 'bad', scale: [0, 9, 1] });
+  assert(normalizedPart.shape === 'box', 'shared part normalizer should clamp invalid shapes');
+  assert(normalizedPart.color === '#d8d0c0', 'shared part normalizer should repair invalid colors');
+  assert(normalizedPart.scale[0] === 0.03 && normalizedPart.scale[1] === 4, 'shared part normalizer should clamp scales');
+  const defaultModelProject = schema.createDefaultModelProject(['enemy-smoke'], () => createModelProjectFixture(schema).models[0]);
+  assert(defaultModelProject.modelSchema === schema.MODEL_RUNTIME_SCHEMA, 'default model project should carry runtime schema marker');
 
   const runtimeLevel = schema.buildRuntimeLevelFromEditorProject(createLevelProjectFixture(), { floor: 0 });
   const counts = countTiles(runtimeLevel.map);

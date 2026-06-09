@@ -520,7 +520,7 @@
       let controls = { yaw: -0.65, pitch: -0.45, distance: 4.2, dragging: false, lastX: 0, lastY: 0 };
 
       function createDefaultProject() {
-        return {
+        return SHARED_DATA.createDefaultModelProject?.(TEMPLATE_IDS, createTemplateModel) || {
           version: 1,
           modelSchema: SHARED_DATA.MODEL_RUNTIME_SCHEMA || 'indoor-horror-v1',
           updatedAt: new Date().toISOString(),
@@ -710,47 +710,31 @@
       };
 
       function part(id, name, shape, color, edgeColor, position, rotation, scale) {
-        return {
-          id,
-          name,
-          shape,
-          color,
-          edgeColor,
-          emissive: '#000000',
-          opacity: 1,
-          position,
-          rotation,
-          scale,
-          wire: true
+        return SHARED_DATA.createModelPart?.(id, name, shape, color, edgeColor, position, rotation, scale) || {
+          id, name, shape, color, edgeColor, emissive: '#000000', opacity: 1, position, rotation, scale, wire: true
         };
       }
 
       function normalizePart(raw) {
-        raw.id ||= makeId('part');
-        raw.name ||= raw.id;
-        raw.shape = SHAPES.includes(raw.shape) ? raw.shape : 'box';
-        raw.color = normalizeHex(raw.color, '#d8d0c0');
-        raw.edgeColor = normalizeHex(raw.edgeColor, '#111111');
-        raw.emissive = normalizeHex(raw.emissive, '#000000');
-        raw.opacity = clamp(Number(raw.opacity ?? 1), 0.1, 1);
-        raw.position = normalizeVector(raw.position, [0, 0.5, 0]);
-        raw.rotation = normalizeVector(raw.rotation, [0, 0, 0]);
-        raw.scale = normalizeVector(raw.scale, [0.4, 0.4, 0.4]).map((value) => clamp(value, 0.03, 4));
-        raw.wire = raw.wire !== false;
+        const normalized = SHARED_DATA.normalizeModelPart?.(raw);
+        if (normalized) {
+          Object.assign(raw, normalized);
+          if (raw.id === 'part') raw.id = makeId('part');
+        } else {
+          raw.id ||= makeId('part');
+          raw.name ||= raw.id;
+          raw.shape = SHAPES.includes(raw.shape) ? raw.shape : 'box';
+          raw.color = /^#[0-9a-f]{6}$/i.test(String(raw.color)) ? String(raw.color) : '#d8d0c0';
+          raw.edgeColor = /^#[0-9a-f]{6}$/i.test(String(raw.edgeColor)) ? String(raw.edgeColor) : '#111111';
+          raw.emissive = /^#[0-9a-f]{6}$/i.test(String(raw.emissive)) ? String(raw.emissive) : '#000000';
+          raw.opacity = Math.max(0.1, Math.min(1, Number(raw.opacity ?? 1)));
+          raw.position = Array.isArray(raw.position) ? [0, 1, 2].map((index) => Number(raw.position[index]) || 0) : [0, 0.5, 0];
+          raw.rotation = Array.isArray(raw.rotation) ? [0, 1, 2].map((index) => Number(raw.rotation[index]) || 0) : [0, 0, 0];
+          raw.scale = (Array.isArray(raw.scale) ? [0, 1, 2].map((index) => Number(raw.scale[index]) || 0.4) : [0.4, 0.4, 0.4])
+            .map((value) => Math.max(0.03, Math.min(4, value)));
+          raw.wire = raw.wire !== false;
+        }
         return raw;
-      }
-
-      function normalizeVector(value, fallback) {
-        if (!Array.isArray(value)) return [...fallback];
-        return [0, 1, 2].map((index) => Number.isFinite(Number(value[index])) ? Number(value[index]) : fallback[index]);
-      }
-
-      function normalizeHex(value, fallback) {
-        return /^#[0-9a-f]{6}$/i.test(String(value)) ? String(value) : fallback;
-      }
-
-      function clamp(value, min, max) {
-        return Math.max(min, Math.min(max, value));
       }
 
       function makeId(prefix) {
@@ -1234,6 +1218,12 @@
         const model = getModel();
         return {
           version: project.version,
+          modelSchema: project.modelSchema || '',
+          sharedContract: {
+            defaultProjectFactory: typeof SHARED_DATA.createDefaultModelProject === 'function',
+            partFactory: typeof SHARED_DATA.createModelPart === 'function',
+            partNormalizer: typeof SHARED_DATA.normalizeModelPart === 'function'
+          },
           modelCount: project.models.length,
           selectedModelId,
           selectedPartId,
