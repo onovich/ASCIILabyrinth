@@ -14,17 +14,55 @@ const devServerHost = process.env.VISUAL_SMOKE_DEV_HOST || baseUrlParts.hostname
 const devServerPort = Number(process.env.VISUAL_SMOKE_DEV_PORT || baseUrlParts.port || 5174);
 const domDumpBudgetMs = Number(process.env.VISUAL_SMOKE_DOM_BUDGET_MS || 6000);
 
+const runtimeSharedUiKeys = [
+  'formatMeter',
+  'renderPanel',
+  'setPanelLines',
+  'setElementVisible',
+  'isElementVisible',
+  'getElementState',
+  'getPanelState'
+];
+
+const editorSharedContractKeys = [
+  'typeMeta',
+  'defaultEffect',
+  'defaultInteraction',
+  'paletteOrder',
+  'objectFactory',
+  'levelFactory',
+  'pathTools',
+  'clamp',
+  'optionHtml',
+  'parseJson',
+  'jsonExport',
+  'timestamps',
+  'floorTools',
+  'htmlEscapes',
+  'optionsHtml',
+  'optionsWithEmptyHtml',
+  'projectNormalizer'
+];
+
+const modelEditorSharedContractKeys = [
+  'defaultProjectFactory',
+  'partFactory',
+  'partNormalizer',
+  'pathTools',
+  'clamp',
+  'optionHtml',
+  'parseJson',
+  'jsonExport',
+  'timestamps',
+  'htmlEscapes',
+  'optionsHtml',
+  'optionsWithEmptyHtml',
+  'projectNormalizer'
+];
+
 const runtimeSnapshotChecks = [
   ['runtime shared contract', (snapshot) => allTrue(snapshot.sharedContract, ['clamp'])],
-  ['runtime shared UI contract', (snapshot) => allTrue(snapshot.sharedUiContract, [
-    'formatMeter',
-    'renderPanel',
-    'setPanelLines',
-    'setElementVisible',
-    'isElementVisible',
-    'getElementState',
-    'getPanelState'
-  ])],
+  ['runtime shared UI contract', (snapshot) => allTrue(snapshot.sharedUiContract, runtimeSharedUiKeys)],
   ['runtime HUD panels', (snapshot) => ['status', 'mission', 'log'].every((key) => {
     const panel = snapshot.hudPanels?.[key];
     return panel?.exists === true && panel.isPanel === true && Number(panel.lineCount) > 0;
@@ -70,25 +108,7 @@ const pages = [
     mustContain: ['ASCII Labyrinth Level Editor', 'data-editor-snapshot', 'mapCanvas'],
     snapshotAttr: 'data-editor-snapshot',
     snapshotChecks: [
-      ['editor shared contract', (snapshot) => allTrue(snapshot.sharedContract, [
-        'typeMeta',
-        'defaultEffect',
-        'defaultInteraction',
-        'paletteOrder',
-        'objectFactory',
-        'levelFactory',
-        'pathTools',
-        'clamp',
-        'optionHtml',
-        'parseJson',
-        'jsonExport',
-        'timestamps',
-        'floorTools',
-        'htmlEscapes',
-        'optionsHtml',
-        'optionsWithEmptyHtml',
-        'projectNormalizer'
-      ])],
+      ['editor shared contract', (snapshot) => allTrue(snapshot.sharedContract, editorSharedContractKeys)],
       ['editor shared tool UI class', (snapshot) => snapshot.toolUi?.bodyClass === true],
       ['editor levels', (snapshot) => Number(snapshot.levelCount) > 0],
       ['editor canvas', (snapshot) => Number(snapshot.canvas?.width) > 0 && Number(snapshot.canvas?.height) > 0]
@@ -100,21 +120,7 @@ const pages = [
     mustContain: ['ASCII Labyrinth Model Editor', 'data-model-editor-snapshot', 'previewCanvas'],
     snapshotAttr: 'data-model-editor-snapshot',
     snapshotChecks: [
-      ['model editor shared contract', (snapshot) => allTrue(snapshot.sharedContract, [
-        'defaultProjectFactory',
-        'partFactory',
-        'partNormalizer',
-        'pathTools',
-        'clamp',
-        'optionHtml',
-        'parseJson',
-        'jsonExport',
-        'timestamps',
-        'htmlEscapes',
-        'optionsHtml',
-        'optionsWithEmptyHtml',
-        'projectNormalizer'
-      ])],
+      ['model editor shared contract', (snapshot) => allTrue(snapshot.sharedContract, modelEditorSharedContractKeys)],
       ['model editor shared tool UI class', (snapshot) => snapshot.toolUi?.bodyClass === true],
       ['model editor models', (snapshot) => Number(snapshot.modelCount) > 0],
       ['model editor selected model', (snapshot) => Boolean(snapshot.selectedModelId)]
