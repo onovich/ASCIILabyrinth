@@ -44,8 +44,13 @@ function createDomElement(tagName) {
     tagName,
     className: '',
     dataset: {},
+    style: {},
+    attributes: {},
     textContent: '',
     children: [],
+    setAttribute(name, value) {
+      this.attributes[name] = String(value);
+    },
     appendChild(child) {
       this.children.push(child);
     },
@@ -192,12 +197,16 @@ async function main() {
   assert(ui.formatMeter(5, 10, { width: 4 }) === '\u2588\u2588\u2591\u2591', 'shared UI meter helper should format HUD bars');
   assert(ui.getElementState('smoke-panel', ['al-panel']).classes['al-panel'] === true, 'shared UI element state should report requested classes');
   assert(ui.getPanelState('smoke-panel').isPanel && ui.getPanelState('smoke-panel').lineCount === 2, 'shared UI panel state should report rendered design-system panels');
+  assert(ui.setElementVisible('smoke-panel', false)?.style.display === 'none', 'shared UI visibility helper should hide elements');
+  assert(ui.isElementVisible('smoke-panel') === false, 'shared UI visibility helper should report hidden elements');
+  assert(ui.setElementVisible('smoke-panel', true)?.style.display === 'block', 'shared UI visibility helper should show elements');
+  assert(ui.isElementVisible('smoke-panel') === true, 'shared UI visibility helper should report shown elements');
 
   assert(schema?.TILE?.WEAPON === '9', 'shared tile contract should expose weapon tile');
   assert(schema.MODEL_RUNTIME_SCHEMA === 'indoor-horror-v1', 'model runtime schema should be stable');
   assert(schema.getCellKey(2, 3) === '2,3', 'shared cell key should match runtime grid key contract');
   assert(/^smoke-[a-z0-9]+-[a-z0-9]{5}$/.test(schema.createId('smoke')), 'shared id helper should create prefixed ids');
-  assert(/^legacy-[a-z0-9]+-[a-z0-9]{5}$/.test(schema.createEditorId('legacy')), 'shared editor id alias should stay compatible');
+  assert(/^editor-[a-z0-9]+-[a-z0-9]{5}$/.test(schema.createEditorId('editor')), 'shared editor id helper should create prefixed editor ids');
   assert(schema.countBy([{ type: 'a' }, { type: 'a' }, { type: 'b' }], 'type').a === 2, 'shared countBy should count object keys');
   assert(schema.countBy([{ kind: '' }, {}], (item) => item.kind || 'unknown').unknown === 2, 'shared countBy should support derived keys');
   assert(schema.clamp(7, 0, 5) === 5 && schema.clamp(-2, 0, 5) === 0, 'shared clamp should bound values');

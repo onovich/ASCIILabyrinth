@@ -57,7 +57,7 @@
     <canvas id="ascii-canvas" class="al-fullscreen-canvas"></canvas>
 
     <div id="password-panel" class="terminal-modal al-modal al-modal-centered">
-        <h2 id="password-title" class="al-modal-title">┌─[ EXIT ACCESS ]─┐</h2>
+        <h2 id="password-title" class="al-modal-title">EXIT ACCESS</h2>
         <pre id="password-copy" class="al-modal-copy">输入隐藏房间获得的四位撤离密码。</pre>
         <input id="password-input" class="al-input al-input-code" maxlength="4" inputmode="numeric" autocomplete="off">
         <button id="password-submit" class="al-button al-button-terminal">确认 (ENTER)</button>
@@ -65,7 +65,7 @@
     </div>
 
     <div id="ending-panel" class="terminal-modal al-modal al-modal-centered">
-        <h1 id="ending-title" class="al-modal-title">┌─[ EXTRACTION COMPLETE ]─┐</h1>
+        <h1 id="ending-title" class="al-modal-title">EXTRACTION COMPLETE</h1>
         <pre id="ending-text" class="al-modal-copy"></pre>
         <button id="ending-restart" class="al-button al-button-terminal" onclick="location.reload()">再次部署 (RESTART)</button>
     </div>
@@ -1074,7 +1074,7 @@
                 gameState.isGameOver = true;
                 pushLog(`被 ${sourceEnemy?.name || '未知敌人'} 杀死。最终得分 ${gameState.score}。`);
                 if (document.pointerLockElement) document.exitPointerLock(); // 释放鼠标指针，允许点击 UI
-                document.getElementById('game-over').style.display = 'block';
+                setElementVisible('game-over', true);
                 document.getElementById('final-score').innerText = gameState.score;
             } else {
                 updateUI();
@@ -1111,15 +1111,14 @@
             if (gameState.escaped || gameState.isGameOver || gameState.isPaused) return;
             gameState.isPaused = true;
             if (document.pointerLockElement) document.exitPointerLock();
-            const panel = document.getElementById('password-panel');
             const input = document.getElementById('password-input');
-            panel.style.display = 'block';
+            setElementVisible('password-panel', true);
             input.value = '';
             setTimeout(() => input.focus(), 0);
         }
 
         function hidePasswordPrompt() {
-            document.getElementById('password-panel').style.display = 'none';
+            setElementVisible('password-panel', false);
             gameState.isPaused = false;
             updateUI();
         }
@@ -1130,15 +1129,13 @@
             gameState.score += 1000;
             playSfx('success');
             if (document.pointerLockElement) document.exitPointerLock();
-            document.getElementById('password-panel').style.display = 'none';
+            setElementVisible('password-panel', false);
             document.getElementById('ending-text').textContent = [
-                '┌────────────────────────────────────────┐',
-                '│  FACILITY LOCKDOWN BYPASSED           │',
-                '│  SURVIVOR SIGNAL ACQUIRED             │',
-                `│  FINAL SCORE ${String(gameState.score).padStart(6, '0')}                  │`,
-                '└────────────────────────────────────────┘'
+                'FACILITY LOCKDOWN BYPASSED',
+                'SURVIVOR SIGNAL ACQUIRED',
+                `FINAL SCORE ${String(gameState.score).padStart(6, '0')}`
             ].join('\n');
-            document.getElementById('ending-panel').style.display = 'block';
+            setElementVisible('ending-panel', true);
             updateUI();
         }
 
@@ -1365,7 +1362,7 @@
         const keys = { w: false, a: false, s: false, d: false };
         window.addEventListener('keydown', e => {
             const k = e.key.toLowerCase();
-            const passwordVisible = document.getElementById('password-panel').style.display === 'block';
+            const passwordVisible = isElementVisible('password-panel');
             if (passwordVisible) {
                 if (k === 'enter') submitPassword();
                 if (k === 'escape') hidePasswordPrompt();
@@ -1443,6 +1440,25 @@
             }
             const filled = clamp(Math.round((value / max) * width), 0, width);
             return `${'█'.repeat(filled)}${'░'.repeat(width - filled)}`;
+        }
+
+        function setElementVisible(id, visible, display = 'block') {
+            if (window.ASCIIUI?.setElementVisible) {
+                return window.ASCIIUI.setElementVisible(id, visible, display);
+            }
+            const element = document.getElementById(id);
+            if (!element) return null;
+            element.style.display = visible ? display : 'none';
+            element.setAttribute('aria-hidden', visible ? 'false' : 'true');
+            return element;
+        }
+
+        function isElementVisible(id) {
+            if (window.ASCIIUI?.isElementVisible) {
+                return window.ASCIIUI.isElementVisible(id);
+            }
+            const element = document.getElementById(id);
+            return Boolean(element && element.style.display !== 'none');
         }
 
         function pushLog(text) {
@@ -1690,7 +1706,7 @@
             updateUI();
         }
         if (new URLSearchParams(window.location.search).get('debugModal') === 'password') {
-            document.getElementById('password-panel').style.display = 'block';
+            setElementVisible('password-panel', true);
         }
         function getUiClassState(id, classNames) {
             return window.ASCIIUI?.getElementState?.(id, classNames) || { exists: false };
@@ -1705,6 +1721,8 @@
                     formatMeter: typeof window.ASCIIUI?.formatMeter === 'function',
                     renderPanel: typeof window.ASCIIUI?.renderPanel === 'function',
                     setPanelLines: typeof window.ASCIIUI?.setPanelLines === 'function',
+                    setElementVisible: typeof window.ASCIIUI?.setElementVisible === 'function',
+                    isElementVisible: typeof window.ASCIIUI?.isElementVisible === 'function',
                     getElementState: typeof window.ASCIIUI?.getElementState === 'function',
                     getPanelState: typeof window.ASCIIUI?.getPanelState === 'function'
                 },
@@ -1732,6 +1750,13 @@
                     passwordCancel: getUiClassState('password-cancel', ['al-button', 'al-button-terminal']),
                     endingRestart: getUiClassState('ending-restart', ['al-button', 'al-button-terminal']),
                     gameOverRestart: getUiClassState('game-over-restart', ['al-button', 'al-button-terminal'])
+                },
+                modalText: {
+                    passwordTitle: document.getElementById('password-title')?.textContent || '',
+                    passwordCopy: document.getElementById('password-copy')?.textContent || '',
+                    endingTitle: document.getElementById('ending-title')?.textContent || '',
+                    endingText: document.getElementById('ending-text')?.textContent || '',
+                    gameOverTitle: document.getElementById('game-over-title')?.textContent || ''
                 },
                 runtimeLevel: {
                     source: runtimeLevel.source,

@@ -61,6 +61,24 @@
     });
   }
 
+  function setElementVisible(target, visible, display = 'block') {
+    const element = resolveElement(target);
+    if (!element) return null;
+    element.style.display = visible ? display : 'none';
+    element.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    return element;
+  }
+
+  function isElementVisible(target) {
+    const element = resolveElement(target);
+    if (!element) return false;
+    if (element.style?.display === 'none') return false;
+    if (typeof window.getComputedStyle === 'function') {
+      return window.getComputedStyle(element).display !== 'none';
+    }
+    return element.style?.display !== 'none';
+  }
+
   function getElementState(target, classNames = []) {
     const element = resolveElement(target);
     if (!element) return { exists: false };
@@ -68,7 +86,7 @@
     (Array.isArray(classNames) ? classNames : []).forEach((name) => {
       classes[name] = element.classList?.contains(name) === true;
     });
-    return { exists: true, classes, display: element.style?.display || '' };
+    return { exists: true, classes, display: element.style?.display || '', visible: isElementVisible(element) };
   }
 
   function getPanelState(target) {
@@ -87,6 +105,8 @@
     formatMeter,
     renderPanel,
     setPanelLines,
+    setElementVisible,
+    isElementVisible,
     getElementState,
     getPanelState
   });

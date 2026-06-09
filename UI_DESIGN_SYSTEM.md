@@ -12,7 +12,7 @@ This project uses a small shared UI system for runtime HUD, editor tools, and fu
 ## Source Of Truth
 
 - `origin/shared/ui-system.css`: shared design tokens and reusable classes.
-- `origin/shared/ui-system.js`: small DOM render helpers, currently `ASCIIUI.renderPanel`.
+- `origin/shared/ui-system.js`: small DOM helpers for panels, meters, element visibility, and snapshot state.
 - `scripts/sync-runtime.mjs`: copies shared assets into `public/shared` and `public/runtime/shared`.
 
 Runtime pages load shared assets from `./shared/`.
@@ -33,7 +33,7 @@ Use shared tokens instead of ad hoc colors:
 
 ## Runtime HUD Panels
 
-Use CSS borders and `ASCIIUI.renderPanel`; do not draw boxes with characters such as `┌`, `│`, `└`.
+Use CSS borders and `ASCIIUI.renderPanel`; do not draw boxes with text characters.
 
 ```js
 ASCIIUI.renderPanel('mission-layer', {
@@ -74,6 +74,7 @@ Preferred local patterns:
 - Do not create one-off UI colors unless the color becomes a shared token.
 - Do not create text-box borders for any UI that may contain Chinese, Japanese, emoji, or mixed-width text.
 - Do not append HTML strings into existing panels for state such as pause, damage, or alerts. Re-render through the shared component helper.
+- Use `ASCIIUI.setElementVisible` for runtime modal visibility instead of writing one-off `style.display` code.
 - Keep HUD panels fixed to viewport corners and let them wrap text. Avoid placing gameplay instructions in floating cards over the center of the view.
 - Prefer adding a shared primitive to `origin/shared/ui-system.css` over copying CSS between runtime, editor, and model editor.
 
@@ -81,6 +82,6 @@ Preferred local patterns:
 
 1. Check whether `origin/shared/ui-system.css` already has the needed primitive.
 2. If not, add a small reusable class or token there.
-3. Use `ASCIIUI.renderPanel` for runtime HUD text panels.
+3. Use `ASCIIUI.renderPanel` for runtime HUD text panels and `ASCIIUI.setElementVisible` for modals.
 4. Build with `npm run build`.
 5. Verify at least the runtime page and the page you touched in the browser.

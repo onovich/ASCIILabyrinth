@@ -16,7 +16,15 @@ const domDumpBudgetMs = Number(process.env.VISUAL_SMOKE_DOM_BUDGET_MS || 6000);
 
 const runtimeSnapshotChecks = [
   ['runtime shared contract', (snapshot) => allTrue(snapshot.sharedContract, ['clamp'])],
-  ['runtime shared UI contract', (snapshot) => allTrue(snapshot.sharedUiContract, ['formatMeter', 'renderPanel', 'setPanelLines', 'getElementState', 'getPanelState'])],
+  ['runtime shared UI contract', (snapshot) => allTrue(snapshot.sharedUiContract, [
+    'formatMeter',
+    'renderPanel',
+    'setPanelLines',
+    'setElementVisible',
+    'isElementVisible',
+    'getElementState',
+    'getPanelState'
+  ])],
   ['runtime HUD panels', (snapshot) => ['status', 'mission', 'log'].every((key) => {
     const panel = snapshot.hudPanels?.[key];
     return panel?.exists === true && panel.isPanel === true && Number(panel.lineCount) > 0;
@@ -31,6 +39,7 @@ const runtimeSnapshotChecks = [
   ['runtime modal UI classes', (snapshot) => Object.values(snapshot.modalUi || {}).every((state) =>
     state?.exists === true && Object.values(state.classes || {}).every(Boolean)
   )],
+  ['runtime modal text has no drawn boxes', (snapshot) => noBoxDrawingText(snapshot.modalText)],
   ['runtime level source', (snapshot) => Boolean(snapshot.runtimeLevel?.source)],
   ['runtime level size', (snapshot) => Number(snapshot.levelSize?.rows) > 0 && Number(snapshot.levelSize?.cols) > 0],
   ['runtime enemy profiles', (snapshot) => Number(snapshot.runtimeModels?.activeEnemyCount) > 0],
@@ -117,6 +126,10 @@ function normalizeBase(value) {
 
 function allTrue(object, keys) {
   return keys.every((key) => object?.[key] === true);
+}
+
+function noBoxDrawingText(values) {
+  return Object.values(values || {}).every((value) => !/[┌┐└┘│─]/.test(String(value)));
 }
 
 function decodeHtmlAttribute(value) {
