@@ -408,6 +408,19 @@
   gap: 7px;
 }
 
+.al-tool-page :where(.palette-item, .model-row, .part-row) {
+  display: grid;
+  gap: var(--al-space-2);
+  align-items: center;
+  background: #15191d;
+}
+
+.al-tool-page :where(.palette-name, .model-row strong, .part-row strong) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .al-tool-page :where(.swatch) {
   width: var(--al-swatch-size, 18px);
   height: var(--al-swatch-size, 18px);
