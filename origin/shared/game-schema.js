@@ -172,6 +172,68 @@
     };
   }
 
+  function createEditorId(prefix) {
+    return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+  }
+
+  function createEditorObject(type, x, y, floor = 0, extra = {}, options = {}) {
+    const typeMeta = options.typeMeta || createEditorTypeMeta();
+    const makeId = options.makeId || createEditorId;
+    const meta = typeMeta[type];
+    if (!meta) {
+      throw new Error(`Unknown editor object type: ${type}`);
+    }
+    const base = structuredClone(meta.default || {});
+    return {
+      id: makeId(type),
+      type,
+      label: meta.name,
+      x,
+      y,
+      floor,
+      ...base,
+      ...extra
+    };
+  }
+
+  function createEditorLevel(id, name, width = 24, height = 16, options = {}) {
+    const typeMeta = options.typeMeta || createEditorTypeMeta();
+    const makeId = options.makeId || createEditorId;
+    const floors = Array.isArray(options.floors) && options.floors.length
+      ? [...options.floors]
+      : FLOORS.map((floor) => floor.id);
+    const level = {
+      id,
+      name,
+      width,
+      height,
+      floors,
+      objects: [],
+      triggers: [],
+      notes: options.notes || ''
+    };
+    const add = (type, objectX, objectY, objectFloor, extra = {}) => {
+      level.objects.push(createEditorObject(type, objectX, objectY, objectFloor, extra, { typeMeta, makeId }));
+    };
+
+    if (options.upperStart) {
+      add('entrance', 2, 2, 1, { label: '上层入口', entranceId: 'entry-upper' });
+      add('exit', 20, 11, 1, { label: '返回设施 A', exitId: 'exit-back', targetLevelId: 'facility-a', targetEntranceId: 'entry-a', targetFloor: 0 });
+      add('terminal', 8, 5, 1, { label: '档案终端', message: 'ARCHIVE LINK ONLINE' });
+      add('weapon', 5, 8, 1, { weaponKind: 'sidearm' });
+      for (let x = 0; x < width; x += 1) {
+        add('wall', x, 0, 1);
+        add('wall', x, height - 1, 1);
+      }
+      for (let y = 1; y < height - 1; y += 1) {
+        add('wall', 0, y, 1);
+        add('wall', width - 1, y, 1);
+      }
+    }
+
+    return level;
+  }
+
   function objectFloorSpan(object) {
     return Math.max(1, Number(object?.floorSpan) || 1);
   }
@@ -486,6 +548,9 @@
     createDefaultEffect,
     createDefaultInteraction,
     createEditorTypeMeta,
+    createEditorId,
+    createEditorObject,
+    createEditorLevel,
     createModelPart,
     createDefaultModelProject,
     objectFloorSpan,
