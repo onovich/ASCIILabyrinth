@@ -18,6 +18,7 @@ const runtimeSharedUiKeys = [
   'formatMeter',
   'colorVarStyle',
   'swatchHtml',
+  'downloadTextFile',
   'renderPanel',
   'setPanelLines',
   'setElementVisible',
@@ -137,7 +138,7 @@ function allTrue(object, keys) {
 function toolPageChecks(label, contractKeys, checks) {
   return [
     [`${label} shared contract`, (snapshot) => allTrue(snapshot.sharedContract, contractKeys)],
-    [`${label} shared UI contract`, (snapshot) => allTrue(snapshot.sharedUiContract, ['swatchHtml'])],
+    [`${label} shared UI contract`, (snapshot) => allTrue(snapshot.sharedUiContract, ['swatchHtml', 'downloadTextFile'])],
     [`${label} shared tool UI class`, (snapshot) => snapshot.toolUi?.bodyClass === true],
     ...checks
   ];

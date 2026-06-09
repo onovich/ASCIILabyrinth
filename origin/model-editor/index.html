@@ -233,6 +233,7 @@
         return optionHtml(value, label, selected);
       }).join(''));
       const swatchHtml = SHARED_UI.swatchHtml || ((color) => `<span class="swatch" style="--al-swatch-color:${/^#[0-9a-f]{3,8}$/i.test(String(color || '').trim()) ? String(color).trim() : '#777777'}"></span>`);
+      const downloadTextFile = SHARED_UI.downloadTextFile;
       const parseJson = SHARED_DATA.parseJson || JSON.parse;
       const stringifyJson = SHARED_DATA.stringifyJson || ((value) => JSON.stringify(value, null, 2));
       const createJsonExportName = SHARED_DATA.createJsonExportName || ((prefix) => `${prefix}-${new Date().toISOString().slice(0, 10)}.json`);
@@ -953,13 +954,11 @@
 
       function exportProject() {
         touchProject();
-        const blob = new Blob([stringifyJson(project)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = createJsonExportName('ascii-labyrinth-models');
-        link.click();
-        URL.revokeObjectURL(url);
+        downloadTextFile({
+          text: stringifyJson(project),
+          fileName: createJsonExportName('ascii-labyrinth-models'),
+          mimeType: 'application/json'
+        });
         setStatus('JSON exported');
       }
 
@@ -992,7 +991,8 @@
             projectNormalizer: typeof SHARED_DATA.normalizeModelProject === 'function'
           },
           sharedUiContract: {
-            swatchHtml: typeof SHARED_UI.swatchHtml === 'function'
+            swatchHtml: typeof SHARED_UI.swatchHtml === 'function',
+            downloadTextFile: typeof SHARED_UI.downloadTextFile === 'function'
           },
           toolUi: {
             bodyClass: document.body.classList.contains('al-tool-page')

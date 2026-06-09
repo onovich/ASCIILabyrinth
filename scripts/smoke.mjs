@@ -54,6 +54,9 @@ function createDomElement(tagName) {
     appendChild(child) {
       this.children.push(child);
     },
+    click() {
+      this.clicked = true;
+    },
     replaceChildren(...children) {
       this.children = children;
     },
@@ -79,11 +82,26 @@ async function loadSharedUi() {
   const uiPath = resolve(projectRoot, 'origin', 'shared', 'ui-system.js');
   const source = await readFile(uiPath, 'utf8');
   const elements = new Map();
+  const objectUrls = [];
   const context = {
     window: {},
     document: {
       createElement: createDomElement,
       getElementById: (id) => elements.get(id) || null
+    },
+    Blob: class SmokeBlob {
+      constructor(parts = [], options = {}) {
+        this.parts = parts;
+        this.type = String(options.type || '');
+        this.size = parts.reduce((size, part) => size + String(part ?? '').length, 0);
+      }
+    },
+    URL: {
+      createObjectURL: (blob) => {
+        objectUrls.push(blob);
+        return `blob:smoke-${objectUrls.length}`;
+      },
+      revokeObjectURL: () => {}
     },
     String,
     Object
@@ -224,6 +242,8 @@ async function main() {
   assert(ui.formatMeter(5, 10, { width: 4 }) === '\u2588\u2588\u2591\u2591', 'shared UI meter helper should format HUD bars');
   assert(ui.colorVarStyle('#aabbcc') === '--al-swatch-color:#aabbcc', 'shared UI color style helper should write swatch CSS variables');
   assert(ui.swatchHtml('bad color') === '<span class="swatch" style="--al-swatch-color:#777777"></span>', 'shared UI swatch helper should repair unsafe colors');
+  const downloaded = ui.downloadTextFile({ text: 'abc', fileName: 'smoke.json', mimeType: 'application/json' });
+  assert(downloaded.fileName === 'smoke.json' && downloaded.size === 3, 'shared UI download helper should create named text downloads');
   assert(ui.getElementState('smoke-panel', ['al-panel']).classes['al-panel'] === true, 'shared UI element state should report requested classes');
   assert(ui.getPanelState('smoke-panel').isPanel && ui.getPanelState('smoke-panel').lineCount === 2, 'shared UI panel state should report rendered design-system panels');
   assert(ui.setElementVisible('smoke-panel', false)?.style.display === 'none', 'shared UI visibility helper should hide elements');

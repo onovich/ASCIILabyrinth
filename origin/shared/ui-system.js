@@ -59,6 +59,24 @@
     return `<span class="${escapeAttr(classes)}" style="${colorVarStyle(color)}"${titleAttr}></span>`;
   }
 
+  function downloadTextFile({ text = '', fileName = 'download.txt', mimeType = 'text/plain;charset=utf-8' } = {}) {
+    const safeText = String(text ?? '');
+    const safeName = String(fileName || 'download.txt');
+    const safeType = String(mimeType || 'text/plain;charset=utf-8');
+    const blob = new Blob([safeText], { type: safeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = safeName;
+    const result = { fileName: safeName, mimeType: safeType, size: blob.size ?? safeText.length };
+    try {
+      link.click();
+      return result;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
   function renderPanel(target, { title = '', lines = [], tone = '' } = {}) {
     const panel = resolveElement(target);
     if (!panel) return null;
@@ -136,6 +154,7 @@
     formatMeter,
     colorVarStyle,
     swatchHtml,
+    downloadTextFile,
     renderPanel,
     setPanelLines,
     setElementVisible,
