@@ -654,6 +654,7 @@
             if (key) acc[key] = (acc[key] || 0) + 1;
             return acc;
         }, {}));
+        const clamp = SHARED_DATA.clamp || ((value, min, max) => Math.max(min, Math.min(max, value)));
         const gridKey = SHARED_DATA.getCellKey || ((x, z) => `${x},${z}`);
 
         const mapSize = 2; 
@@ -1327,7 +1328,7 @@
         function applyLookDelta(dx, dy, sensitivity = 0.002) {
             yaw -= dx * sensitivity;
             pitch -= dy * sensitivity;
-            pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, pitch));
+            pitch = clamp(pitch, -Math.PI / 2.2, Math.PI / 2.2);
             player.rotation.y = yaw;
             pitchObject.rotation.x = pitch;
             document.body.dataset.lookState = JSON.stringify({ yaw, pitch });
@@ -1392,13 +1393,13 @@
                     const maxRadius = 50;
                     moveRight = (t.clientX - touchLeft.startX) / maxRadius;
                     moveForward = -(t.clientY - touchLeft.startY) / maxRadius; 
-                    moveRight = Math.max(-1, Math.min(1, moveRight));
-                    moveForward = Math.max(-1, Math.min(1, moveForward));
+                    moveRight = clamp(moveRight, -1, 1);
+                    moveForward = clamp(moveForward, -1, 1);
                 }
                 if (touchRight && t.identifier === touchRight.id) {
                     yaw += (t.clientX - touchRight.curX) * -0.005;
                     pitch += (t.clientY - touchRight.curY) * -0.005;
-                    pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, pitch));
+                    pitch = clamp(pitch, -Math.PI / 2.2, Math.PI / 2.2);
                     player.rotation.y = yaw;
                     pitchObject.rotation.x = pitch;
 
@@ -1547,7 +1548,7 @@
         }
 
         function bar(value, max, width = 12) {
-            const filled = Math.max(0, Math.min(width, Math.round((value / max) * width)));
+            const filled = clamp(Math.round((value / max) * width), 0, width);
             return `${'█'.repeat(filled)}${'░'.repeat(width - filled)}`;
         }
 
@@ -1632,8 +1633,8 @@
             let curMoveR = moveRight + (keys.d ? 1 : 0) - (keys.a ? 1 : 0);
             
             // 限制最大值为 1，防止键盘和手机同时输入导致移速翻倍
-            curMoveF = Math.max(-1, Math.min(1, curMoveF));
-            curMoveR = Math.max(-1, Math.min(1, curMoveR));
+            curMoveF = clamp(curMoveF, -1, 1);
+            curMoveR = clamp(curMoveR, -1, 1);
 
             if (curMoveF !== 0 || curMoveR !== 0) {
                 const speed = 4.0 * delta; 
@@ -1738,7 +1739,7 @@
                         pushLog('取得钥匙。隐藏门认证已可用。');
                     } else {
                         const amount = item.amount || 30;
-                        gameState.health = Math.min(100, gameState.health + amount);
+                        gameState.health = clamp(gameState.health + amount, 0, 100);
                         playSfx('pickup');
                         pushLog(`医疗包恢复 +${amount}。`);
                     }
@@ -1797,6 +1798,9 @@
         }
         function getDebugSnapshot() {
             return {
+                sharedContract: {
+                    clamp: typeof SHARED_DATA.clamp === 'function'
+                },
                 runtimeLevel: {
                     source: runtimeLevel.source,
                     levelId: runtimeLevel.levelId,

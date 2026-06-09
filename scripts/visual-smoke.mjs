@@ -20,6 +20,7 @@ const pages = [
     mustContain: ['ASCII 3D FPS', 'data-debug-snapshot', 'ascii-canvas'],
     snapshotAttr: 'data-debug-snapshot',
     snapshotChecks: [
+      ['runtime shared contract', (snapshot) => allTrue(snapshot.sharedContract, ['clamp'])],
       ['runtime level source', (snapshot) => Boolean(snapshot.runtimeLevel?.source)],
       ['runtime level size', (snapshot) => Number(snapshot.levelSize?.rows) > 0 && Number(snapshot.levelSize?.cols) > 0],
       ['runtime enemy profiles', (snapshot) => Number(snapshot.runtimeModels?.activeEnemyCount) > 0],
