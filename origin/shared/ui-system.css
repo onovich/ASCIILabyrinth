@@ -102,6 +102,19 @@
   color: var(--al-color-green);
 }
 
+.al-modal-centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  display: none;
+  min-width: min(88vw, 480px);
+  padding: 18px 22px;
+  text-align: center;
+  pointer-events: auto;
+}
+
 .al-button,
 .al-input {
   min-height: 32px;

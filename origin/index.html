@@ -88,19 +88,6 @@
             transition: opacity 0.1s;
         }
 
-        .terminal-modal {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 20;
-            text-align: center;
-            display: none;
-            padding: 18px 22px;
-            pointer-events: auto;
-            min-width: min(88vw, 480px);
-        }
-
         .terminal-modal h1,
         .terminal-modal h2 {
             margin: 0 0 12px;
@@ -160,7 +147,7 @@
     <!-- 替换为 Canvas 作为 ASCII 输出载体 -->
     <canvas id="ascii-canvas"></canvas>
 
-    <div id="password-panel" class="terminal-modal al-modal">
+    <div id="password-panel" class="terminal-modal al-modal al-modal-centered">
         <h2>┌─[ EXIT ACCESS ]─┐</h2>
         <pre>输入隐藏房间获得的四位撤离密码。</pre>
         <input id="password-input" class="al-input" maxlength="4" inputmode="numeric" autocomplete="off">
@@ -168,13 +155,13 @@
         <button id="password-cancel" class="al-button">取消 (ESC)</button>
     </div>
 
-    <div id="ending-panel" class="terminal-modal al-modal">
+    <div id="ending-panel" class="terminal-modal al-modal al-modal-centered">
         <h1>┌─[ EXTRACTION COMPLETE ]─┐</h1>
         <pre id="ending-text"></pre>
         <button id="ending-restart" class="al-button" onclick="location.reload()">再次部署 (RESTART)</button>
     </div>
 
-    <div id="game-over" class="terminal-modal al-modal">
+    <div id="game-over" class="terminal-modal al-modal al-modal-centered">
         <h1>任务失败 (YOU DIED)</h1>
         <p>最终得分: <span id="final-score">0</span></p>
         <button id="game-over-restart" class="al-button" onclick="location.reload()">重新部署 (RESTART)</button>
@@ -1816,9 +1803,9 @@
                     log: window.ASCIIUI?.getPanelState?.('log-layer') || { exists: false }
                 },
                 modalUi: {
-                    passwordPanel: getUiClassState('password-panel', ['terminal-modal', 'al-modal']),
-                    endingPanel: getUiClassState('ending-panel', ['terminal-modal', 'al-modal']),
-                    gameOverPanel: getUiClassState('game-over', ['terminal-modal', 'al-modal']),
+                    passwordPanel: getUiClassState('password-panel', ['terminal-modal', 'al-modal', 'al-modal-centered']),
+                    endingPanel: getUiClassState('ending-panel', ['terminal-modal', 'al-modal', 'al-modal-centered']),
+                    gameOverPanel: getUiClassState('game-over', ['terminal-modal', 'al-modal', 'al-modal-centered']),
                     passwordInput: getUiClassState('password-input', ['al-input']),
                     passwordSubmit: getUiClassState('password-submit', ['al-button']),
                     passwordCancel: getUiClassState('password-cancel', ['al-button']),
