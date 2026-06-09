@@ -12,13 +12,6 @@ function assert(condition, message) {
   }
 }
 
-function countTiles(map) {
-  return map.join('').split('').reduce((acc, tile) => {
-    acc[tile] = (acc[tile] || 0) + 1;
-    return acc;
-  }, {});
-}
-
 async function loadSharedData() {
   const schemaPath = resolve(projectRoot, 'origin', 'shared', 'game-schema.js');
   const source = await readFile(schemaPath, 'utf8');
@@ -138,6 +131,7 @@ async function main() {
   const schema = await loadSharedData();
   assert(schema?.TILE?.WEAPON === '9', 'shared tile contract should expose weapon tile');
   assert(schema.MODEL_RUNTIME_SCHEMA === 'indoor-horror-v1', 'model runtime schema should be stable');
+  assert(schema.countTiles(['102', '200'])[schema.TILE.AMMO] === 2, 'shared tile counter should count runtime map symbols');
   const editorTypeMeta = schema.createEditorTypeMeta();
   assert(schema.PALETTE_ORDER.includes('trigger'), 'shared palette order should include trigger tool');
   assert(editorTypeMeta.wall.default.blocking === true, 'shared wall meta should keep blocking default');
@@ -186,7 +180,7 @@ async function main() {
   assert(normalizedModelProject.models[0].parts[0].id === 'core', 'shared model project normalizer should keep fallback core part');
 
   const runtimeLevel = schema.buildRuntimeLevelFromEditorProject(createLevelProjectFixture(schema), { floor: 0 });
-  const counts = countTiles(runtimeLevel.map);
+  const counts = schema.countTiles(runtimeLevel.map);
   assert(runtimeLevel.source === 'editor-local', 'level fixture should convert to editor-local runtime source');
   assert(runtimeLevel.startCell.x === 1 && runtimeLevel.startCell.y === 1, 'entrance should define runtime start cell');
   assert(counts[schema.TILE.WALL] >= 30, 'converted map should include walls');

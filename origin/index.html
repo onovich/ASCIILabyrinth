@@ -645,6 +645,10 @@
 
         const runtimeLevel = loadRuntimeLevel();
         const levelMap = runtimeLevel.map;
+        const countTiles = SHARED_DATA.countTiles || ((map) => map.join('').split('').reduce((acc, ch) => {
+            acc[ch] = (acc[ch] || 0) + 1;
+            return acc;
+        }, {}));
 
         const mapSize = 2; 
         const startCell = runtimeLevel.startCell || { x: 1, y: 1 };
@@ -1806,10 +1810,7 @@
                     itemModelCount: modelProfileBundle?.itemModels?.length || 0
                 },
                 levelSize: { rows: levelMap.length, cols: levelMap[0].length },
-                tileCounts: levelMap.join('').split('').reduce((acc, ch) => {
-                    acc[ch] = (acc[ch] || 0) + 1;
-                    return acc;
-                }, {}),
+                tileCounts: countTiles(levelMap),
                 wallCount: walls.length,
                 wallGridBuckets: wallGrid.size,
                 enemyCount: enemies.length,

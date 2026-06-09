@@ -313,6 +313,16 @@
     return `${x},${y}`;
   }
 
+  function countTiles(map) {
+    return (Array.isArray(map) ? map : [])
+      .join('')
+      .split('')
+      .reduce((acc, tile) => {
+        acc[tile] = (acc[tile] || 0) + 1;
+        return acc;
+      }, {});
+  }
+
   function pickRuntimeLevel(project, options = {}) {
     const normalized = normalizeProject(structuredClone(project));
     if (!normalized) return null;
@@ -629,6 +639,7 @@
     objectFloorSpan,
     objectOnFloor,
     allLevelObjects,
+    countTiles,
     normalizeProject,
     normalizeEditorProject,
     buildRuntimeLevelFromEditorProject,
