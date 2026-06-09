@@ -61,6 +61,16 @@
     });
   }
 
+  function getElementState(target, classNames = []) {
+    const element = resolveElement(target);
+    if (!element) return { exists: false };
+    const classes = {};
+    (Array.isArray(classNames) ? classNames : []).forEach((name) => {
+      classes[name] = element.classList?.contains(name) === true;
+    });
+    return { exists: true, classes };
+  }
+
   function getPanelState(target) {
     const panel = resolveElement(target);
     if (!panel) return { exists: false };
@@ -77,6 +87,7 @@
     formatMeter,
     renderPanel,
     setPanelLines,
+    getElementState,
     getPanelState
   });
 })();

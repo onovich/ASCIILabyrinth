@@ -190,6 +190,7 @@ async function main() {
   });
   assert(smokePanel.dataset.title === 'SMOKE' && smokePanel.dataset.tone === 'cyan', 'shared UI panel helper should set panel metadata');
   assert(ui.formatMeter(5, 10, { width: 4 }) === '\u2588\u2588\u2591\u2591', 'shared UI meter helper should format HUD bars');
+  assert(ui.getElementState('smoke-panel', ['al-panel']).classes['al-panel'] === true, 'shared UI element state should report requested classes');
   assert(ui.getPanelState('smoke-panel').isPanel && ui.getPanelState('smoke-panel').lineCount === 2, 'shared UI panel state should report rendered design-system panels');
 
   assert(schema?.TILE?.WEAPON === '9', 'shared tile contract should expose weapon tile');

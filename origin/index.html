@@ -168,24 +168,24 @@
     <!-- 替换为 Canvas 作为 ASCII 输出载体 -->
     <canvas id="ascii-canvas"></canvas>
 
-    <div id="password-panel" class="terminal-modal">
+    <div id="password-panel" class="terminal-modal al-modal">
         <h2>┌─[ EXIT ACCESS ]─┐</h2>
         <pre>输入隐藏房间获得的四位撤离密码。</pre>
-        <input id="password-input" maxlength="4" inputmode="numeric" autocomplete="off">
-        <button id="password-submit">确认 (ENTER)</button>
-        <button id="password-cancel">取消 (ESC)</button>
+        <input id="password-input" class="al-input" maxlength="4" inputmode="numeric" autocomplete="off">
+        <button id="password-submit" class="al-button">确认 (ENTER)</button>
+        <button id="password-cancel" class="al-button">取消 (ESC)</button>
     </div>
 
-    <div id="ending-panel" class="terminal-modal">
+    <div id="ending-panel" class="terminal-modal al-modal">
         <h1>┌─[ EXTRACTION COMPLETE ]─┐</h1>
         <pre id="ending-text"></pre>
-        <button onclick="location.reload()">再次部署 (RESTART)</button>
+        <button id="ending-restart" class="al-button" onclick="location.reload()">再次部署 (RESTART)</button>
     </div>
 
-    <div id="game-over" class="terminal-modal">
+    <div id="game-over" class="terminal-modal al-modal">
         <h1>任务失败 (YOU DIED)</h1>
         <p>最终得分: <span id="final-score">0</span></p>
-        <button onclick="location.reload()">重新部署 (RESTART)</button>
+        <button id="game-over-restart" class="al-button" onclick="location.reload()">重新部署 (RESTART)</button>
     </div>
 
     <!-- 引入 Three.js -->
@@ -1799,6 +1799,10 @@
         } else {
             updateUI();
         }
+        function getUiClassState(id, classNames) {
+            return window.ASCIIUI?.getElementState?.(id, classNames) || { exists: false };
+        }
+
         function getDebugSnapshot() {
             return {
                 sharedContract: {
@@ -1808,12 +1812,23 @@
                     formatMeter: typeof window.ASCIIUI?.formatMeter === 'function',
                     renderPanel: typeof window.ASCIIUI?.renderPanel === 'function',
                     setPanelLines: typeof window.ASCIIUI?.setPanelLines === 'function',
+                    getElementState: typeof window.ASCIIUI?.getElementState === 'function',
                     getPanelState: typeof window.ASCIIUI?.getPanelState === 'function'
                 },
                 hudPanels: {
                     status: window.ASCIIUI?.getPanelState?.('ui-layer') || { exists: false },
                     mission: window.ASCIIUI?.getPanelState?.('mission-layer') || { exists: false },
                     log: window.ASCIIUI?.getPanelState?.('log-layer') || { exists: false }
+                },
+                modalUi: {
+                    passwordPanel: getUiClassState('password-panel', ['terminal-modal', 'al-modal']),
+                    endingPanel: getUiClassState('ending-panel', ['terminal-modal', 'al-modal']),
+                    gameOverPanel: getUiClassState('game-over', ['terminal-modal', 'al-modal']),
+                    passwordInput: getUiClassState('password-input', ['al-input']),
+                    passwordSubmit: getUiClassState('password-submit', ['al-button']),
+                    passwordCancel: getUiClassState('password-cancel', ['al-button']),
+                    endingRestart: getUiClassState('ending-restart', ['al-button']),
+                    gameOverRestart: getUiClassState('game-over-restart', ['al-button'])
                 },
                 runtimeLevel: {
                     source: runtimeLevel.source,
