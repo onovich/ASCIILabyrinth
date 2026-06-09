@@ -1024,7 +1024,7 @@
             ${option('false', '隐藏', String(partItem.wire))}
           </select></label>
         `;
-        dom.jsonPreview.value = JSON.stringify(model, null, 2);
+        dom.jsonPreview.value = stringifyJson(model);
       }
 
       function vectorInput(path, label, values, step) {
