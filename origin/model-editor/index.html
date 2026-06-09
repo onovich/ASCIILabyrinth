@@ -502,6 +502,8 @@
       const escapeAttr = SHARED_DATA.escapeAttr || escapeHtml;
       const optionHtml = SHARED_DATA.optionHtml || ((value, label, selected) => `<option value="${escapeAttr(value)}" ${String(value) === String(selected) ? 'selected' : ''}>${escapeHtml(label)}</option>`);
       const parseJson = SHARED_DATA.parseJson || JSON.parse;
+      const stringifyJson = SHARED_DATA.stringifyJson || ((value) => JSON.stringify(value, null, 2));
+      const createJsonExportName = SHARED_DATA.createJsonExportName || ((prefix) => `${prefix}-${new Date().toISOString().slice(0, 10)}.json`);
       const countBy = SHARED_DATA.countBy || ((items, getKey) => (Array.isArray(items) ? items : []).reduce((acc, item, index) => {
         const key = typeof getKey === 'function' ? getKey(item, index) : item?.[getKey];
         if (key) acc[key] = (acc[key] || 0) + 1;
@@ -1217,11 +1219,11 @@
 
       function exportProject() {
         touchProject();
-        const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' });
+        const blob = new Blob([stringifyJson(project)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `ascii-labyrinth-models-${new Date().toISOString().slice(0, 10)}.json`;
+        link.download = createJsonExportName('ascii-labyrinth-models');
         link.click();
         URL.revokeObjectURL(url);
         setStatus('JSON exported');
@@ -1248,6 +1250,7 @@
             clamp: typeof SHARED_DATA.clamp === 'function',
             optionHtml: typeof SHARED_DATA.optionHtml === 'function',
             parseJson: typeof SHARED_DATA.parseJson === 'function',
+            jsonExport: typeof SHARED_DATA.stringifyJson === 'function' && typeof SHARED_DATA.createJsonExportName === 'function',
             htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeModelProject === 'function'
           },

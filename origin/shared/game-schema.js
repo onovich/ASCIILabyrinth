@@ -167,6 +167,15 @@
     return JSON.parse(raw);
   }
 
+  function stringifyJson(value) {
+    return JSON.stringify(value, null, 2);
+  }
+
+  function createJsonExportName(prefix, date = new Date()) {
+    const stamp = (date instanceof Date ? date : new Date(date)).toISOString().slice(0, 10);
+    return `${prefix}-${stamp}.json`;
+  }
+
   const PALETTE_ORDER = Object.freeze([
     'select',
     'wall',
@@ -671,6 +680,8 @@
     escapeAttr,
     optionHtml,
     parseJson,
+    stringifyJson,
+    createJsonExportName,
     PALETTE_ORDER,
     createDefaultEffect,
     createDefaultInteraction,

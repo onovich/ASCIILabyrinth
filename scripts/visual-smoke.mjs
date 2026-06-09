@@ -44,6 +44,7 @@ const pages = [
         'clamp',
         'optionHtml',
         'parseJson',
+        'jsonExport',
         'htmlEscapes',
         'projectNormalizer'
       ])],
@@ -65,6 +66,7 @@ const pages = [
         'clamp',
         'optionHtml',
         'parseJson',
+        'jsonExport',
         'htmlEscapes',
         'projectNormalizer'
       ])],
