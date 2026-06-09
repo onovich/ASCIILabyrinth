@@ -443,3 +443,41 @@
   align-items: center;
   min-width: 0;
 }
+
+.al-tool-page :where(.workspace) {
+  display: grid;
+  min-height: 0;
+}
+
+.al-tool-page :where(.sidebar, .inspector) {
+  min-height: 0;
+  overflow: auto;
+  background: var(--panel, var(--al-color-surface));
+}
+
+.al-tool-page :where(.sidebar) {
+  border-right: 1px solid var(--line, var(--al-color-line));
+}
+
+.al-tool-page :where(.inspector) {
+  border-left: 1px solid var(--line, var(--al-color-line));
+}
+
+@media (max-width: 860px) {
+  .al-tool-page :where(.app) {
+    grid-template-rows: auto 1fr 32px;
+  }
+
+  .al-tool-page :where(.topbar) {
+    grid-template-columns: 1fr;
+  }
+
+  .al-tool-page :where(.workspace) {
+    grid-template-columns: 1fr;
+  }
+
+  .al-tool-page :where(.sidebar, .inspector) {
+    border: 0;
+    border-bottom: 1px solid var(--line, var(--al-color-line));
+  }
+}

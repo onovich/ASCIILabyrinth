@@ -70,6 +70,7 @@ Preferred local patterns:
 - Tool pages should put `.al-tool-page` on `<body>` so base form controls, buttons, labels, and focus states come from shared CSS.
 - Shared tool-page primitives include `.section`, `.section-title`, `.stack`, `.grid-two`, `.grid-three`, `.pill`, `.empty`, `.statusbar`, and `.file-input`.
 - Shared header primitives include `.app`, `.topbar`, `.brand`, `.mark`, and `.toolbar`; keep page-specific grid columns local.
+- Shared shell primitives include `.workspace`, `.sidebar`, and `.inspector`; keep page-specific column and mobile row sizes local.
 - Repeated command buttons should use familiar icon text or concise labels.
 - New major panel surfaces should be implemented with shared `--al-*` tokens first.
 

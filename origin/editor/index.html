@@ -149,24 +149,7 @@
       }
 
       .workspace {
-        display: grid;
         grid-template-columns: 250px minmax(360px, 1fr) 318px;
-        min-height: 0;
-      }
-
-      .sidebar,
-      .inspector {
-        min-height: 0;
-        overflow: auto;
-        background: var(--panel);
-      }
-
-      .sidebar {
-        border-right: 1px solid var(--line);
-      }
-
-      .inspector {
-        border-left: 1px solid var(--line);
       }
 
       .palette {
@@ -354,23 +337,8 @@
       }
 
       @media (max-width: 860px) {
-        .app {
-          grid-template-rows: auto 1fr 32px;
-        }
-
-        .topbar {
-          grid-template-columns: 1fr;
-        }
-
         .workspace {
-          grid-template-columns: 1fr;
           grid-template-rows: 190px 1fr 280px;
-        }
-
-        .sidebar,
-        .inspector {
-          border: 0;
-          border-bottom: 1px solid var(--line);
         }
 
         .sidebar {
