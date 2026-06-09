@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ASCII Labyrinth Model Editor</title>
+    <link rel="stylesheet" href="../shared/ui-system.css" />
     <style>
       :root {
         color-scheme: dark;
@@ -462,10 +463,12 @@
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../shared/game-schema.js"></script>
     <script>
-      const STORAGE_KEY = 'ascii-labyrinth-model-editor-v1';
-      const SHAPES = ['box', 'sphere', 'cylinder', 'cone', 'torus', 'octahedron', 'icosahedron', 'dodecahedron'];
-      const TEMPLATE_IDS = [
+      const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
+      const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS?.modelProject || 'ascii-labyrinth-model-editor-v1';
+      const SHAPES = SHARED_DATA.MODEL_SHAPES || ['box', 'sphere', 'cylinder', 'cone', 'torus', 'octahedron', 'icosahedron', 'dodecahedron'];
+      const TEMPLATE_IDS = SHARED_DATA.MODEL_TEMPLATE_IDS || [
         'enemy-longlimb',
         'enemy-orderly',
         'enemy-inverted',

@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ASCII Labyrinth Level Editor</title>
+    <link rel="stylesheet" href="../shared/ui-system.css" />
     <style>
       :root {
         color-scheme: dark;
@@ -661,11 +662,13 @@
       </footer>
     </main>
 
+    <script src="../shared/game-schema.js"></script>
     <script>
-      const STORAGE_KEY = 'ascii-labyrinth-editor-v1';
+      const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
+      const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS?.editorProject || 'ascii-labyrinth-editor-v1';
       const CELL_SIZE = 32;
       const HISTORY_LIMIT = 80;
-      const FLOORS = [
+      const FLOORS = SHARED_DATA.FLOORS || [
         { id: 0, label: 'B1' },
         { id: 1, label: '1F' }
       ];
@@ -708,7 +711,7 @@
         'eraser'
       ];
 
-      const ENEMY_KIND_OPTIONS = [
+      const ENEMY_KIND_OPTIONS = SHARED_DATA.ENEMY_KIND_OPTIONS || [
         ['longlimb', '走廊瘦长人'],
         ['orderly', '无脸护理员'],
         ['inverted', '倒行爬行者'],

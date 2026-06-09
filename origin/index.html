@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ASCII 3D FPS 游戏 (彩色分层版)</title>
+    <link rel="stylesheet" href="./shared/ui-system.css">
     <style>
         :root {
-            --term-green: #8cff9a;
-            --term-cyan: #6ee7ff;
-            --term-amber: #ffd166;
-            --term-red: #ff5c5c;
-            --panel-bg: rgba(0, 12, 10, 0.72);
+            --term-green: var(--al-color-green);
+            --term-cyan: var(--al-color-cyan);
+            --term-amber: var(--al-color-amber);
+            --term-red: var(--al-color-danger);
+            --panel-bg: var(--al-panel-bg);
         }
 
         body {
@@ -18,7 +19,7 @@
             padding: 0;
             background-color: #000;
             color: var(--term-green);
-            font-family: 'Courier New', Courier, monospace;
+            font-family: var(--al-font-mono);
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
@@ -36,37 +37,27 @@
             z-index: 1;
         }
 
-        .tui-layer {
-            position: absolute;
-            z-index: 10;
-            pointer-events: none;
-            font-size: 14px;
-            line-height: 1.18;
-            white-space: pre;
-            color: var(--term-green);
-            text-shadow: 0 0 8px rgba(140, 255, 154, 0.38), 2px 2px 0 #000;
-        }
-
-        .tui-panel {
-            padding: 0;
-            background: var(--panel-bg);
-        }
-
         #ui-layer {
             top: 10px;
             left: 12px;
+            width: min(360px, calc(100vw - 24px));
+            --al-panel-accent: var(--term-green);
         }
 
         #mission-layer {
             top: 10px;
             right: 12px;
-            color: var(--term-cyan);
+            width: min(470px, calc(100vw - 24px));
+            --al-panel-accent: var(--term-cyan);
+            box-shadow: 0 0 18px rgba(110, 231, 255, 0.16);
         }
 
         #log-layer {
             left: 12px;
             bottom: 12px;
-            color: var(--term-amber);
+            width: min(410px, calc(100vw - 24px));
+            --al-panel-accent: var(--term-amber);
+            box-shadow: 0 0 18px rgba(255, 209, 102, 0.16);
         }
 
         /* 准星 */
@@ -161,9 +152,9 @@
 </head>
 <body>
 
-    <div id="ui-layer" class="tui-layer tui-panel"></div>
-    <div id="mission-layer" class="tui-layer tui-panel"></div>
-    <div id="log-layer" class="tui-layer tui-panel"></div>
+    <div id="ui-layer" class="al-hud al-panel" data-title="OPS / STATUS"></div>
+    <div id="mission-layer" class="al-hud al-panel" data-title="MISSION / LINK"></div>
+    <div id="log-layer" class="al-hud al-panel" data-title="RADIO / LOG" aria-live="polite"></div>
 
     <div id="metrics-store" style="display:none">
         <span id="health-val">100</span>
@@ -202,11 +193,14 @@
     
     <!-- 新增：引入 lil-gui 开发者面板库 (修复了版本号) -->
     <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.19.2/dist/lil-gui.umd.js"></script>
+    <script src="./shared/ui-system.js"></script>
+    <script src="./shared/game-schema.js"></script>
 
     <script>
         // ==========================================
         // 1. 游戏状态与核心配置
         // ==========================================
+        const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
         const gameState = {
             health: 100,
             ammo: 20,
@@ -222,7 +216,7 @@
         };
         const EXIT_CODE = '3142';
         const messageLog = [];
-        const weapons = [
+        const weapons = (SHARED_DATA.WEAPON_DEFS || [
             {
                 id: 'sidearm',
                 name: 'SIDEARM',
@@ -245,7 +239,7 @@
                 speed: 18,
                 lightColor: 0xff9955
             }
-        ];
+        ]).map((weapon) => ({ ...weapon }));
         let lastShotAt = 0;
         let audioContext = null;
 
@@ -528,7 +522,7 @@
         // ==========================================
         // 3. 地图与场景生成 (调整了材质颜色，形成分层)
         // ==========================================
-        const TILE = {
+        const TILE = SHARED_DATA.TILE || {
             WALL: '1',
             EMPTY: '0',
             AMMO: '2',
@@ -537,7 +531,8 @@
             KEY: '5',
             DOOR: '6',
             CLUE: '7',
-            EXIT: '8'
+            EXIT: '8',
+            WEAPON: '9'
         };
 
         function generateFacilityMap() {
@@ -620,9 +615,40 @@
             return grid.map((row) => row.join(''));
         }
 
-        const levelMap = generateFacilityMap();
+        function createProceduralRuntimeLevel() {
+            const map = generateFacilityMap();
+            return {
+                source: 'procedural',
+                levelId: 'procedural-facility',
+                levelName: '程序生成设施',
+                floor: 0,
+                map,
+                objectsByCell: {},
+                triggers: [],
+                startCell: { x: 1, y: 1, entranceId: 'procedural-entry' },
+                dimensions: { width: map[0]?.length || 0, height: map.length }
+            };
+        }
+
+        function isValidRuntimeLevel(candidate) {
+            return candidate
+                && Array.isArray(candidate.map)
+                && candidate.map.length > 0
+                && candidate.map.every((row) => typeof row === 'string' && row.length === candidate.map[0].length);
+        }
+
+        function loadRuntimeLevel() {
+            const editorLevel = SHARED_DATA.loadRuntimeLevelFromLocalStorage?.({ floor: 0 });
+            if (isValidRuntimeLevel(editorLevel)) return editorLevel;
+            return createProceduralRuntimeLevel();
+        }
+
+        const runtimeLevel = loadRuntimeLevel();
+        const levelMap = runtimeLevel.map;
 
         const mapSize = 2; 
+        const startCell = runtimeLevel.startCell || { x: 1, y: 1 };
+        player.position.set(startCell.x * mapSize, 1, startCell.y * mapSize);
         const walls = [];
         const wallGrid = new Map();
         const enemies = [];
@@ -645,6 +671,15 @@
 
         function gridKey(x, z) {
             return `${x},${z}`;
+        }
+
+        function getRuntimeCellObjects(x, z) {
+            return runtimeLevel.objectsByCell?.[gridKey(x, z)] || [];
+        }
+
+        function getRuntimeCellObject(x, z, type) {
+            const objects = getRuntimeCellObjects(x, z);
+            return objects.find((object) => object.type === type) || objects[objects.length - 1] || null;
         }
 
         function addWallCollider(box, x, z, ref = null) {
@@ -691,6 +726,8 @@
                     const type = levelMap[z][x];
                     const posX = x * mapSize;
                     const posZ = z * mapSize;
+                    const cellObjects = getRuntimeCellObjects(x, z);
+                    const cellObject = cellObjects[cellObjects.length - 1] || null;
 
                     if (type === TILE.WALL) {
                         const wall = new THREE.Mesh(wallGeo, wallMat);
@@ -700,17 +737,19 @@
                         scene.add(wall);
                         addWallCollider(new THREE.Box3().setFromObject(wall), x, z);
                     } else if (type === TILE.AMMO || type === TILE.HEALTH) {
-                        spawnItem(posX, posZ, type === TILE.AMMO ? 'ammo' : 'health');
+                        spawnItem(posX, posZ, type === TILE.AMMO ? 'ammo' : 'health', cellObject);
+                    } else if (type === TILE.WEAPON) {
+                        spawnItem(posX, posZ, 'weapon', cellObject);
                     } else if (type === TILE.ENEMY) {
-                        spawnEnemy(posX, posZ);
+                        spawnEnemy(posX, posZ, getRuntimeCellObject(x, z, 'enemy'));
                     } else if (type === TILE.KEY) {
-                        spawnItem(posX, posZ, 'key');
+                        spawnItem(posX, posZ, 'key', cellObject);
                     } else if (type === TILE.DOOR) {
-                        spawnDoor(posX, posZ, x, z);
+                        spawnDoor(posX, posZ, x, z, cellObject);
                     } else if (type === TILE.CLUE) {
-                        spawnTerminal(posX, posZ);
+                        spawnTerminal(posX, posZ, cellObject);
                     } else if (type === TILE.EXIT) {
-                        spawnExit(posX, posZ);
+                        spawnExit(posX, posZ, cellObject);
                     }
                 }
             }
@@ -719,27 +758,39 @@
         // ==========================================
         // 4. 复杂角色/实体系统
         // ==========================================
-        function spawnItem(x, z, type) {
+        function spawnItem(x, z, type, config = {}) {
             const geo = type === 'ammo'
                 ? new THREE.BoxGeometry(0.4, 0.4, 0.4)
                 : type === 'key'
                     ? new THREE.TorusGeometry(0.28, 0.07, 6, 16)
-                    : new THREE.OctahedronGeometry(0.3);
-            const color = type === 'ammo' ? 0x00ffff : type === 'key' ? 0xffdd55 : 0x00ff00;
-            const emissive = type === 'ammo' ? 0x003333 : type === 'key' ? 0x664400 : 0x113311;
+                    : type === 'weapon'
+                        ? new THREE.CylinderGeometry(0.1, 0.1, 0.7, 8)
+                        : new THREE.OctahedronGeometry(0.3);
+            const color = type === 'ammo' ? 0x00ffff : type === 'key' ? 0xffdd55 : type === 'weapon' ? 0xff9955 : 0x00ff00;
+            const emissive = type === 'ammo' ? 0x003333 : type === 'key' ? 0x664400 : type === 'weapon' ? 0x442000 : 0x113311;
             const mat = new THREE.MeshStandardMaterial({ color, emissive, roughness: 0.42, metalness: type === 'key' ? 0.6 : 0 });
             const mesh = new THREE.Mesh(geo, mat);
             mesh.position.set(x, 0.5, z);
+            if (type === 'weapon') mesh.rotation.z = Math.PI / 2;
             mesh.castShadow = true;
             
             const light = new THREE.PointLight(color, type === 'key' ? 1.2 : 0.6, type === 'key' ? 6 : 4);
             mesh.add(light);
 
             scene.add(mesh);
-            items.push({ mesh, type, active: true });
+            items.push({
+                mesh,
+                type,
+                active: true,
+                amount: Number(config?.amount) || 0,
+                ammo: Number(config?.ammo) || 0,
+                label: config?.label || '',
+                keyId: config?.keyId || '',
+                weaponKind: config?.weaponKind || ''
+            });
         }
 
-        function spawnDoor(x, z, gridX, gridZ) {
+        function spawnDoor(x, z, gridX, gridZ, config = {}) {
             const geo = new THREE.BoxGeometry(mapSize, mapSize, 0.36);
             const mesh = new THREE.Mesh(geo, doorMat);
             mesh.position.set(x, mapSize / 2, z);
@@ -749,12 +800,22 @@
             seam.position.y = 0.4;
             mesh.add(seam);
             scene.add(mesh);
-            const door = { mesh, active: true, unlocked: false, gridX, gridZ, promptShown: false };
+            const door = {
+                mesh,
+                active: true,
+                unlocked: false,
+                gridX,
+                gridZ,
+                promptShown: false,
+                label: config?.label || '隐藏门',
+                doorId: config?.doorId || '',
+                requiredKeyId: config?.requiredKeyId || ''
+            };
             door.collider = addWallCollider(new THREE.Box3().setFromObject(mesh), gridX, gridZ, door);
             doors.push(door);
         }
 
-        function spawnTerminal(x, z) {
+        function spawnTerminal(x, z, config = {}) {
             const terminalGroup = new THREE.Group();
             terminalGroup.position.set(x, 0, z);
 
@@ -777,10 +838,16 @@
             terminalGroup.add(light);
 
             scene.add(terminalGroup);
-            terminals.push({ group: terminalGroup, read: false, promptShown: false });
+            terminals.push({
+                group: terminalGroup,
+                read: false,
+                promptShown: false,
+                label: config?.label || '终端',
+                message: config?.message || config?.interaction?.effect?.dialog || `EXIT CODE :: ${EXIT_CODE}`
+            });
         }
 
-        function spawnExit(x, z) {
+        function spawnExit(x, z, config = {}) {
             const exitGroup = new THREE.Group();
             exitGroup.position.set(x, 0, z);
 
@@ -796,7 +863,15 @@
             exitGroup.add(light);
 
             scene.add(exitGroup);
-            exits.push({ group: exitGroup, promptShown: false });
+            exits.push({
+                group: exitGroup,
+                promptShown: false,
+                label: config?.label || '出口',
+                exitId: config?.exitId || '',
+                targetLevelId: config?.targetLevelId || '',
+                targetEntranceId: config?.targetEntranceId || '',
+                targetFloor: Number(config?.targetFloor) || 0
+            });
         }
 
         const enemyProfiles = [
@@ -970,8 +1045,10 @@
             return group;
         }
 
-        function spawnEnemy(x, z) {
-            const profile = enemyProfiles[Math.floor(Math.random() * enemyProfiles.length)];
+        function spawnEnemy(x, z, config = {}) {
+            const requestedKind = typeof config === 'string' ? config : config?.enemyKind;
+            const profile = enemyProfiles.find((enemy) => enemy.id === requestedKind)
+                || enemyProfiles[Math.floor(Math.random() * enemyProfiles.length)];
             const enemyGroup = buildEnemyModel(profile);
             enemyGroup.position.set(x, 0, z);
             scene.add(enemyGroup);
@@ -1110,7 +1187,7 @@
             gameState.score += 250;
             playSfx('key');
             setObjective('找到出口大门，输入撤离密码。');
-            pushLog(`终端线索：EXIT CODE :: ${EXIT_CODE}`);
+            pushLog(`终端线索：${terminal.message || `EXIT CODE :: ${EXIT_CODE}`}`);
             updateUI();
         }
 
@@ -1192,19 +1269,21 @@
             gameState.nearbyAction = '';
             for (const door of doors) {
                 if (door.active && distanceXZ(player.position, door.mesh.position) < 2.2) {
-                    gameState.nearbyAction = gameState.hasKey ? '[E] OPEN HIDDEN DOOR' : '[E] LOCKED DOOR: KEY REQUIRED';
+                    gameState.nearbyAction = gameState.hasKey
+                        ? `[E] OPEN ${door.label || 'DOOR'}`
+                        : `[E] LOCKED ${door.label || 'DOOR'}: KEY REQUIRED`;
                     return;
                 }
             }
             for (const terminal of terminals) {
                 if (!terminal.read && distanceXZ(player.position, terminal.group.position) < 2.2) {
-                    gameState.nearbyAction = '[E] READ TERMINAL';
+                    gameState.nearbyAction = `[E] READ ${terminal.label || 'TERMINAL'}`;
                     return;
                 }
             }
             for (const exit of exits) {
                 if (distanceXZ(player.position, exit.group.position) < 2.2) {
-                    gameState.nearbyAction = '[E] ENTER EXIT CODE';
+                    gameState.nearbyAction = `[E] ENTER ${exit.label || 'EXIT'} CODE`;
                     return;
                 }
             }
@@ -1231,8 +1310,34 @@
             mouseLookFallback = {
                 lastX: e.clientX,
                 lastY: e.clientY,
-                moved: 0
+                active: true
             };
+            document.body.dataset.mouseLookMode = 'fallback';
+        }
+
+        function stopMouseLookFallback() {
+            mouseLookFallback = null;
+            document.body.dataset.mouseLookMode = '';
+        }
+
+        function isPointerLocked() {
+            return document.pointerLockElement === document.body;
+        }
+
+        function requestMouseLook(e) {
+            if (typeof document.body.requestPointerLock !== 'function') {
+                startMouseLookFallback(e);
+                return;
+            }
+
+            try {
+                const lockRequest = document.body.requestPointerLock();
+                if (lockRequest && typeof lockRequest.catch === 'function') {
+                    lockRequest.catch(() => startMouseLookFallback(e));
+                }
+            } catch {
+                startMouseLookFallback(e);
+            }
         }
 
         window.addEventListener('touchstart', (e) => {
@@ -1297,20 +1402,17 @@
             // 排除手机端的触摸事件，防止和上述的触控逻辑冲突
             if (e.pointerType === 'touch') return; 
             
-            if (document.pointerLockElement === document.body) {
+            if (isPointerLocked()) {
                 if (e.button === 0) shoot(); // 锁定状态下：左键开火
-            } else if (typeof document.body.requestPointerLock === 'function') {
-                try {
-                    const lockRequest = document.body.requestPointerLock(); // 未锁定状态下：点击请求隐藏并锁定鼠标
-                    if (lockRequest && typeof lockRequest.catch === 'function') {
-                        lockRequest.catch(() => startMouseLookFallback(e));
-                    }
-                } catch {
-                    startMouseLookFallback(e);
-                }
-            } else {
-                startMouseLookFallback(e);
+                return;
             }
+
+            if (mouseLookFallback?.active) {
+                if (e.button === 0) shoot();
+                return;
+            }
+
+            requestMouseLook(e);
         });
 
         document.addEventListener('pointerdown', startBgm);
@@ -1318,25 +1420,26 @@
         // 2. 鼠标自由移动控制视角
         window.addEventListener('mousemove', e => {
             if (gameState.isPaused) return; // 新增：暂停期间停止视角转动
-            if (document.pointerLockElement === document.body) {
+            if (isPointerLocked()) {
                 // 读取鼠标的物理相对位移 (movementX/Y)，实现真正的 FPS 视角
                 applyLookDelta(e.movementX, e.movementY);
-            } else if (mouseLookFallback) {
+            } else if (mouseLookFallback?.active) {
                 const dx = e.clientX - mouseLookFallback.lastX;
                 const dy = e.clientY - mouseLookFallback.lastY;
                 mouseLookFallback.lastX = e.clientX;
                 mouseLookFallback.lastY = e.clientY;
-                mouseLookFallback.moved += Math.abs(dx) + Math.abs(dy);
                 applyLookDelta(dx, dy, 0.005);
             }
         });
-        window.addEventListener('pointerup', e => {
-            if (!mouseLookFallback) return;
-            if (e.button === 0 && mouseLookFallback.moved < 8) shoot();
-            mouseLookFallback = null;
+
+        document.addEventListener('pointerlockchange', () => {
+            document.body.dataset.mouseLookMode = isPointerLocked()
+                ? 'pointer-lock'
+                : (mouseLookFallback?.active ? 'fallback' : '');
         });
+
         window.addEventListener('blur', () => {
-            mouseLookFallback = null;
+            stopMouseLookFallback();
         });
 
         document.getElementById('password-submit').addEventListener('click', submitPassword);
@@ -1361,21 +1464,16 @@
                 if (gameState.isPaused) {
                     // 呼出面板时，释放鼠标供用户点击 UI
                     if (document.pointerLockElement) document.exitPointerLock();
-                    document.getElementById('ui-layer').innerHTML += '<br><span id="pause-text" style="color:#ff0">已暂停 (PAUSED)</span>';
                 } else {
                     // 关闭面板时，自动请求锁定鼠标，恢复游戏
-                    const pt = document.getElementById('pause-text');
-                    if (pt) pt.remove();
                     // 这里不直接锁定，让用户通过下一次点击屏幕来锁定即可
                 }
+                updateUI();
                 return;
             }
-            if (k === '1') {
-                switchWeapon(0);
-                return;
-            }
-            if (k === '2') {
-                switchWeapon(1);
+            const weaponKey = Number(k);
+            if (Number.isInteger(weaponKey) && weapons[weaponKey - 1]) {
+                switchWeapon(weaponKey - 1);
                 return;
             }
             if (k === 'q') {
@@ -1410,17 +1508,15 @@
             return false;
         }
 
-        function padLine(text, width) {
-            const clean = String(text).slice(0, width);
-            return `${clean}${' '.repeat(Math.max(0, width - clean.length))}`;
-        }
+        function renderPanel(id, title, lines) {
+            if (window.ASCIIUI?.renderPanel) {
+                window.ASCIIUI.renderPanel(id, { title, lines });
+                return;
+            }
 
-        function drawBox(title, lines, width = 36) {
-            const label = ` ${title} `;
-            const top = `┌${label}${'─'.repeat(Math.max(0, width - label.length))}┐`;
-            const body = lines.map((line) => `│${padLine(line, width)}│`).join('\n');
-            const bottom = `└${'─'.repeat(width)}┘`;
-            return `${top}\n${body}\n${bottom}`;
+            const panel = document.getElementById(id);
+            panel.dataset.title = title;
+            panel.textContent = lines.join('\n');
         }
 
         function bar(value, max, width = 12) {
@@ -1445,22 +1541,23 @@
             document.getElementById('score-val').innerText = gameState.score;
 
             const weapon = weapons[gameState.weaponIndex];
-            document.getElementById('ui-layer').textContent = drawBox('OPS / STATUS', [
+            renderPanel('ui-layer', 'OPS / STATUS', [
                 `HP   ${bar(gameState.health, 100)} ${String(gameState.health).padStart(3, '0')}`,
                 `AMMO ${String(gameState.ammo).padStart(3, '0')}    SCORE ${String(gameState.score).padStart(5, '0')}`,
                 `WEAP ${weapon.name.padEnd(8, ' ')} COST ${weapon.cost}`,
-                `KEY  ${gameState.hasKey ? 'YES' : 'NO '}    CODE ${gameState.foundCode ? EXIT_CODE : '----'}`
+                `KEY  ${gameState.hasKey ? 'YES' : 'NO '}    CODE ${gameState.foundCode ? EXIT_CODE : '----'}`,
+                ...(gameState.isPaused ? ['PAUSED / 调试面板已打开'] : [])
             ]);
 
-            document.getElementById('mission-layer').textContent = drawBox('MISSION / LINK', [
+            renderPanel('mission-layer', 'MISSION / LINK', [
                 gameState.objective,
                 gameState.nearbyAction || 'WASD move | mouse look | LMB fire',
-                '1 sidearm | 2 scatter | E interact'
-            ], 46);
+                `${weapons.map((item, index) => `${index + 1} ${item.name.toLowerCase()}`).join(' | ')} | E interact`
+            ]);
 
-            document.getElementById('log-layer').textContent = drawBox('RADIO / LOG', messageLog.length ? messageLog : [
+            renderPanel('log-layer', 'RADIO / LOG', messageLog.length ? messageLog : [
                 '> 活下来，找到钥匙并逃离设施。'
-            ], 50);
+            ]);
         }
 
         const clock = new THREE.Clock();
@@ -1595,9 +1692,17 @@
                     item.active = false;
                     scene.remove(item.mesh);
                     if (item.type === 'ammo') {
-                        gameState.ammo += 15;
+                        const amount = item.amount || 15;
+                        gameState.ammo += amount;
                         playSfx('pickup');
-                        pushLog('拾取弹药 +15。');
+                        pushLog(`拾取弹药 +${amount}。`);
+                    } else if (item.type === 'weapon') {
+                        const index = weapons.findIndex((weapon) => weapon.id === item.weaponKind);
+                        const amount = item.amount || item.ammo || 6;
+                        gameState.ammo += amount;
+                        if (index >= 0) switchWeapon(index);
+                        playSfx('pickup');
+                        pushLog(`取得武器 ${weapons[index]?.name || item.weaponKind || 'UNKNOWN'}，弹药 +${amount}。`);
                     } else if (item.type === 'key') {
                         gameState.hasKey = true;
                         gameState.score += 150;
@@ -1605,9 +1710,10 @@
                         setObjective('返回隐藏门，使用钥匙进入控制室。');
                         pushLog('取得钥匙。隐藏门认证已可用。');
                     } else {
-                        gameState.health = Math.min(100, gameState.health + 30);
+                        const amount = item.amount || 30;
+                        gameState.health = Math.min(100, gameState.health + amount);
                         playSfx('pickup');
-                        pushLog('医疗包恢复 +30。');
+                        pushLog(`医疗包恢复 +${amount}。`);
                     }
                     updateUI();
                 }
@@ -1657,9 +1763,21 @@
         // 8. 启动
         // ==========================================
         buildLevel();
-        updateUI();
+        if (runtimeLevel.source === 'editor-local') {
+            pushLog(`载入地编关卡：${runtimeLevel.levelName || runtimeLevel.levelId} / floor ${runtimeLevel.floor}`);
+        } else {
+            updateUI();
+        }
         function getDebugSnapshot() {
             return {
+                runtimeLevel: {
+                    source: runtimeLevel.source,
+                    levelId: runtimeLevel.levelId,
+                    levelName: runtimeLevel.levelName,
+                    floor: runtimeLevel.floor,
+                    startCell: runtimeLevel.startCell,
+                    triggerCount: runtimeLevel.triggers?.length || 0
+                },
                 levelSize: { rows: levelMap.length, cols: levelMap[0].length },
                 tileCounts: levelMap.join('').split('').reduce((acc, ch) => {
                     acc[ch] = (acc[ch] || 0) + 1;

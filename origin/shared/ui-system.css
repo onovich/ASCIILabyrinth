@@ -1,0 +1,148 @@
+/*
+  ASCII Labyrinth UI Design System
+  Shared visual tokens and reusable UI primitives for runtime and tools.
+*/
+
+:root {
+  color-scheme: dark;
+  --al-color-bg: #101214;
+  --al-color-bg-deep: #020604;
+  --al-color-surface: #181b1f;
+  --al-color-surface-strong: #20242a;
+  --al-color-line: #313840;
+  --al-color-line-soft: #252a30;
+  --al-color-text: #e8e3d8;
+  --al-color-muted: #a5acb3;
+  --al-color-green: #8cff9a;
+  --al-color-accent: #61d394;
+  --al-color-cyan: #6ee7ff;
+  --al-color-amber: #ffd166;
+  --al-color-danger: #ff5c5c;
+  --al-panel-bg: rgba(0, 12, 10, 0.72);
+  --al-panel-bg-solid: rgba(0, 0, 0, 0.92);
+  --al-radius-xs: 4px;
+  --al-radius-sm: 6px;
+  --al-radius-md: 8px;
+  --al-space-1: 4px;
+  --al-space-2: 8px;
+  --al-space-3: 12px;
+  --al-space-4: 16px;
+  --al-font-ui: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --al-font-mono: "Courier New", Courier, monospace;
+  --al-shadow-green: 0 0 18px rgba(140, 255, 154, 0.14);
+  --al-shadow-cyan: 0 0 18px rgba(110, 231, 255, 0.16);
+  --al-shadow-amber: 0 0 18px rgba(255, 209, 102, 0.16);
+  --al-text-glow: 0 0 8px rgba(140, 255, 154, 0.38), 2px 2px 0 #000;
+}
+
+.al-hud {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  font-family: var(--al-font-mono);
+  font-size: 14px;
+  line-height: 1.28;
+  white-space: normal;
+  color: var(--al-panel-accent);
+  text-shadow: var(--al-text-glow);
+}
+
+.al-panel {
+  --al-panel-accent: var(--al-color-green);
+  box-sizing: border-box;
+  min-width: 260px;
+  padding: 10px 12px 9px;
+  border: 1px solid var(--al-panel-accent);
+  background: var(--al-panel-bg);
+  box-shadow: var(--al-shadow-green);
+  color: var(--al-panel-accent);
+}
+
+.al-panel::before {
+  content: " " attr(data-title) " ";
+  position: absolute;
+  top: -0.72em;
+  left: 10px;
+  padding: 0 5px;
+  background: #000;
+  color: var(--al-panel-accent);
+  font-weight: 700;
+}
+
+.al-panel[data-tone='cyan'] {
+  --al-panel-accent: var(--al-color-cyan);
+  box-shadow: var(--al-shadow-cyan);
+}
+
+.al-panel[data-tone='amber'] {
+  --al-panel-accent: var(--al-color-amber);
+  box-shadow: var(--al-shadow-amber);
+}
+
+.al-panel[data-tone='danger'] {
+  --al-panel-accent: var(--al-color-danger);
+}
+
+.al-panel-lines,
+.al-stack {
+  display: grid;
+  gap: var(--al-space-1);
+}
+
+.al-panel-line {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.al-modal {
+  box-sizing: border-box;
+  background: var(--al-panel-bg-solid);
+  border: 1px solid var(--al-color-green);
+  box-shadow: 0 0 24px rgba(140, 255, 154, 0.2);
+  color: var(--al-color-green);
+}
+
+.al-button,
+.al-input {
+  min-height: 32px;
+  border: 1px solid var(--al-color-line);
+  border-radius: var(--al-radius-sm);
+  background: #111418;
+  color: var(--al-color-text);
+  font: inherit;
+}
+
+.al-button {
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.al-button:hover,
+.al-button:focus-visible,
+.al-input:focus-visible {
+  border-color: var(--al-color-accent);
+  outline: none;
+}
+
+.al-button-primary {
+  background: #254d3a;
+  border-color: #3e8867;
+}
+
+.al-button-danger {
+  background: #4d2525;
+  border-color: #8a4848;
+}
+
+.al-section-title {
+  margin: 0 0 10px;
+  color: #f0ede5;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.al-muted {
+  color: var(--al-color-muted);
+}

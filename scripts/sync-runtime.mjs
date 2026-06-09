@@ -6,6 +6,9 @@ const sourcePath = resolve(projectRoot, 'origin', 'index.html');
 const targetPath = resolve(projectRoot, 'public', 'runtime', 'index.html');
 const bgmSourceDir = resolve(projectRoot, 'bgm');
 const bgmTargetDir = resolve(projectRoot, 'public', 'runtime', 'bgm');
+const sharedSourceDir = resolve(projectRoot, 'origin', 'shared');
+const sharedTargetDir = resolve(projectRoot, 'public', 'shared');
+const runtimeSharedTargetDir = resolve(projectRoot, 'public', 'runtime', 'shared');
 const editorSourceDir = resolve(projectRoot, 'origin', 'editor');
 const editorTargetDir = resolve(projectRoot, 'public', 'editor');
 const modelEditorSourceDir = resolve(projectRoot, 'origin', 'model-editor');
@@ -56,3 +59,5 @@ await Promise.all(
 
 await copyDirectory(editorSourceDir, editorTargetDir);
 await copyDirectory(modelEditorSourceDir, modelEditorTargetDir);
+await copyDirectory(sharedSourceDir, sharedTargetDir);
+await copyDirectory(sharedSourceDir, runtimeSharedTargetDir);

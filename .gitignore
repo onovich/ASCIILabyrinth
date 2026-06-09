@@ -6,8 +6,10 @@ Thumbs.db
 .env.*
 *.local
 .vscode/
+.codex/
 .codex-artifacts/
 public/runtime/
 public/editor/
 public/model-editor/
+public/shared/
 bgm/*.wav
