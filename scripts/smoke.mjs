@@ -149,6 +149,12 @@ async function main() {
   const schema = await loadSharedData();
   assert(schema?.TILE?.WEAPON === '9', 'shared tile contract should expose weapon tile');
   assert(schema.MODEL_RUNTIME_SCHEMA === 'indoor-horror-v1', 'model runtime schema should be stable');
+  const editorTypeMeta = schema.createEditorTypeMeta();
+  assert(schema.PALETTE_ORDER.includes('trigger'), 'shared palette order should include trigger tool');
+  assert(editorTypeMeta.wall.default.blocking === true, 'shared wall meta should keep blocking default');
+  assert(editorTypeMeta.weapon.default.weaponKind === 'scatter', 'shared weapon meta should keep weapon default');
+  assert(editorTypeMeta.terminal.default.interaction.effect.type === 'dialog', 'shared terminal meta should keep dialog interaction');
+  assert(schema.createDefaultEffect('heal').healAmount === 20, 'shared default effects should keep heal amount');
   const sharedPart = schema.createModelPart('p', 'Part', 'box', '#ffffff', '#111111', [0, 1, 0], [0, 0, 0], [1, 1, 1]);
   assert(sharedPart.wire === true && sharedPart.opacity === 1, 'shared part factory should set editor defaults');
   const normalizedPart = schema.normalizeModelPart({ shape: 'missing', color: 'bad', scale: [0, 9, 1] });

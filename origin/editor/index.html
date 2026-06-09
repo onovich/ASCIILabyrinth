@@ -673,7 +673,24 @@
         { id: 1, label: '1F' }
       ];
 
-      const TYPE_META = {
+      const defaultEffect = SHARED_DATA.createDefaultEffect || ((type) => ({
+        type,
+        healAmount: 20,
+        dialog: '无线电短句',
+        targetLevelId: '',
+        targetEntranceId: '',
+        targetFloor: 0,
+        doorId: '',
+        weaponKind: 'scatter'
+      }));
+
+      const defaultInteraction = SHARED_DATA.createDefaultInteraction || ((type) => ({
+        mode: 'interact',
+        once: true,
+        effect: defaultEffect(type)
+      }));
+
+      const TYPE_META = SHARED_DATA.createEditorTypeMeta?.() || {
         select: { group: '工具', name: '选择', icon: 'SEL', color: '#61d394', default: {} },
         wall: { group: '结构', name: '墙壁', icon: 'W', color: '#718078', default: { w: 1, h: 1, blocking: true } },
         keyDoor: { group: '结构', name: '钥匙门', icon: 'D', color: '#6ba6f6', default: { w: 1, h: 1, doorId: 'door-a', requiredKeyId: 'key-a', locked: true } },
@@ -692,7 +709,7 @@
         eraser: { group: '工具', name: '橡皮', icon: '⌫', color: '#b8b8b8', default: {} }
       };
 
-      const PALETTE_ORDER = [
+      const PALETTE_ORDER = SHARED_DATA.PALETTE_ORDER || [
         'select',
         'wall',
         'keyDoor',
@@ -762,27 +779,6 @@
       let activeTool = 'select';
       let dragState = null;
       let undoStack = [];
-
-      function defaultEffect(type) {
-        return {
-          type,
-          healAmount: 20,
-          dialog: '无线电短句',
-          targetLevelId: '',
-          targetEntranceId: '',
-          targetFloor: 0,
-          doorId: '',
-          weaponKind: 'scatter'
-        };
-      }
-
-      function defaultInteraction(type) {
-        return {
-          mode: 'interact',
-          once: true,
-          effect: defaultEffect(type)
-        };
-      }
 
       function createStarterProject() {
         return {
@@ -1214,6 +1210,12 @@
         const objects = allObjects(level);
         return {
           version: project.version,
+          sharedContract: {
+            typeMeta: typeof SHARED_DATA.createEditorTypeMeta === 'function',
+            defaultEffect: typeof SHARED_DATA.createDefaultEffect === 'function',
+            defaultInteraction: typeof SHARED_DATA.createDefaultInteraction === 'function',
+            paletteOrder: Array.isArray(SHARED_DATA.PALETTE_ORDER)
+          },
           levelCount: project.levels.length,
           currentLevelId,
           currentFloor,
