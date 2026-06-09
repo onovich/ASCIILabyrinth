@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "smoke": "node scripts/smoke.mjs",
     "visual-smoke": "node scripts/visual-smoke.mjs",
-    "validate": "npm run build && npm run smoke"
+    "validate": "npm run build && npm run smoke",
+    "verify": "npm run validate && npm run visual-smoke"
   },
   "dependencies": {
     "react": "^19.2.7",
