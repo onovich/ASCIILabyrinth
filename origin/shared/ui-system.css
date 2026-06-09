@@ -115,6 +115,18 @@
   pointer-events: auto;
 }
 
+.al-modal-title {
+  margin: 0 0 12px;
+  color: var(--al-color-amber);
+  font-size: 20px;
+}
+
+.al-modal-copy {
+  margin: 0 0 12px;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
 .al-button,
 .al-input {
   min-height: 32px;
