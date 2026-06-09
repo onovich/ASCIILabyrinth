@@ -61,6 +61,11 @@
         outline: none;
       }
 
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.45;
+      }
+
       button.primary {
         background: #254d3a;
         border-color: #3e8867;
@@ -162,6 +167,10 @@
         min-width: 0;
       }
 
+      .level-toolbar {
+        gap: 10px;
+      }
+
       .toolbar select {
         max-width: 210px;
       }
@@ -189,6 +198,84 @@
       .segmented button.active {
         background: #31533f;
         color: #ffffff;
+      }
+
+      .floor-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px;
+        border: 1px solid rgba(97, 211, 148, 0.48);
+        border-radius: 9px;
+        background: #102019;
+      }
+
+      .toolbar-label {
+        padding: 0 2px 0 4px;
+        color: #cfeadd;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .floor-switch {
+        gap: 5px;
+        border: 0;
+        border-radius: 0;
+        overflow: visible;
+      }
+
+      .floor-switch button {
+        min-width: 62px;
+        min-height: 36px;
+        border: 1px solid #365442;
+        border-radius: 7px;
+        background: #151d19;
+        color: #cdd8cf;
+        font-weight: 800;
+      }
+
+      .floor-switch button.active {
+        border-color: var(--accent);
+        background: #2f7b59;
+        box-shadow: 0 0 0 2px rgba(97, 211, 148, 0.16);
+        color: #ffffff;
+      }
+
+      .floor-preview-controls {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .floor-preview-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 34px;
+        padding: 0 9px;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: #171b20;
+        color: var(--muted);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .floor-preview-toggle input {
+        width: 14px;
+        height: 14px;
+        min-height: 0;
+        margin: 0;
+      }
+
+      .floor-preview-toggle:has(input:checked) {
+        border-color: #668b73;
+        background: #1b2922;
+        color: #e8f1ea;
+      }
+
+      .floor-preview-toggle:has(input:disabled) {
+        opacity: 0.48;
       }
 
       .workspace {
@@ -281,7 +368,7 @@
 
       .canvas-shell {
         display: grid;
-        grid-template-rows: 38px 1fr;
+        grid-template-rows: auto 1fr;
         min-width: 0;
         min-height: 0;
         background: #0d0f11;
@@ -292,16 +379,38 @@
         align-items: center;
         justify-content: space-between;
         gap: 10px;
-        padding: 7px 10px;
+        min-height: 56px;
+        padding: 8px 10px;
         border-bottom: 1px solid var(--line);
         background: #14171a;
         color: var(--muted);
         font-size: 12px;
+        flex-wrap: wrap;
       }
 
       .scene-strip strong {
         color: var(--text);
         font-weight: 700;
+      }
+
+      .scene-summary {
+        display: grid;
+        gap: 2px;
+        min-width: 190px;
+      }
+
+      .scene-controls {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        min-width: 0;
+        flex-wrap: wrap;
+      }
+
+      #cursorReadout {
+        min-width: 62px;
+        text-align: right;
       }
 
       .canvas-wrap {
@@ -319,6 +428,46 @@
         background: #151812;
         image-rendering: pixelated;
         cursor: crosshair;
+      }
+
+      #mapCanvas[data-tool='select'] {
+        cursor: grab;
+      }
+
+      #mapCanvas[data-tool='eraser'] {
+        cursor: not-allowed;
+      }
+
+      #mapCanvas[data-dragging='move'] {
+        cursor: grabbing;
+      }
+
+      .object-tooltip {
+        position: fixed;
+        z-index: 30;
+        min-width: 180px;
+        max-width: 260px;
+        padding: 8px 10px;
+        border: 1px solid rgba(97, 211, 148, 0.55);
+        border-radius: 8px;
+        background: rgba(13, 15, 17, 0.94);
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.38);
+        color: var(--text);
+        font-size: 12px;
+        line-height: 1.45;
+        pointer-events: none;
+      }
+
+      .object-tooltip strong {
+        display: block;
+        margin-bottom: 2px;
+        color: #ffffff;
+        font-size: 13px;
+      }
+
+      .object-tooltip span {
+        display: block;
+        color: var(--muted);
       }
 
       .grid-two {
@@ -363,31 +512,6 @@
         color: var(--muted);
         font-size: 12px;
         text-decoration: none;
-      }
-
-      .object-list {
-        display: grid;
-        gap: 6px;
-        max-height: 220px;
-        overflow: auto;
-      }
-
-      .object-row {
-        display: grid;
-        grid-template-columns: 24px 1fr auto;
-        gap: 7px;
-        align-items: center;
-        padding: 6px;
-        border: 1px solid var(--line-soft);
-        border-radius: 6px;
-        background: #14181c;
-        color: var(--text);
-        font-size: 12px;
-      }
-
-      .object-row.active {
-        border-color: var(--accent);
-        background: #1a2821;
       }
 
       .swatch {
@@ -467,15 +591,15 @@
           </div>
         </div>
 
-        <div class="toolbar">
+        <div class="toolbar level-toolbar">
           <select id="levelSelect" title="关卡"></select>
           <button id="addLevelBtn" title="新增关卡">+</button>
           <button id="duplicateLevelBtn" title="复制关卡">⧉</button>
           <button id="deleteLevelBtn" class="danger" title="删除关卡">×</button>
-          <div class="segmented" id="floorSwitch" aria-label="楼层"></div>
         </div>
 
         <div class="toolbar">
+          <button id="undoBtn" title="撤销上一步 (Ctrl+Z)" disabled>撤销</button>
           <button id="saveBtn" class="primary" title="保存到本机">保存</button>
           <button id="loadBtn" title="读取本机存档">读取</button>
           <button id="exportBtn" title="导出 JSON">导出</button>
@@ -491,11 +615,31 @@
 
         <section class="canvas-shell">
           <div class="scene-strip">
-            <span><strong id="sceneName"></strong> <span id="sceneStats"></span></span>
-            <span id="cursorReadout">x 0 / y 0</span>
+            <div class="scene-summary">
+              <strong id="sceneName"></strong>
+              <span id="sceneStats"></span>
+            </div>
+            <div class="scene-controls">
+              <div class="floor-controls">
+                <span class="toolbar-label">楼层</span>
+                <div class="segmented floor-switch" id="floorSwitch" aria-label="楼层"></div>
+              </div>
+              <div class="floor-preview-controls" aria-label="相邻楼层预览">
+                <label class="floor-preview-toggle">
+                  <input id="showPrevFloor" type="checkbox" />
+                  <span id="prevFloorLabel">显示上一层</span>
+                </label>
+                <label class="floor-preview-toggle">
+                  <input id="showNextFloor" type="checkbox" />
+                  <span id="nextFloorLabel">显示下一层</span>
+                </label>
+              </div>
+              <span id="cursorReadout">x 0 / y 0</span>
+            </div>
           </div>
           <div class="canvas-wrap" id="canvasWrap">
             <canvas id="mapCanvas"></canvas>
+            <div id="objectTooltip" class="object-tooltip" hidden></div>
           </div>
         </section>
 
@@ -505,12 +649,8 @@
             <div id="levelInspector" class="stack"></div>
           </div>
           <div class="section">
-            <h2 class="section-title">对象</h2>
+            <h2 class="section-title">选中对象</h2>
             <div id="objectInspector" class="stack"></div>
-          </div>
-          <div class="section">
-            <h2 class="section-title">列表</h2>
-            <div id="objectList" class="object-list"></div>
           </div>
         </aside>
       </section>
@@ -524,12 +664,14 @@
     <script>
       const STORAGE_KEY = 'ascii-labyrinth-editor-v1';
       const CELL_SIZE = 32;
+      const HISTORY_LIMIT = 80;
       const FLOORS = [
         { id: 0, label: 'B1' },
         { id: 1, label: '1F' }
       ];
 
       const TYPE_META = {
+        select: { group: '工具', name: '选择', icon: 'SEL', color: '#61d394', default: {} },
         wall: { group: '结构', name: '墙壁', icon: 'W', color: '#718078', default: { w: 1, h: 1, blocking: true } },
         keyDoor: { group: '结构', name: '钥匙门', icon: 'D', color: '#6ba6f6', default: { w: 1, h: 1, doorId: 'door-a', requiredKeyId: 'key-a', locked: true } },
         hiddenDoor: { group: '结构', name: '隐藏门', icon: 'H', color: '#a889dc', default: { w: 1, h: 1, doorId: 'hidden-a', requiredKeyId: 'key-a', locked: true, hidden: true } },
@@ -548,6 +690,7 @@
       };
 
       const PALETTE_ORDER = [
+        'select',
         'wall',
         'keyDoor',
         'hiddenDoor',
@@ -582,6 +725,11 @@
         duplicateLevelBtn: document.getElementById('duplicateLevelBtn'),
         deleteLevelBtn: document.getElementById('deleteLevelBtn'),
         floorSwitch: document.getElementById('floorSwitch'),
+        showPrevFloor: document.getElementById('showPrevFloor'),
+        showNextFloor: document.getElementById('showNextFloor'),
+        prevFloorLabel: document.getElementById('prevFloorLabel'),
+        nextFloorLabel: document.getElementById('nextFloorLabel'),
+        undoBtn: document.getElementById('undoBtn'),
         saveBtn: document.getElementById('saveBtn'),
         loadBtn: document.getElementById('loadBtn'),
         exportBtn: document.getElementById('exportBtn'),
@@ -590,9 +738,9 @@
         palettePanel: document.getElementById('palettePanel'),
         mapCanvas: document.getElementById('mapCanvas'),
         canvasWrap: document.getElementById('canvasWrap'),
+        objectTooltip: document.getElementById('objectTooltip'),
         levelInspector: document.getElementById('levelInspector'),
         objectInspector: document.getElementById('objectInspector'),
-        objectList: document.getElementById('objectList'),
         sceneName: document.getElementById('sceneName'),
         sceneStats: document.getElementById('sceneStats'),
         cursorReadout: document.getElementById('cursorReadout'),
@@ -606,8 +754,11 @@
       let currentLevelId = project.levels[0].id;
       let currentFloor = 0;
       let selectedId = null;
-      let activeTool = 'wall';
+      let hoveredId = null;
+      let floorPreview = { previous: false, next: false };
+      let activeTool = 'select';
       let dragState = null;
+      let undoStack = [];
 
       function defaultEffect(type) {
         return {
@@ -766,11 +917,96 @@
         return allObjects().find((object) => object.id === id) || null;
       }
 
-      function visibleOnFloor(object) {
+      function floorLabel(floorId) {
+        return FLOORS.find((floor) => floor.id === floorId)?.label || String(floorId);
+      }
+
+      function adjacentFloorId(direction) {
+        const index = FLOORS.findIndex((floor) => floor.id === currentFloor);
+        return FLOORS[index + direction]?.id ?? null;
+      }
+
+      function floorExists(floorId) {
+        return FLOORS.some((floor) => floor.id === floorId);
+      }
+
+      function objectFloorSpan(object) {
+        return Math.max(1, Number(object.floorSpan) || 1);
+      }
+
+      function objectOnFloor(object, floorId = currentFloor) {
         if (object.type === 'ramp') {
-          return object.floorFrom === currentFloor || object.floorTo === currentFloor || object.floor === currentFloor;
+          return object.floorFrom === floorId || object.floorTo === floorId || object.floor === floorId;
         }
-        return object.floor === currentFloor;
+        const baseFloor = Number(object.floor) || 0;
+        return floorId >= baseFloor && floorId < baseFloor + objectFloorSpan(object);
+      }
+
+      function visibleOnFloor(object) {
+        return objectOnFloor(object, currentFloor);
+      }
+
+      function getPreviewFloorIds() {
+        const floors = [];
+        const previous = adjacentFloorId(-1);
+        const next = adjacentFloorId(1);
+        if (floorPreview.previous && previous !== null && floorExists(previous)) floors.push(previous);
+        if (floorPreview.next && next !== null && floorExists(next)) floors.push(next);
+        return floors;
+      }
+
+      function makeUndoSnapshot(label) {
+        return structuredClone({
+          label,
+          project,
+          currentLevelId,
+          currentFloor,
+          selectedId,
+          floorPreview,
+          activeTool
+        });
+      }
+
+      function recordUndo(label) {
+        undoStack.push(makeUndoSnapshot(label));
+        if (undoStack.length > HISTORY_LIMIT) undoStack.shift();
+        renderUndoControls();
+      }
+
+      function restoreUndoSnapshot(snapshot) {
+        project = structuredClone(snapshot.project);
+        validateProject(project);
+        currentLevelId = project.levels.some((level) => level.id === snapshot.currentLevelId)
+          ? snapshot.currentLevelId
+          : project.levels[0].id;
+        currentFloor = floorExists(snapshot.currentFloor) ? snapshot.currentFloor : project.levels[0].floors?.[0] ?? 0;
+        floorPreview = {
+          previous: Boolean(snapshot.floorPreview?.previous),
+          next: Boolean(snapshot.floorPreview?.next)
+        };
+        activeTool = TYPE_META[snapshot.activeTool] ? snapshot.activeTool : 'select';
+        selectedId = null;
+        hoveredId = null;
+        dragState = null;
+        if (snapshot.selectedId && findObject(snapshot.selectedId)) selectedId = snapshot.selectedId;
+        hideObjectTooltip();
+        render();
+      }
+
+      function undoLastEdit() {
+        const snapshot = undoStack.pop();
+        if (!snapshot) {
+          setStatus('没有可撤销的编辑');
+          renderUndoControls();
+          return;
+        }
+        restoreUndoSnapshot(snapshot);
+        setStatus(`已撤销：${snapshot.label || '上一步编辑'}`);
+      }
+
+      function renderUndoControls() {
+        dom.undoBtn.disabled = undoStack.length === 0;
+        dom.undoBtn.title = undoStack.length ? `撤销上一步 (Ctrl+Z) · ${undoStack.length}` : '没有可撤销的编辑';
       }
 
       function clampObject(object, level = getLevel()) {
@@ -778,6 +1014,16 @@
         object.y = Math.max(0, Math.min(level.height - Math.max(1, object.h || 1), Number(object.y) || 0));
         object.w = Math.max(1, Math.min(level.width, Number(object.w) || 1));
         object.h = Math.max(1, Math.min(level.height, Number(object.h) || 1));
+        if (object.type !== 'ramp') {
+          const floorIds = FLOORS.map((floor) => floor.id);
+          const minFloor = Math.min(...floorIds);
+          const maxFloor = Math.max(...floorIds);
+          object.floor = floorExists(Number(object.floor)) ? Number(object.floor) : minFloor;
+          if ('floorSpan' in object) {
+            const maxSpan = Math.max(1, maxFloor - object.floor + 1);
+            object.floorSpan = Math.max(1, Math.min(maxSpan, Number(object.floorSpan) || 1));
+          }
+        }
       }
 
       function render() {
@@ -789,13 +1035,15 @@
         dom.mapCanvas.style.height = `${height}px`;
         dom.mapCanvas.width = Math.floor(width * ratio);
         dom.mapCanvas.height = Math.floor(height * ratio);
+        dom.mapCanvas.dataset.tool = activeTool;
+        dom.mapCanvas.dataset.dragging = dragState?.mode || '';
         ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
         drawScene(level, width, height);
         renderMeta();
         renderLevelControls();
         renderInspector();
-        renderObjectList();
         renderPalette();
+        renderUndoControls();
         document.body.dataset.editorSnapshot = JSON.stringify(getDebugSnapshot());
       }
 
@@ -805,13 +1053,22 @@
         ctx.fillRect(0, 0, width, height);
         drawGrid(level);
 
-        const objects = allObjects(level).filter(visibleOnFloor);
-        const floors = objects.filter((object) => object.type === 'ramp');
+        const all = allObjects(level);
+        for (const floorId of getPreviewFloorIds()) {
+          const previewObjects = all.filter((object) => objectOnFloor(object, floorId) && !visibleOnFloor(object));
+          drawObjectGroup(previewObjects, { preview: true, floorId });
+        }
+
+        drawObjectGroup(all.filter(visibleOnFloor), { preview: false, floorId: currentFloor });
+      }
+
+      function drawObjectGroup(objects, layer) {
+        const ramps = objects.filter((object) => object.type === 'ramp');
         const triggers = objects.filter((object) => object.type === 'trigger');
         const regular = objects.filter((object) => object.type !== 'trigger' && object.type !== 'ramp');
-        floors.forEach(drawObject);
-        triggers.forEach(drawObject);
-        regular.forEach(drawObject);
+        ramps.forEach((object) => drawObject(object, layer));
+        triggers.forEach((object) => drawObject(object, layer));
+        regular.forEach((object) => drawObject(object, layer));
       }
 
       function drawGrid(level) {
@@ -837,26 +1094,33 @@
         ctx.restore();
       }
 
-      function drawObject(object) {
+      function drawObject(object, layer = {}) {
         const meta = TYPE_META[object.type];
+        if (!meta) return;
         const x = object.x * CELL_SIZE;
         const y = object.y * CELL_SIZE;
         const w = Math.max(1, object.w || 1) * CELL_SIZE;
         const h = Math.max(1, object.h || 1) * CELL_SIZE;
-        const selected = object.id === selectedId;
+        const preview = Boolean(layer.preview);
+        const selected = !preview && object.id === selectedId;
+        const hovered = !preview && object.id === hoveredId && !dragState;
         ctx.save();
+        if (preview) {
+          ctx.globalAlpha = 0.28;
+          ctx.setLineDash([4, 4]);
+        }
 
         if (object.type === 'trigger') {
-          ctx.fillStyle = hexToRgba(meta.color, 0.18);
-          ctx.strokeStyle = selected ? '#ffffff' : meta.color;
-          ctx.setLineDash([6, 5]);
-          ctx.lineWidth = selected ? 3 : 2;
+          ctx.fillStyle = hexToRgba(meta.color, preview ? 0.1 : 0.18);
+          ctx.strokeStyle = preview ? (layer.floorId < currentFloor ? '#8bb5ff' : '#ffd27a') : selected ? '#ffffff' : hovered ? '#f1d36d' : meta.color;
+          if (!preview) ctx.setLineDash([6, 5]);
+          ctx.lineWidth = selected || hovered ? 3 : 2;
           ctx.fillRect(x + 3, y + 3, w - 6, h - 6);
           ctx.strokeRect(x + 3, y + 3, w - 6, h - 6);
         } else {
           ctx.fillStyle = object.type === 'wall' ? '#66736d' : hexToRgba(meta.color, 0.82);
-          ctx.strokeStyle = selected ? '#ffffff' : shade(meta.color, -24);
-          ctx.lineWidth = selected ? 3 : 1.5;
+          ctx.strokeStyle = preview ? (layer.floorId < currentFloor ? '#8bb5ff' : '#ffd27a') : selected ? '#ffffff' : hovered ? '#f1d36d' : shade(meta.color, -24);
+          ctx.lineWidth = selected || hovered ? 3 : 1.5;
           roundRect(ctx, x + 4, y + 4, w - 8, h - 8, 5);
           ctx.fill();
           ctx.stroke();
@@ -890,6 +1154,11 @@
           ctx.strokeStyle = '#61d394';
           ctx.lineWidth = 2;
           ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+        } else if (hovered) {
+          ctx.setLineDash([]);
+          ctx.strokeStyle = '#f1d36d';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
         }
         ctx.restore();
       }
@@ -930,8 +1199,9 @@
           acc[object.type] = (acc[object.type] || 0) + 1;
           return acc;
         }, {});
-        dom.sceneName.textContent = `${level.name} / ${FLOORS.find((floor) => floor.id === currentFloor).label}`;
-        dom.sceneStats.textContent = `${level.width}x${level.height} / ${Object.values(counts).reduce((a, b) => a + b, 0)} objects`;
+        const previewLabels = getPreviewFloorIds().map(floorLabel);
+        dom.sceneName.textContent = `${level.name} / ${floorLabel(currentFloor)}`;
+        dom.sceneStats.textContent = `${level.width}x${level.height} / ${Object.values(counts).reduce((a, b) => a + b, 0)} objects${previewLabels.length ? ` / 预览 ${previewLabels.join(', ')}` : ''}`;
         dom.projectMeta.textContent = `${project.levels.length} levels`;
         dom.schemaText.textContent = `schema v${project.version}`;
       }
@@ -944,8 +1214,15 @@
           levelCount: project.levels.length,
           currentLevelId,
           currentFloor,
+          undoDepth: undoStack.length,
+          floorPreview: {
+            previous: floorPreview.previous,
+            next: floorPreview.next,
+            floorIds: getPreviewFloorIds()
+          },
           activeTool,
           selectedId,
+          hoveredId,
           canvas: {
             width: dom.mapCanvas.width,
             height: dom.mapCanvas.height
@@ -956,6 +1233,9 @@
             width: level.width,
             height: level.height,
             visibleCount: objects.filter(visibleOnFloor).length,
+            previewCount: getPreviewFloorIds()
+              .flatMap((floorId) => objects.filter((object) => objectOnFloor(object, floorId) && !visibleOnFloor(object)))
+              .length,
             counts: objects.reduce((acc, object) => {
               acc[object.type] = (acc[object.type] || 0) + 1;
               return acc;
@@ -975,6 +1255,15 @@
           (floor) =>
             `<button type="button" data-floor="${floor.id}" class="${floor.id === currentFloor ? 'active' : ''}">${floor.label}</button>`
         ).join('');
+
+        const previous = adjacentFloorId(-1);
+        const next = adjacentFloorId(1);
+        dom.showPrevFloor.checked = floorPreview.previous && previous !== null;
+        dom.showPrevFloor.disabled = previous === null;
+        dom.prevFloorLabel.textContent = previous === null ? '无上一层' : `显示上一层 ${floorLabel(previous)}`;
+        dom.showNextFloor.checked = floorPreview.next && next !== null;
+        dom.showNextFloor.disabled = next === null;
+        dom.nextFloorLabel.textContent = next === null ? '无下一层' : `显示下一层 ${floorLabel(next)}`;
 
         const level = getLevel();
         dom.levelInspector.innerHTML = `
@@ -1004,7 +1293,7 @@
                 ${entries
                   .map(
                     ({ type, meta }) => `
-                    <div class="palette-item ${activeTool === type ? 'active' : ''}" draggable="true" data-tool="${type}">
+                    <div class="palette-item ${activeTool === type ? 'active' : ''}" draggable="${type !== 'select'}" data-tool="${type}">
                       <span class="palette-icon" style="color:${meta.color}">${escapeHtml(meta.icon)}</span>
                       <span>
                         <span class="palette-name">${escapeHtml(meta.name)}</span>
@@ -1041,9 +1330,10 @@
             <label>Y<input type="number" data-path="y" value="${object.y}" /></label>
             <label>层<select data-path="floor">${floorOptions(object.floor)}</select></label>
           </div>
-          <div class="grid-two">
+          <div class="${object.type === 'ramp' ? 'grid-two' : 'grid-three'}">
             <label>宽<input type="number" min="1" data-path="w" value="${object.w || 1}" /></label>
             <label>高<input type="number" min="1" data-path="h" value="${object.h || 1}" /></label>
+            ${object.type === 'ramp' ? '' : `<label>层高<select data-path="floorSpan">${floorSpanOptions(object)}</select></label>`}
           </div>
         `;
         dom.objectInspector.innerHTML = common + renderTypeFields(object);
@@ -1222,6 +1512,16 @@
         return FLOORS.map((floor) => option(String(floor.id), floor.label, String(value))).join('');
       }
 
+      function floorSpanOptions(object) {
+        const maxFloor = Math.max(...FLOORS.map((floor) => floor.id));
+        const baseFloor = Number(object.floor) || 0;
+        const maxSpan = Math.max(1, maxFloor - baseFloor + 1);
+        return Array.from({ length: maxSpan }, (_, index) => {
+          const value = index + 1;
+          return option(String(value), value === 1 ? '1 层' : `${value} 层`, String(object.floorSpan || 1));
+        }).join('');
+      }
+
       function levelOptions(value) {
         return `<option value=""></option>${project.levels.map((level) => option(level.id, level.name, value)).join('')}`;
       }
@@ -1233,27 +1533,6 @@
 
       function option(value, label, selected) {
         return `<option value="${escapeAttr(value)}" ${String(value) === String(selected) ? 'selected' : ''}>${escapeHtml(label)}</option>`;
-      }
-
-      function renderObjectList() {
-        const level = getLevel();
-        const objects = allObjects(level).filter(visibleOnFloor);
-        if (!objects.length) {
-          dom.objectList.innerHTML = `<div class="empty">当前楼层为空</div>`;
-          return;
-        }
-        dom.objectList.innerHTML = objects
-          .map((object) => {
-            const meta = TYPE_META[object.type];
-            return `
-              <button class="object-row ${object.id === selectedId ? 'active' : ''}" data-object-id="${object.id}">
-                <span class="swatch" style="background:${meta.color}"></span>
-                <span>${escapeHtml(object.label || meta.name)}</span>
-                <span class="muted">${object.x},${object.y}</span>
-              </button>
-            `;
-          })
-          .join('');
       }
 
       function canvasPoint(event) {
@@ -1282,15 +1561,102 @@
         );
       }
 
-      function placeTool(type, point) {
+      function isPlaceableTool(type) {
+        return Boolean(TYPE_META[type]) && type !== 'select' && type !== 'eraser';
+      }
+
+      function objectDisplayName(object) {
+        return object.label || TYPE_META[object.type]?.name || object.type;
+      }
+
+      function objectTypeDetail(object) {
+        if (object.type === 'enemy') {
+          const enemy = ENEMY_KIND_OPTIONS.find(([value]) => value === object.enemyKind);
+          return enemy?.[1] || object.enemyKind || 'enemy';
+        }
+        if (object.type === 'keyDoor' || object.type === 'hiddenDoor') {
+          return `door ${object.doorId || object.id} / key ${object.requiredKeyId || '-'}`;
+        }
+        if (object.type === 'key') {
+          return `key ${object.keyId || object.id} / door ${object.boundDoorId || '-'}`;
+        }
+        if (object.type === 'exit') {
+          return `to ${object.targetLevelId || '-'} / ${object.targetEntranceId || '-'}`;
+        }
+        if (object.type === 'trigger') {
+          return `${object.effect?.type || 'effect'} / ${object.once ? 'once' : 'repeat'}`;
+        }
+        if (object.type === 'ammo' || object.type === 'medkit') {
+          return `amount ${object.amount || 0}`;
+        }
+        if (object.type === 'weapon') {
+          return `${object.weaponKind || 'weapon'} / ammo ${object.ammo || 0}`;
+        }
+        if (object.type === 'npc') {
+          return object.npcId || object.id;
+        }
+        if (object.type === 'terminal') {
+          return object.message || 'terminal';
+        }
+        return object.id;
+      }
+
+      function showObjectTooltip(object, event) {
+        const meta = TYPE_META[object.type];
+        if (!dom.objectTooltip || !meta) return;
+        const floorLabel = FLOORS.find((floor) => floor.id === (object.floor ?? currentFloor))?.label || object.floor;
+        dom.objectTooltip.innerHTML = `
+          <strong>${escapeHtml(objectDisplayName(object))}</strong>
+          <span>${escapeHtml(meta.name)} · ${escapeHtml(object.type)}</span>
+          <span>${escapeHtml(objectTypeDetail(object))}</span>
+          <span>x ${object.x}, y ${object.y} · ${Math.max(1, object.w || 1)}x${Math.max(1, object.h || 1)} · ${escapeHtml(floorLabel)}</span>
+        `;
+        dom.objectTooltip.hidden = false;
+        positionObjectTooltip(event);
+      }
+
+      function positionObjectTooltip(event) {
+        if (!dom.objectTooltip || dom.objectTooltip.hidden) return;
+        const width = dom.objectTooltip.offsetWidth || 220;
+        const height = dom.objectTooltip.offsetHeight || 92;
+        const left = Math.min(event.clientX + 14, window.innerWidth - width - 10);
+        const top = Math.min(event.clientY + 14, window.innerHeight - height - 10);
+        dom.objectTooltip.style.left = `${Math.max(10, left)}px`;
+        dom.objectTooltip.style.top = `${Math.max(10, top)}px`;
+      }
+
+      function hideObjectTooltip() {
+        if (dom.objectTooltip) dom.objectTooltip.hidden = true;
+      }
+
+      function updateHover(point, event) {
+        const hit = hitTest(point);
+        const nextHoveredId = hit?.id || null;
+        if (hoveredId !== nextHoveredId) {
+          hoveredId = nextHoveredId;
+          render();
+        }
+        if (hit) showObjectTooltip(hit, event);
+        else hideObjectTooltip();
+      }
+
+      function placeTool(type, point, options = {}) {
+        if (type === 'select') {
+          selectedId = hitTest(point)?.id || null;
+          render();
+          return false;
+        }
+
         const level = getLevel();
         if (type === 'eraser') {
           const hit = hitTest(point);
           if (hit) {
+            if (!options.skipUndo) recordUndo('擦除对象');
             selectedId = hit.id;
-            deleteSelected();
+            deleteSelected({ skipUndo: true });
+            return true;
           }
-          return;
+          return false;
         }
 
         if (type === 'wall') {
@@ -1300,10 +1666,11 @@
           if (existing) {
             selectedId = existing.id;
             render();
-            return;
+            return false;
           }
         }
 
+        if (!options.skipUndo) recordUndo(`放置${TYPE_META[type].name}`);
         const object = createObject(type, point.x, point.y, currentFloor);
         if (type === 'trigger') level.triggers.push(object);
         else level.objects.push(object);
@@ -1312,6 +1679,7 @@
         touchProject();
         setStatus(`${TYPE_META[type].name} placed at ${point.x}, ${point.y}`);
         render();
+        return true;
       }
 
       function selectObject(id) {
@@ -1319,14 +1687,17 @@
         render();
       }
 
-      function deleteSelected() {
+      function deleteSelected(options = {}) {
         const level = getLevel();
         const object = findObject(selectedId);
         if (!object) return;
+        if (!options.skipUndo) recordUndo('删除对象');
         const collection = getCollectionForObject(level, object);
         const index = collection.findIndex((entry) => entry.id === selectedId);
         if (index >= 0) collection.splice(index, 1);
         selectedId = null;
+        hoveredId = null;
+        hideObjectTooltip();
         touchProject();
         setStatus('Object deleted');
         render();
@@ -1336,6 +1707,7 @@
         const level = getLevel();
         const object = findObject(selectedId);
         if (!object) return;
+        recordUndo('复制对象');
         const clone = structuredClone(object);
         clone.id = makeId(object.type);
         clone.label = `${object.label || TYPE_META[object.type].name} copy`;
@@ -1374,10 +1746,13 @@
         try {
           const next = JSON.parse(raw);
           validateProject(next);
+          recordUndo('读取项目');
           project = next;
           currentLevelId = project.levels[0].id;
           currentFloor = project.levels[0].floors?.[0] ?? 0;
           selectedId = null;
+          hoveredId = null;
+          hideObjectTooltip();
           setStatus(message);
           render();
         } catch (error) {
@@ -1413,17 +1788,21 @@
       }
 
       function addLevel() {
+        recordUndo('新增关卡');
         const id = `level-${project.levels.length + 1}`;
         const level = createLevel(id, `关卡 ${project.levels.length + 1}`, 24, 16, false);
         level.objects.push(createObject('entrance', 2, 2, 0, { entranceId: `entry-${project.levels.length + 1}` }));
         project.levels.push(level);
         currentLevelId = level.id;
         selectedId = null;
+        hoveredId = null;
+        hideObjectTooltip();
         touchProject();
         render();
       }
 
       function duplicateLevel() {
+        recordUndo('复制关卡');
         const source = getLevel();
         const clone = structuredClone(source);
         clone.id = makeId('level');
@@ -1433,6 +1812,8 @@
         project.levels.push(clone);
         currentLevelId = clone.id;
         selectedId = null;
+        hoveredId = null;
+        hideObjectTooltip();
         touchProject();
         render();
       }
@@ -1442,10 +1823,13 @@
           setStatus('At least one level is required');
           return;
         }
+        recordUndo('删除关卡');
         const index = project.levels.findIndex((level) => level.id === currentLevelId);
         if (index >= 0) project.levels.splice(index, 1);
         currentLevelId = project.levels[0].id;
         selectedId = null;
+        hoveredId = null;
+        hideObjectTooltip();
         touchProject();
         render();
       }
@@ -1457,6 +1841,8 @@
         let value = target.value;
         if (field === 'width' || field === 'height') value = Math.max(8, Math.min(80, Number(value) || 8));
         if (field === 'id') value = String(value).trim() || oldId;
+        if (level[field] === value) return;
+        recordUndo('修改关卡');
         level[field] = value;
         if (field === 'id') {
           project.levels.forEach((candidate) => {
@@ -1482,11 +1868,14 @@
         const path = target.dataset.path;
         let value = target.type === 'checkbox' ? target.checked : target.value;
         const lastPart = path.split('.').at(-1);
-        const numericFields = new Set(['x', 'y', 'w', 'h', 'floor', 'floorFrom', 'floorTo', 'targetFloor', 'amount', 'ammo', 'healAmount']);
+        const numericFields = new Set(['x', 'y', 'w', 'h', 'floor', 'floorSpan', 'floorFrom', 'floorTo', 'targetFloor', 'amount', 'ammo', 'healAmount']);
         if (target.type === 'number' || numericFields.has(lastPart)) value = Number(value);
         if (value === 'true') value = true;
         if (value === 'false') value = false;
+        if (getByPath(object, path) === value) return;
+        recordUndo('修改对象');
         setByPath(object, path, value);
+        if (path === 'id') selectedId = value;
         if (path.endsWith('.type')) {
           const effectPath = path.replace(/\.type$/, '');
           const effect = getByPath(object, effectPath);
@@ -1528,13 +1917,19 @@
         const item = event.target.closest('[data-tool]');
         if (!item) return;
         activeTool = item.dataset.tool;
-        renderPalette();
+        hoveredId = null;
+        hideObjectTooltip();
+        render();
         setStatus(`${TYPE_META[activeTool].name} selected`);
       });
 
       dom.palettePanel.addEventListener('dragstart', (event) => {
         const item = event.target.closest('[data-tool]');
         if (!item) return;
+        if (!isPlaceableTool(item.dataset.tool) && item.dataset.tool !== 'eraser') {
+          event.preventDefault();
+          return;
+        }
         event.dataTransfer.setData('application/x-ascii-tool', item.dataset.tool);
         event.dataTransfer.effectAllowed = 'copy';
       });
@@ -1546,7 +1941,7 @@
       dom.mapCanvas.addEventListener('drop', (event) => {
         event.preventDefault();
         const type = event.dataTransfer.getData('application/x-ascii-tool');
-        if (!TYPE_META[type]) return;
+        if (!isPlaceableTool(type) && type !== 'eraser') return;
         placeTool(type, canvasPoint(event));
       });
 
@@ -1554,7 +1949,15 @@
         dom.mapCanvas.setPointerCapture(event.pointerId);
         const point = canvasPoint(event);
         const hit = hitTest(point);
-        if (hit && activeTool !== 'eraser') {
+        hideObjectTooltip();
+
+        if (activeTool === 'select') {
+          if (!hit) {
+            selectedId = null;
+            hoveredId = null;
+            render();
+            return;
+          }
           if (event.shiftKey) {
             selectedId = hit.id;
             cloneSelected();
@@ -1562,48 +1965,86 @@
             selectedId = hit.id;
           }
           const object = findObject(selectedId);
+          if (!object) return;
           dragState = {
             mode: 'move',
             id: selectedId,
             startPoint: point,
             startX: object.x,
-            startY: object.y
+            startY: object.y,
+            undoRecorded: false
           };
           render();
           return;
         }
-        placeTool(activeTool, point);
+
+        const changed = placeTool(activeTool, point);
         if (activeTool === 'wall' || activeTool === 'eraser') {
-          dragState = { mode: activeTool, last: point };
+          dragState = { mode: activeTool, last: point, undoRecorded: changed };
+          render();
         }
       });
 
       dom.mapCanvas.addEventListener('pointermove', (event) => {
         const point = canvasPoint(event);
         dom.cursorReadout.textContent = `x ${point.x} / y ${point.y}`;
-        if (!dragState) return;
+        if (!dragState) {
+          updateHover(point, event);
+          return;
+        }
+
+        hideObjectTooltip();
         if (dragState.mode === 'move') {
           const object = findObject(dragState.id);
           if (!object) return;
-          object.x = dragState.startX + point.x - dragState.startPoint.x;
-          object.y = dragState.startY + point.y - dragState.startPoint.y;
+          const nextX = dragState.startX + point.x - dragState.startPoint.x;
+          const nextY = dragState.startY + point.y - dragState.startPoint.y;
+          if (object.x === nextX && object.y === nextY) return;
+          if (!dragState.undoRecorded) {
+            recordUndo('移动对象');
+            dragState.undoRecorded = true;
+          }
+          object.x = nextX;
+          object.y = nextY;
           clampObject(object);
           touchProject();
           render();
         } else if ((dragState.mode === 'wall' || dragState.mode === 'eraser') && (dragState.last.x !== point.x || dragState.last.y !== point.y)) {
-          placeTool(dragState.mode, point);
+          const changed = placeTool(dragState.mode, point, { skipUndo: dragState.undoRecorded });
+          if (changed) dragState.undoRecorded = true;
           dragState.last = point;
         }
       });
 
       dom.mapCanvas.addEventListener('pointerup', (event) => {
-        dom.mapCanvas.releasePointerCapture(event.pointerId);
+        if (dragState?.mode === 'move') {
+          const object = findObject(dragState.id);
+          if (object) setStatus(`${objectDisplayName(object)} moved to ${object.x}, ${object.y}`);
+        }
+        if (dom.mapCanvas.hasPointerCapture(event.pointerId)) dom.mapCanvas.releasePointerCapture(event.pointerId);
         dragState = null;
+        render();
+      });
+
+      dom.mapCanvas.addEventListener('pointercancel', (event) => {
+        if (dom.mapCanvas.hasPointerCapture(event.pointerId)) dom.mapCanvas.releasePointerCapture(event.pointerId);
+        dragState = null;
+        hideObjectTooltip();
+        render();
+      });
+
+      dom.mapCanvas.addEventListener('pointerleave', () => {
+        if (dragState) return;
+        hoveredId = null;
+        hideObjectTooltip();
+        render();
       });
 
       dom.levelSelect.addEventListener('change', (event) => {
         currentLevelId = event.target.value;
         selectedId = null;
+        hoveredId = null;
+        hideObjectTooltip();
         render();
       });
 
@@ -1612,6 +2053,22 @@
         if (!button) return;
         currentFloor = Number(button.dataset.floor);
         selectedId = null;
+        hoveredId = null;
+        hideObjectTooltip();
+        render();
+      });
+
+      dom.showPrevFloor.addEventListener('change', (event) => {
+        floorPreview.previous = event.target.checked;
+        hoveredId = null;
+        hideObjectTooltip();
+        render();
+      });
+
+      dom.showNextFloor.addEventListener('change', (event) => {
+        floorPreview.next = event.target.checked;
+        hoveredId = null;
+        hideObjectTooltip();
         render();
       });
 
@@ -1623,14 +2080,10 @@
         if (event.target.matches('[data-path]')) updateObjectField(event.target);
       });
 
-      dom.objectList.addEventListener('click', (event) => {
-        const row = event.target.closest('[data-object-id]');
-        if (row) selectObject(row.dataset.objectId);
-      });
-
       dom.addLevelBtn.addEventListener('click', addLevel);
       dom.duplicateLevelBtn.addEventListener('click', duplicateLevel);
       dom.deleteLevelBtn.addEventListener('click', deleteLevel);
+      dom.undoBtn.addEventListener('click', undoLastEdit);
       dom.saveBtn.addEventListener('click', saveProject);
       dom.loadBtn.addEventListener('click', loadProject);
       dom.exportBtn.addEventListener('click', exportProject);
@@ -1643,12 +2096,20 @@
       });
 
       window.addEventListener('keydown', (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !event.shiftKey) {
+          if (document.activeElement.matches('input, textarea, select')) return;
+          event.preventDefault();
+          undoLastEdit();
+          return;
+        }
         if (event.key === 'Delete' || event.key === 'Backspace') {
           if (document.activeElement.matches('input, textarea, select')) return;
           deleteSelected();
         }
         if (event.key === 'Escape') {
           selectedId = null;
+          hoveredId = null;
+          hideObjectTooltip();
           render();
         }
       });

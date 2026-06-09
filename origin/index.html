@@ -978,6 +978,7 @@
             enemies.push({
                 group: enemyGroup,
                 kind: profile.id,
+                name: profile.name,
                 health: profile.health,
                 active: true,
                 speed: profile.speed + Math.random() * 0.12,
@@ -1032,13 +1033,19 @@
             if (now - lastShotAt < weapon.cooldown) return;
             if (gameState.ammo < weapon.cost) {
                 playSfx('error');
-                pushLog(`${weapon.name} 弹药不足。`);
+                pushLog(gameState.ammo <= 0
+                    ? `弹药用完，${weapon.name} 无法开火。`
+                    : `${weapon.name} 弹药不足：剩余 ${gameState.ammo}/${weapon.cost}。`);
                 return;
             }
 
             lastShotAt = now;
             gameState.ammo -= weapon.cost;
-            updateUI();
+            if (gameState.ammo <= 0) {
+                pushLog(`弹药用完：${weapon.name} 打出了最后一发。`);
+            } else {
+                updateUI();
+            }
 
             const baseDirection = new THREE.Vector3();
             camera.getWorldDirection(baseDirection);
@@ -1062,10 +1069,9 @@
             updateUI();
         }
 
-        function takeDamage() {
-            gameState.health -= 10;
+        function takeDamage(sourceEnemy = null) {
+            gameState.health = Math.max(0, gameState.health - 10);
             playSfx('damage');
-            updateUI();
             
             const flash = document.getElementById('damage-flash');
             flash.style.opacity = 0.4;
@@ -1073,9 +1079,12 @@
 
             if (gameState.health <= 0) {
                 gameState.isGameOver = true;
+                pushLog(`被 ${sourceEnemy?.name || '未知敌人'} 杀死。最终得分 ${gameState.score}。`);
                 if (document.pointerLockElement) document.exitPointerLock(); // 释放鼠标指针，允许点击 UI
                 document.getElementById('game-over').style.display = 'block';
                 document.getElementById('final-score').innerText = gameState.score;
+            } else {
+                updateUI();
             }
         }
 
@@ -1539,7 +1548,7 @@
                                 scene.remove(enemy.group);
                                 gameState.score += 100;
                                 playSfx('enemyDown');
-                                updateUI();
+                                pushLog(`击败敌人：${enemy.name || '未知敌人'}。+100 分。`);
                                 
                                 // 触发击杀特效：相机震动 + 爆炸粒子与强光
                                 cameraShake = 0.5; 
@@ -1573,7 +1582,7 @@
                         dir.y = 0;
                         enemy.group.position.add(dir.multiplyScalar(enemy.speed * delta));
                     } else if (enemy.attackTimer <= 0) {
-                        takeDamage();
+                        takeDamage(enemy);
                         enemy.attackTimer = 0.75;
                     }
                 }
@@ -1671,6 +1680,7 @@
                 terminalCount: terminals.length,
                 exitCount: exits.length,
                 weapons: weapons.map((weapon) => ({ name: weapon.name, cost: weapon.cost, pellets: weapon.pellets })),
+                messageLog: [...messageLog],
                 shaderPipeline: !!postMaterial && !!renderTarget
             };
         }
