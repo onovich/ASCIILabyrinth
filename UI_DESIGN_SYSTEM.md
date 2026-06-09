@@ -73,6 +73,7 @@ Preferred local patterns:
 - Shared shell primitives include `.workspace`, `.sidebar`, and `.inspector`; keep page-specific column and mobile row sizes local.
 - Shared work-area primitives include `.canvas-shell`, `.preview-shell`, `.scene-strip`, `.preview-strip`, `.canvas-wrap`, and `.preview-wrap`; keep page-specific heights, padding, and canvas behavior local.
 - Shared utility primitives include `.row`, `.palette`, `.model-list`, `.part-list`, `.swatch`, `.tiny`, and `.muted`; override with CSS variables for page-specific sizing.
+- Shared utility classes include `.al-hidden` for static hidden DOM and `.al-mt-2` for standard small vertical offsets.
 - Shared list-item primitives include `.palette-item`, `.model-row`, `.part-row`, and their compact title overflow rules; keep page-specific columns, padding, and active colors local.
 - Repeated command buttons should use familiar icon text or concise labels.
 - New major panel surfaces should be implemented with shared `--al-*` tokens first.

@@ -230,6 +230,14 @@
   color: var(--al-color-muted);
 }
 
+.al-hidden {
+  display: none !important;
+}
+
+.al-mt-2 {
+  margin-top: var(--al-space-2) !important;
+}
+
 .al-tool-page,
 .al-tool-page * {
   box-sizing: border-box;

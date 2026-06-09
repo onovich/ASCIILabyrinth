@@ -186,6 +186,8 @@ async function assertSharedCssContract() {
   const requiredSelectors = [
     '.al-panel',
     '.al-modal',
+    '.al-hidden',
+    '.al-mt-2',
     '.al-tool-page',
     '.al-tool-page :where(.app)',
     '.al-tool-page :where(.workspace)',
