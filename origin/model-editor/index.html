@@ -50,20 +50,8 @@
         grid-template-columns: 290px minmax(360px, 1fr) 338px;
       }
 
-      .row {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-      }
-
       .row > * {
         flex: 1;
-      }
-
-      .model-list,
-      .part-list {
-        display: grid;
-        gap: 7px;
       }
 
       .model-row,
@@ -92,15 +80,9 @@
       }
 
       .swatch {
-        width: 22px;
-        height: 22px;
-        border: 1px solid rgba(255, 255, 255, 0.32);
-        border-radius: 5px;
-      }
-
-      .tiny {
-        color: var(--muted);
-        font-size: 11px;
+        --al-swatch-size: 22px;
+        --al-swatch-radius: 5px;
+        --al-swatch-border-color: rgba(255, 255, 255, 0.32);
       }
 
       .preview-shell {

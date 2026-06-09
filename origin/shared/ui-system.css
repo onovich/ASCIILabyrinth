@@ -389,6 +389,32 @@
   display: none;
 }
 
+.al-tool-page :where(.muted, .tiny) {
+  color: var(--muted, var(--al-color-muted));
+}
+
+.al-tool-page :where(.tiny) {
+  font-size: 11px;
+}
+
+.al-tool-page :where(.row) {
+  display: flex;
+  gap: var(--al-space-2);
+  align-items: center;
+}
+
+.al-tool-page :where(.palette, .model-list, .part-list) {
+  display: grid;
+  gap: 7px;
+}
+
+.al-tool-page :where(.swatch) {
+  width: var(--al-swatch-size, 18px);
+  height: var(--al-swatch-size, 18px);
+  border: 1px solid var(--al-swatch-border-color, rgba(255, 255, 255, 0.3));
+  border-radius: var(--al-swatch-radius, var(--al-radius-xs));
+}
+
 .al-tool-page :where(.app) {
   display: grid;
   grid-template-rows: 52px 1fr 32px;
