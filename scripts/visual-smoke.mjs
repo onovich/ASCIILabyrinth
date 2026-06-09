@@ -20,6 +20,10 @@ const runtimeSnapshotChecks = [
     const panel = snapshot.hudPanels?.[key];
     return panel?.exists === true && panel.isPanel === true && Number(panel.lineCount) > 0;
   })],
+  ['runtime HUD tones', (snapshot) =>
+    snapshot.hudPanels?.status?.tone === ''
+    && snapshot.hudPanels?.mission?.tone === 'cyan'
+    && snapshot.hudPanels?.log?.tone === 'amber'],
   ['runtime screen UI classes', (snapshot) => Object.values(snapshot.screenUi || {}).every((state) =>
     state?.exists === true && Object.values(state.classes || {}).every(Boolean)
   )],

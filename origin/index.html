@@ -6,19 +6,11 @@
     <title>ASCII 3D FPS 游戏 (彩色分层版)</title>
     <link rel="stylesheet" href="./shared/ui-system.css">
     <style>
-        :root {
-            --term-green: var(--al-color-green);
-            --term-cyan: var(--al-color-cyan);
-            --term-amber: var(--al-color-amber);
-            --term-red: var(--al-color-danger);
-            --panel-bg: var(--al-panel-bg);
-        }
-
         body {
             margin: 0;
             padding: 0;
             background-color: #000;
-            color: var(--term-green);
+            color: var(--al-color-green);
             font-family: var(--al-font-mono);
             overflow: hidden;
             user-select: none;
@@ -41,23 +33,18 @@
             top: 10px;
             left: 12px;
             width: min(360px, calc(100vw - 24px));
-            --al-panel-accent: var(--term-green);
         }
 
         #mission-layer {
             top: 10px;
             right: 12px;
             width: min(470px, calc(100vw - 24px));
-            --al-panel-accent: var(--term-cyan);
-            box-shadow: 0 0 18px rgba(110, 231, 255, 0.16);
         }
 
         #log-layer {
             left: 12px;
             bottom: 12px;
             width: min(410px, calc(100vw - 24px));
-            --al-panel-accent: var(--term-amber);
-            box-shadow: 0 0 18px rgba(255, 209, 102, 0.16);
         }
 
     </style>
@@ -1448,14 +1435,16 @@
             return false;
         }
 
-        function renderPanel(id, title, lines) {
+        function renderPanel(id, title, lines, tone = '') {
             if (window.ASCIIUI?.renderPanel) {
-                window.ASCIIUI.renderPanel(id, { title, lines });
+                window.ASCIIUI.renderPanel(id, { title, lines, tone });
                 return;
             }
 
             const panel = document.getElementById(id);
             panel.dataset.title = title;
+            if (tone) panel.dataset.tone = tone;
+            else panel.removeAttribute('data-tone');
             panel.textContent = lines.join('\n');
         }
 
@@ -1496,11 +1485,11 @@
                 gameState.objective,
                 gameState.nearbyAction || 'WASD move | mouse look | LMB fire',
                 `${weapons.map((item, index) => `${index + 1} ${item.name.toLowerCase()}`).join(' | ')} | E interact`
-            ]);
+            ], 'cyan');
 
             renderPanel('log-layer', 'RADIO / LOG', messageLog.length ? messageLog : [
                 '> 活下来，找到钥匙并逃离设施。'
-            ]);
+            ], 'amber');
         }
 
         const clock = new THREE.Clock();
