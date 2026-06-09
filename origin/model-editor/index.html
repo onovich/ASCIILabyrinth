@@ -187,8 +187,10 @@
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../shared/ui-system.js"></script>
     <script src="../shared/game-schema.js"></script>
     <script>
+      const SHARED_UI = window.ASCIIUI || {};
       const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
       const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS?.modelProject || 'ascii-labyrinth-model-editor-v1';
       const SHAPES = SHARED_DATA.MODEL_SHAPES || ['box', 'sphere', 'cylinder', 'cone', 'torus', 'octahedron', 'icosahedron', 'dodecahedron'];
@@ -230,6 +232,7 @@
         const label = typeof getLabel === 'function' ? getLabel(item, index, value) : (Array.isArray(item) ? item[1] ?? item[0] : item?.label ?? item?.name ?? value);
         return optionHtml(value, label, selected);
       }).join(''));
+      const swatchHtml = SHARED_UI.swatchHtml || ((color) => `<span class="swatch" style="--al-swatch-color:${/^#[0-9a-f]{3,8}$/i.test(String(color || '').trim()) ? String(color).trim() : '#777777'}"></span>`);
       const parseJson = SHARED_DATA.parseJson || JSON.parse;
       const stringifyJson = SHARED_DATA.stringifyJson || ((value) => JSON.stringify(value, null, 2));
       const createJsonExportName = SHARED_DATA.createJsonExportName || ((prefix) => `${prefix}-${new Date().toISOString().slice(0, 10)}.json`);
@@ -675,7 +678,7 @@
           const color = model.parts[0]?.color || '#777777';
           return `
             <button class="model-row ${model.id === selectedModelId ? 'active' : ''}" data-model-id="${escapeAttr(model.id)}">
-              <span class="swatch" style="background:${color}"></span>
+              ${swatchHtml(color)}
               <span>
                 <strong>${escapeHtml(model.name)}</strong>
                 <span class="tiny">${escapeHtml(model.category)} / ${escapeHtml(model.role)} / ${model.parts.length} parts</span>
@@ -686,7 +689,7 @@
 
         dom.partList.innerHTML = getModel().parts.map((partItem) => `
           <button class="part-row ${partItem.id === selectedPartId ? 'active' : ''}" data-part-id="${escapeAttr(partItem.id)}">
-            <span class="swatch" style="background:${partItem.color}"></span>
+            ${swatchHtml(partItem.color)}
             <span>
               <strong>${escapeHtml(partItem.name)}</strong>
               <span class="tiny">${escapeHtml(partItem.shape)}</span>
@@ -987,6 +990,9 @@
             timestamps: typeof SHARED_DATA.toIsoTimestamp === 'function' && typeof SHARED_DATA.touchProject === 'function',
             htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeModelProject === 'function'
+          },
+          sharedUiContract: {
+            swatchHtml: typeof SHARED_UI.swatchHtml === 'function'
           },
           toolUi: {
             bodyClass: document.body.classList.contains('al-tool-page')

@@ -434,6 +434,11 @@
   height: var(--al-swatch-size, 18px);
   border: 1px solid var(--al-swatch-border-color, rgba(255, 255, 255, 0.3));
   border-radius: var(--al-swatch-radius, var(--al-radius-xs));
+  background: var(--al-swatch-color, #777777);
+}
+
+.al-tool-page :where(.palette-icon) {
+  color: var(--al-swatch-color, currentColor);
 }
 
 .al-tool-page :where(.app) {

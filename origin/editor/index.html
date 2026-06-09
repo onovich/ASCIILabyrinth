@@ -387,8 +387,10 @@
       </footer>
     </main>
 
+    <script src="../shared/ui-system.js"></script>
     <script src="../shared/game-schema.js"></script>
     <script>
+      const SHARED_UI = window.ASCIIUI || {};
       const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
       const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS?.editorProject || 'ascii-labyrinth-editor-v1';
       const CELL_SIZE = 32;
@@ -478,6 +480,8 @@
         return optionHtml(value, label, selected);
       }).join(''));
       const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml || ((items, selected, getValue, getLabel) => `<option value=""></option>${optionsHtml(items, selected, getValue, getLabel)}`);
+      const colorVarStyle = SHARED_UI.colorVarStyle || ((color) => `--al-swatch-color:${/^#[0-9a-f]{3,8}$/i.test(String(color || '').trim()) ? String(color).trim() : '#777777'}`);
+      const swatchHtml = SHARED_UI.swatchHtml || ((color) => `<span class="swatch" style="${colorVarStyle(color)}"></span>`);
       const parseJson = SHARED_DATA.parseJson || JSON.parse;
       const stringifyJson = SHARED_DATA.stringifyJson || ((value) => JSON.stringify(value, null, 2));
       const createJsonExportName = SHARED_DATA.createJsonExportName || ((prefix) => `${prefix}-${new Date().toISOString().slice(0, 10)}.json`);
@@ -1025,6 +1029,10 @@
             optionsWithEmptyHtml: typeof SHARED_DATA.optionsWithEmptyHtml === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeEditorProject === 'function'
           },
+          sharedUiContract: {
+            swatchHtml: typeof SHARED_UI.swatchHtml === 'function',
+            colorVarStyle: typeof SHARED_UI.colorVarStyle === 'function'
+          },
           toolUi: {
             bodyClass: document.body.classList.contains('al-tool-page')
           },
@@ -1108,12 +1116,12 @@
                   .map(
                     ({ type, meta }) => `
                     <div class="palette-item ${activeTool === type ? 'active' : ''}" draggable="${type !== 'select'}" data-tool="${type}">
-                      <span class="palette-icon" style="color:${meta.color}">${escapeHtml(meta.icon)}</span>
+                      <span class="palette-icon" style="${colorVarStyle(meta.color)}">${escapeHtml(meta.icon)}</span>
                       <span>
                         <span class="palette-name">${escapeHtml(meta.name)}</span>
                         <span class="palette-code">${escapeHtml(type)}</span>
                       </span>
-                      <span class="swatch" style="background:${meta.color}"></span>
+                      ${swatchHtml(meta.color)}
                     </div>`
                   )
                   .join('')}

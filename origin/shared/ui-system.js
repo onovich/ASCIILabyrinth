@@ -20,12 +20,43 @@
     return Math.max(min, Math.min(max, number));
   }
 
+  function escapeAttr(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    })[char]);
+  }
+
+  function normalizeHexColor(value, fallback = '#777777') {
+    const color = String(value || '').trim();
+    return /^#[0-9a-f]{3,8}$/i.test(color) ? color : fallback;
+  }
+
   function formatMeter(value, max, { width = 12, filledChar = '\u2588', emptyChar = '\u2591' } = {}) {
     const safeWidth = Math.max(0, Math.floor(Number.isFinite(Number(width)) ? Number(width) : 12));
     const safeMax = Number(max);
     const ratio = safeMax > 0 ? Number(value) / safeMax : 0;
     const filled = clampNumber(Math.round(ratio * safeWidth), 0, safeWidth);
     return `${String(filledChar).repeat(filled)}${String(emptyChar).repeat(safeWidth - filled)}`;
+  }
+
+  function colorVarStyle(color, variable = '--al-swatch-color') {
+    const safeVariable = /^--[a-z0-9-]+$/i.test(String(variable)) ? String(variable) : '--al-swatch-color';
+    return `${safeVariable}:${normalizeHexColor(color)}`;
+  }
+
+  function swatchHtml(color, { className = 'swatch', title = '' } = {}) {
+    const classes = String(className || 'swatch')
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((name) => name.replace(/[^a-z0-9_-]/gi, ''))
+      .filter(Boolean)
+      .join(' ') || 'swatch';
+    const titleAttr = title ? ` title="${escapeAttr(title)}"` : '';
+    return `<span class="${escapeAttr(classes)}" style="${colorVarStyle(color)}"${titleAttr}></span>`;
   }
 
   function renderPanel(target, { title = '', lines = [], tone = '' } = {}) {
@@ -103,6 +134,8 @@
 
   window.ASCIIUI = Object.freeze({
     formatMeter,
+    colorVarStyle,
+    swatchHtml,
     renderPanel,
     setPanelLines,
     setElementVisible,

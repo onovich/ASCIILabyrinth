@@ -16,6 +16,8 @@ const domDumpBudgetMs = Number(process.env.VISUAL_SMOKE_DOM_BUDGET_MS || 6000);
 
 const runtimeSharedUiKeys = [
   'formatMeter',
+  'colorVarStyle',
+  'swatchHtml',
   'renderPanel',
   'setPanelLines',
   'setElementVisible',
@@ -135,6 +137,7 @@ function allTrue(object, keys) {
 function toolPageChecks(label, contractKeys, checks) {
   return [
     [`${label} shared contract`, (snapshot) => allTrue(snapshot.sharedContract, contractKeys)],
+    [`${label} shared UI contract`, (snapshot) => allTrue(snapshot.sharedUiContract, ['swatchHtml'])],
     [`${label} shared tool UI class`, (snapshot) => snapshot.toolUi?.bodyClass === true],
     ...checks
   ];

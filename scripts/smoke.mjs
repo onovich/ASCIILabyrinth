@@ -190,6 +190,8 @@ async function assertSharedCssContract() {
     '.al-mt-2',
     '.al-tool-page',
     '.al-tool-page :where(.app)',
+    '.al-tool-page :where(.swatch)',
+    '.al-tool-page :where(.palette-icon)',
     '.al-tool-page :where(.workspace)',
     '.al-tool-page :where(.canvas-shell, .preview-shell)',
     '.al-tool-page :where(.palette-item, .model-row, .part-row)'
@@ -220,6 +222,8 @@ async function main() {
   });
   assert(smokePanel.dataset.title === 'SMOKE' && smokePanel.dataset.tone === 'cyan', 'shared UI panel helper should set panel metadata');
   assert(ui.formatMeter(5, 10, { width: 4 }) === '\u2588\u2588\u2591\u2591', 'shared UI meter helper should format HUD bars');
+  assert(ui.colorVarStyle('#aabbcc') === '--al-swatch-color:#aabbcc', 'shared UI color style helper should write swatch CSS variables');
+  assert(ui.swatchHtml('bad color') === '<span class="swatch" style="--al-swatch-color:#777777"></span>', 'shared UI swatch helper should repair unsafe colors');
   assert(ui.getElementState('smoke-panel', ['al-panel']).classes['al-panel'] === true, 'shared UI element state should report requested classes');
   assert(ui.getPanelState('smoke-panel').isPanel && ui.getPanelState('smoke-panel').lineCount === 2, 'shared UI panel state should report rendered design-system panels');
   assert(ui.setElementVisible('smoke-panel', false)?.style.display === 'none', 'shared UI visibility helper should hide elements');
