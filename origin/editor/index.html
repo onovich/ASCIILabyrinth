@@ -773,6 +773,15 @@
       });
       const getFloorLabel = SHARED_DATA.getFloorLabel || ((floorId, floors = FLOORS) => floors.find((floor) => floor.id === floorId)?.label || String(floorId));
       const hasFloor = SHARED_DATA.hasFloor || ((floorId, floors = FLOORS) => floors.some((floor) => floor.id === floorId));
+      const getFloorIds = SHARED_DATA.getFloorIds || ((floors = FLOORS) => floors.map((floor) => floor.id));
+      const getMaxFloorSpan = SHARED_DATA.getMaxFloorSpan || ((floorId, floors = FLOORS) => {
+        const floorIds = getFloorIds(floors);
+        if (!floorIds.length) return 1;
+        const minFloor = Math.min(...floorIds);
+        const maxFloor = Math.max(...floorIds);
+        const baseFloor = Number.isFinite(Number(floorId)) ? Number(floorId) : minFloor;
+        return Math.max(1, maxFloor - baseFloor + 1);
+      });
       const getAdjacentFloorId = SHARED_DATA.getAdjacentFloorId || ((floorId, direction, floors = FLOORS) => {
         const index = floors.findIndex((floor) => floor.id === floorId);
         return floors[index + direction]?.id ?? null;
@@ -909,7 +918,7 @@
           upperStart,
           typeMeta: TYPE_META,
           makeId,
-          floors: FLOORS.map((floor) => floor.id)
+          floors: getFloorIds(FLOORS)
         });
         if (sharedLevel) return sharedLevel;
 
@@ -1070,12 +1079,11 @@
         object.w = clamp(Number(object.w) || 1, 1, level.width);
         object.h = clamp(Number(object.h) || 1, 1, level.height);
         if (object.type !== 'ramp') {
-          const floorIds = FLOORS.map((floor) => floor.id);
+          const floorIds = getFloorIds(FLOORS);
           const minFloor = Math.min(...floorIds);
-          const maxFloor = Math.max(...floorIds);
           object.floor = floorExists(Number(object.floor)) ? Number(object.floor) : minFloor;
           if ('floorSpan' in object) {
-            const maxSpan = Math.max(1, maxFloor - object.floor + 1);
+            const maxSpan = getMaxFloorSpan(object.floor, FLOORS);
             object.floorSpan = clamp(Number(object.floorSpan) || 1, 1, maxSpan);
           }
         }
@@ -1276,7 +1284,11 @@
             parseJson: typeof SHARED_DATA.parseJson === 'function',
             jsonExport: typeof SHARED_DATA.stringifyJson === 'function' && typeof SHARED_DATA.createJsonExportName === 'function',
             timestamps: typeof SHARED_DATA.toIsoTimestamp === 'function' && typeof SHARED_DATA.touchProject === 'function',
-            floorTools: typeof SHARED_DATA.getFloorLabel === 'function' && typeof SHARED_DATA.hasFloor === 'function' && typeof SHARED_DATA.getAdjacentFloorId === 'function',
+            floorTools: typeof SHARED_DATA.getFloorLabel === 'function'
+              && typeof SHARED_DATA.hasFloor === 'function'
+              && typeof SHARED_DATA.getFloorIds === 'function'
+              && typeof SHARED_DATA.getMaxFloorSpan === 'function'
+              && typeof SHARED_DATA.getAdjacentFloorId === 'function',
             htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeEditorProject === 'function'
           },
@@ -1579,9 +1591,7 @@
       }
 
       function floorSpanOptions(object) {
-        const maxFloor = Math.max(...FLOORS.map((floor) => floor.id));
-        const baseFloor = Number(object.floor) || 0;
-        const maxSpan = Math.max(1, maxFloor - baseFloor + 1);
+        const maxSpan = getMaxFloorSpan(object.floor, FLOORS);
         return Array.from({ length: maxSpan }, (_, index) => {
           const value = index + 1;
           return option(String(value), value === 1 ? '1 层' : `${value} 层`, String(object.floorSpan || 1));

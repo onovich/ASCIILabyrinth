@@ -119,6 +119,19 @@
     return floors.some((floor) => floor.id === floorId);
   }
 
+  function getFloorIds(floors = FLOORS) {
+    return floors.map((floor) => floor.id);
+  }
+
+  function getMaxFloorSpan(floorId, floors = FLOORS) {
+    const floorIds = getFloorIds(floors);
+    if (!floorIds.length) return 1;
+    const minFloor = Math.min(...floorIds);
+    const maxFloor = Math.max(...floorIds);
+    const baseFloor = Number.isFinite(Number(floorId)) ? Number(floorId) : minFloor;
+    return Math.max(1, maxFloor - baseFloor + 1);
+  }
+
   function getAdjacentFloorId(currentFloor, direction, floors = FLOORS) {
     const index = floors.findIndex((floor) => floor.id === currentFloor);
     if (index < 0) return null;
@@ -699,6 +712,8 @@
     OBJECT_TO_TILE,
     getFloorLabel,
     hasFloor,
+    getFloorIds,
+    getMaxFloorSpan,
     getAdjacentFloorId,
     setValueByPath,
     getValueByPath,

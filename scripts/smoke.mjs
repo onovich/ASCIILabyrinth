@@ -140,6 +140,8 @@ async function main() {
   assert(schema.clamp(3, 5, 0) === 3 && schema.clamp('bad', 2, 8) === 2, 'shared clamp should normalize reversed limits and invalid values');
   assert(schema.getFloorLabel(1) === '1F' && schema.getFloorLabel(99) === '99', 'shared floor label helper should map known floors and fallback ids');
   assert(schema.hasFloor(0) && !schema.hasFloor(9), 'shared floor existence helper should test configured floors');
+  assert(schema.getFloorIds().join(',') === '0,1', 'shared floor id helper should expose floor ids');
+  assert(schema.getMaxFloorSpan(0) === 2 && schema.getMaxFloorSpan(1) === 1, 'shared floor span helper should cap tall objects by remaining floors');
   assert(schema.getAdjacentFloorId(0, 1) === 1 && schema.getAdjacentFloorId(1, 1) === null, 'shared adjacent floor helper should follow floor order');
   assert(schema.countTiles(['102', '200'])[schema.TILE.AMMO] === 2, 'shared tile counter should count runtime map symbols');
   assert(schema.isValidRuntimeLevel({ map: ['00', '11'] }), 'shared runtime level validator should accept rectangular string maps');
