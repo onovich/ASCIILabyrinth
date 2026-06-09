@@ -132,6 +132,8 @@ async function main() {
   assert(schema?.TILE?.WEAPON === '9', 'shared tile contract should expose weapon tile');
   assert(schema.MODEL_RUNTIME_SCHEMA === 'indoor-horror-v1', 'model runtime schema should be stable');
   assert(schema.getCellKey(2, 3) === '2,3', 'shared cell key should match runtime grid key contract');
+  assert(/^smoke-[a-z0-9]+-[a-z0-9]{5}$/.test(schema.createId('smoke')), 'shared id helper should create prefixed ids');
+  assert(/^legacy-[a-z0-9]+-[a-z0-9]{5}$/.test(schema.createEditorId('legacy')), 'shared editor id alias should stay compatible');
   assert(schema.countBy([{ type: 'a' }, { type: 'a' }, { type: 'b' }], 'type').a === 2, 'shared countBy should count object keys');
   assert(schema.countBy([{ kind: '' }, {}], (item) => item.kind || 'unknown').unknown === 2, 'shared countBy should support derived keys');
   assert(schema.countTiles(['102', '200'])[schema.TILE.AMMO] === 2, 'shared tile counter should count runtime map symbols');

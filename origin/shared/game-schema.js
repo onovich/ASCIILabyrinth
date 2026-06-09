@@ -211,8 +211,12 @@
     };
   }
 
-  function createEditorId(prefix) {
+  function createId(prefix) {
     return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+  }
+
+  function createEditorId(prefix) {
+    return createId(prefix);
   }
 
   function createEditorObject(type, x, y, floor = 0, extra = {}, options = {}) {
@@ -651,6 +655,7 @@
     createDefaultEffect,
     createDefaultInteraction,
     createEditorTypeMeta,
+    createId,
     createEditorId,
     createEditorObject,
     createEditorLevel,

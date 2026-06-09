@@ -505,6 +505,7 @@
         if (key) acc[key] = (acc[key] || 0) + 1;
         return acc;
       }, {}));
+      const createSharedId = SHARED_DATA.createId || SHARED_DATA.createEditorId || ((prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`);
 
       const dom = {
         templateSelect: document.getElementById('templateSelect'),
@@ -761,7 +762,7 @@
       }
 
       function makeId(prefix) {
-        return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+        return createSharedId(prefix);
       }
 
       function getModel() {
