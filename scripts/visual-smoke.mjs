@@ -12,6 +12,7 @@ const outDir = resolve(projectRoot, process.env.VISUAL_SMOKE_OUT_DIR || '.codex-
 const chromePath = await findChrome();
 const devServerHost = process.env.VISUAL_SMOKE_DEV_HOST || baseUrlParts.hostname || '127.0.0.1';
 const devServerPort = Number(process.env.VISUAL_SMOKE_DEV_PORT || baseUrlParts.port || 5174);
+const domDumpBudgetMs = Number(process.env.VISUAL_SMOKE_DOM_BUDGET_MS || 6000);
 
 const runtimeSnapshotChecks = [
   ['runtime shared contract', (snapshot) => allTrue(snapshot.sharedContract, ['clamp'])],
@@ -312,7 +313,7 @@ async function dumpDom(page, profileDir) {
     '--mute-audio',
     '--window-size=1280,720',
     `--user-data-dir=${profileDir}`,
-    '--virtual-time-budget=3000',
+    `--virtual-time-budget=${domDumpBudgetMs}`,
     '--dump-dom',
     url
   ], { timeoutMs: 60000 });

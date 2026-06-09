@@ -18,17 +18,6 @@
             touch-action: none; 
         }
 
-        /* 升级为 Canvas 渲染，彻底解决字符排版形变问题，并支持彩色 ASCII */
-        #ascii-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 1;
-        }
-
         #ui-layer {
             top: 10px;
             left: 12px;
@@ -65,7 +54,7 @@
     <div id="damage-flash" class="al-damage-flash"></div>
     
     <!-- 替换为 Canvas 作为 ASCII 输出载体 -->
-    <canvas id="ascii-canvas"></canvas>
+    <canvas id="ascii-canvas" class="al-fullscreen-canvas"></canvas>
 
     <div id="password-panel" class="terminal-modal al-modal al-modal-centered">
         <h2 id="password-title" class="al-modal-title">┌─[ EXIT ACCESS ]─┐</h2>
@@ -1725,6 +1714,7 @@
                     log: window.ASCIIUI?.getPanelState?.('log-layer') || { exists: false }
                 },
                 screenUi: {
+                    asciiCanvas: getUiClassState('ascii-canvas', ['al-fullscreen-canvas']),
                     crosshair: getUiClassState('crosshair', ['al-crosshair']),
                     damageFlash: getUiClassState('damage-flash', ['al-damage-flash'])
                 },
