@@ -31,6 +31,7 @@ async function loadSharedData() {
       }
     },
     structuredClone,
+    Date,
     Math,
     Number,
     String,
@@ -45,33 +46,21 @@ async function loadSharedData() {
   return context.window.ASCII_LABYRINTH_DATA;
 }
 
-function createLevelProjectFixture() {
-  const level = {
-    id: 'smoke-level',
-    name: 'Smoke Level',
-    width: 10,
-    height: 8,
-    floors: [0, 1],
-    objects: [],
-    triggers: [
-      {
-        id: 'trigger-smoke',
-        type: 'trigger',
-        label: 'Smoke Trigger',
-        x: 2,
-        y: 2,
-        floor: 0,
-        w: 2,
-        h: 2,
-        once: true,
-        effect: { type: 'dialog', dialog: 'smoke ok' }
-      }
-    ],
-    notes: ''
-  };
+function createLevelProjectFixture(schema) {
+  let nextId = 0;
+  const makeId = (prefix) => `${prefix}-fixture-${nextId++}`;
+  const level = schema.createEditorLevel('smoke-level', 'Smoke Level', 10, 8, { makeId });
   const add = (type, x, y, extra = {}) => {
-    level.objects.push({ id: `${type}-${x}-${y}`, type, label: type, x, y, floor: 0, w: 1, h: 1, ...extra });
+    level.objects.push(schema.createEditorObject(type, x, y, 0, extra, { makeId }));
   };
+  level.triggers.push(schema.createEditorObject('trigger', 2, 2, 0, {
+    label: 'Smoke Trigger',
+    triggerId: 'trigger-smoke',
+    w: 2,
+    h: 2,
+    once: true,
+    effect: { type: 'dialog', dialog: 'smoke ok' }
+  }, { makeId }));
 
   for (let x = 0; x < level.width; x += 1) {
     add('wall', x, 0);
@@ -155,6 +144,17 @@ async function main() {
   assert(editorTypeMeta.weapon.default.weaponKind === 'scatter', 'shared weapon meta should keep weapon default');
   assert(editorTypeMeta.terminal.default.interaction.effect.type === 'dialog', 'shared terminal meta should keep dialog interaction');
   assert(schema.createDefaultEffect('heal').healAmount === 20, 'shared default effects should keep heal amount');
+  const editorObject = schema.createEditorObject('weapon', 1, 2, 0, { weaponKind: 'rail' }, { makeId: (prefix) => `${prefix}-fixed` });
+  assert(editorObject.id === 'weapon-fixed', 'shared editor object factory should accept injected ids');
+  assert(editorObject.ammo === 6 && editorObject.weaponKind === 'rail', 'shared editor object factory should merge defaults before overrides');
+  let levelId = 0;
+  const editorLevel = schema.createEditorLevel('upper-smoke', 'Upper Smoke', 12, 9, {
+    upperStart: true,
+    makeId: (prefix) => `${prefix}-level-${levelId++}`
+  });
+  assert(editorLevel.floors.includes(0) && editorLevel.floors.includes(1), 'shared editor level factory should include both floors');
+  assert(editorLevel.objects.some((object) => object.type === 'terminal' && object.message === 'ARCHIVE LINK ONLINE'), 'shared editor level factory should keep upper terminal default');
+  assert(editorLevel.objects.some((object) => object.type === 'wall' && object.floor === 1), 'shared editor level factory should create upper floor walls');
   const sharedPart = schema.createModelPart('p', 'Part', 'box', '#ffffff', '#111111', [0, 1, 0], [0, 0, 0], [1, 1, 1]);
   assert(sharedPart.wire === true && sharedPart.opacity === 1, 'shared part factory should set editor defaults');
   const normalizedPart = schema.normalizeModelPart({ shape: 'missing', color: 'bad', scale: [0, 9, 1] });
@@ -164,7 +164,7 @@ async function main() {
   const defaultModelProject = schema.createDefaultModelProject(['enemy-smoke'], () => createModelProjectFixture(schema).models[0]);
   assert(defaultModelProject.modelSchema === schema.MODEL_RUNTIME_SCHEMA, 'default model project should carry runtime schema marker');
 
-  const runtimeLevel = schema.buildRuntimeLevelFromEditorProject(createLevelProjectFixture(), { floor: 0 });
+  const runtimeLevel = schema.buildRuntimeLevelFromEditorProject(createLevelProjectFixture(schema), { floor: 0 });
   const counts = countTiles(runtimeLevel.map);
   assert(runtimeLevel.source === 'editor-local', 'level fixture should convert to editor-local runtime source');
   assert(runtimeLevel.startCell.x === 1 && runtimeLevel.startCell.y === 1, 'entrance should define runtime start cell');

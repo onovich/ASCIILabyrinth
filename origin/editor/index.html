@@ -854,6 +854,14 @@
       }
 
       function createLevel(id, name, width = 24, height = 16, upperStart = false) {
+        const sharedLevel = SHARED_DATA.createEditorLevel?.(id, name, width, height, {
+          upperStart,
+          typeMeta: TYPE_META,
+          makeId,
+          floors: FLOORS.map((floor) => floor.id)
+        });
+        if (sharedLevel) return sharedLevel;
+
         const level = {
           id,
           name,
@@ -882,6 +890,12 @@
       }
 
       function createObject(type, x, y, floor = currentFloor, extra = {}) {
+        const sharedObject = SHARED_DATA.createEditorObject?.(type, x, y, floor, extra, {
+          typeMeta: TYPE_META,
+          makeId
+        });
+        if (sharedObject) return sharedObject;
+
         const meta = TYPE_META[type];
         const base = structuredClone(meta.default);
         return {
@@ -1214,7 +1228,9 @@
             typeMeta: typeof SHARED_DATA.createEditorTypeMeta === 'function',
             defaultEffect: typeof SHARED_DATA.createDefaultEffect === 'function',
             defaultInteraction: typeof SHARED_DATA.createDefaultInteraction === 'function',
-            paletteOrder: Array.isArray(SHARED_DATA.PALETTE_ORDER)
+            paletteOrder: Array.isArray(SHARED_DATA.PALETTE_ORDER),
+            objectFactory: typeof SHARED_DATA.createEditorObject === 'function',
+            levelFactory: typeof SHARED_DATA.createEditorLevel === 'function'
           },
           levelCount: project.levels.length,
           currentLevelId,
