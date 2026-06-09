@@ -29,7 +29,7 @@ The root page redirects into the runtime so pointer-lock mouse controls work as 
 - Start the local Vite server with npm run dev.<br/>**使用 npm run dev 启动本地 Vite 开发服务。**
 - Create a production build with npm run build.<br/>**使用 npm run build 生成生产构建。**
 - Run the low-cost refactor guard with npm run smoke, or run npm run validate for build plus smoke checks.<br/>**使用 npm run smoke 运行低成本重构守卫，或使用 npm run validate 串联构建与 smoke 检查。**
-- With the dev server running, run npm run visual-smoke to check the runtime, level editor, and model editor DOM markers and write screenshots to .codex-artifacts/visual-smoke/.<br/>**开发服务器运行时，可用 npm run visual-smoke 检查运行时、地编、模型编辑器的 DOM 标记，并把截图写入 .codex-artifacts/visual-smoke/。**
+- Run npm run visual-smoke to reuse or start a local dev server, check the runtime, level editor, and model editor DOM markers, and write screenshots to .codex-artifacts/visual-smoke/.<br/>**使用 npm run visual-smoke 可复用或启动本地开发服务器，检查运行时、地编、模型编辑器的 DOM 标记，并把截图写入 .codex-artifacts/visual-smoke/。**
 - Preview the built site with npm run preview.<br/>**使用 npm run preview 预览构建产物。**
 
 ## Deployment

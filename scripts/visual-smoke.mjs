@@ -7,8 +7,11 @@ await import('./sync-runtime.mjs');
 
 const projectRoot = resolve(import.meta.dirname, '..');
 const baseUrl = normalizeBase(process.env.VISUAL_SMOKE_BASE_URL || 'http://127.0.0.1:5174/ASCIILabyrinth');
+const baseUrlParts = new URL(baseUrl);
 const outDir = resolve(projectRoot, process.env.VISUAL_SMOKE_OUT_DIR || '.codex-artifacts/visual-smoke');
 const chromePath = await findChrome();
+const devServerHost = process.env.VISUAL_SMOKE_DEV_HOST || baseUrlParts.hostname || '127.0.0.1';
+const devServerPort = Number(process.env.VISUAL_SMOKE_DEV_PORT || baseUrlParts.port || 5174);
 
 const pages = [
   {
@@ -92,16 +95,86 @@ function runChrome(args, options = {}) {
   });
 }
 
-async function assertDevServer() {
-  let response;
+async function fetchReady() {
   try {
-    response = await fetch(`${baseUrl}/runtime/index.html?verify=visual-smoke-ready`, { cache: 'no-store' });
+    const response = await fetch(`${baseUrl}/runtime/index.html?verify=visual-smoke-ready`, { cache: 'no-store' });
+    if (!response.ok) return false;
+    const html = await response.text();
+    return html.includes('ASCII 3D FPS') && html.includes('ascii-canvas');
   } catch (error) {
-    throw new Error(`Dev server is not reachable at ${baseUrl}. Start it with: npm run dev -- --host 127.0.0.1 --port 5174`);
+    return false;
   }
-  if (!response.ok) {
-    throw new Error(`Dev server returned ${response.status} for ${baseUrl}/runtime/index.html`);
+}
+
+async function waitForDevServer(timeoutMs = 25000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (await fetchReady()) return true;
+    await new Promise((resolveWait) => setTimeout(resolveWait, 500));
   }
+  return false;
+}
+
+function killProcessTree(child) {
+  return new Promise((resolveKill) => {
+    if (!child?.pid || child.exitCode !== null) {
+      resolveKill();
+      return;
+    }
+
+    if (process.platform === 'win32') {
+      const killer = spawn('taskkill', ['/pid', String(child.pid), '/t', '/f'], { windowsHide: true });
+      killer.on('exit', () => resolveKill());
+      killer.on('error', () => {
+        child.kill('SIGTERM');
+        resolveKill();
+      });
+      return;
+    }
+
+    child.kill('SIGTERM');
+    resolveKill();
+  });
+}
+
+async function ensureDevServer() {
+  if (await fetchReady()) {
+    return async () => {};
+  }
+  if (process.env.VISUAL_SMOKE_START_SERVER === '0') {
+    throw new Error(`Dev server is not reachable at ${baseUrl}. Start it with: npm run dev -- --host ${devServerHost} --port ${devServerPort}`);
+  }
+
+  const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+  const args = ['run', 'dev', '--', '--host', devServerHost, '--port', String(devServerPort), '--strictPort'];
+  const child = process.platform === 'win32'
+    ? spawn('cmd.exe', ['/d', '/s', '/c', [npmCommand, ...args].join(' ')], {
+      cwd: projectRoot,
+      windowsHide: true,
+      stdio: ['ignore', 'pipe', 'pipe']
+    })
+    : spawn(npmCommand, args, {
+      cwd: projectRoot,
+      windowsHide: true,
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+  const logs = [];
+  const keepLog = (chunk) => {
+    logs.push(chunk.toString());
+    if (logs.length > 20) logs.shift();
+  };
+  child.stdout.on('data', keepLog);
+  child.stderr.on('data', keepLog);
+  child.on('error', keepLog);
+
+  if (!(await waitForDevServer())) {
+    await killProcessTree(child);
+    throw new Error(`Dev server did not become ready at ${baseUrl}.\n${logs.join('').trim()}`);
+  }
+
+  return async () => {
+    await killProcessTree(child);
+  };
 }
 
 async function dumpDom(page, profileDir) {
@@ -144,27 +217,31 @@ async function capture(page, profileDir, screenshotPath) {
 }
 
 async function main() {
-  await assertDevServer();
+  const cleanupDevServer = await ensureDevServer();
   await mkdir(outDir, { recursive: true });
   const results = [];
 
-  for (const page of pages) {
-    const profileDir = resolve(outDir, `chrome-profile-${page.name}`);
-    await rm(profileDir, { recursive: true, force: true }).catch(() => {});
-    await mkdir(profileDir, { recursive: true });
-    const dom = await dumpDom(page, profileDir);
-    for (const expected of page.mustContain) {
-      if (!dom.includes(expected)) {
-        throw new Error(`${page.name} DOM is missing expected marker: ${expected}`);
+  try {
+    for (const page of pages) {
+      const profileDir = resolve(outDir, `chrome-profile-${page.name}`);
+      await rm(profileDir, { recursive: true, force: true }).catch(() => {});
+      await mkdir(profileDir, { recursive: true });
+      const dom = await dumpDom(page, profileDir);
+      for (const expected of page.mustContain) {
+        if (!dom.includes(expected)) {
+          throw new Error(`${page.name} DOM is missing expected marker: ${expected}`);
+        }
       }
+      const screenshotPath = resolve(outDir, `${page.name}.png`);
+      const screenshot = await capture(page, profileDir, screenshotPath);
+      results.push({
+        page: page.name,
+        screenshot: screenshotPath,
+        bytes: screenshot.size
+      });
     }
-    const screenshotPath = resolve(outDir, `${page.name}.png`);
-    const screenshot = await capture(page, profileDir, screenshotPath);
-    results.push({
-      page: page.name,
-      screenshot: screenshotPath,
-      bytes: screenshot.size
-    });
+  } finally {
+    await cleanupDevServer();
   }
 
   console.log(`visual smoke ok: ${results.map((item) => `${item.page} ${item.bytes}b`).join(', ')}`);
