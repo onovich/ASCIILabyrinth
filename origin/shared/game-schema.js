@@ -574,6 +574,19 @@
     };
   }
 
+  function mergeRuntimeEnemyProfiles(baseProfiles = [], overrideProfiles = []) {
+    const merged = new Map();
+    baseProfiles.forEach((profile) => {
+      if (profile?.id) merged.set(profile.id, profile);
+    });
+    overrideProfiles.forEach((profile) => {
+      if (profile?.id && Array.isArray(profile.parts) && profile.parts.length) {
+        merged.set(profile.id, profile);
+      }
+    });
+    return [...merged.values()];
+  }
+
   function loadModelProject(storage = window.localStorage) {
     try {
       const raw = storage?.getItem(STORAGE_KEYS.modelProject);
@@ -624,6 +637,7 @@
     normalizeModelPart,
     normalizeModelProject,
     buildRuntimeModelProfilesFromModelProject,
+    mergeRuntimeEnemyProfiles,
     loadModelProject,
     loadRuntimeModelProfilesFromLocalStorage
   });

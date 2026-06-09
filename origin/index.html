@@ -1002,17 +1002,14 @@
 
         const modelProfileBundle = SHARED_DATA.loadRuntimeModelProfilesFromLocalStorage?.() || null;
         const modelEditorEnemyProfiles = modelProfileBundle?.enemyProfiles || [];
-        const activeEnemyProfiles = mergeEnemyProfiles(enemyProfiles, modelEditorEnemyProfiles);
-
-        function mergeEnemyProfiles(baseProfiles, overrideProfiles) {
+        const mergeEnemyProfiles = SHARED_DATA.mergeRuntimeEnemyProfiles || ((baseProfiles = [], overrideProfiles = []) => {
             const merged = new Map(baseProfiles.map((profile) => [profile.id, profile]));
             overrideProfiles.forEach((profile) => {
-                if (profile?.id && Array.isArray(profile.parts) && profile.parts.length) {
-                    merged.set(profile.id, profile);
-                }
+                if (profile?.id && Array.isArray(profile.parts) && profile.parts.length) merged.set(profile.id, profile);
             });
             return [...merged.values()];
-        }
+        });
+        const activeEnemyProfiles = mergeEnemyProfiles(enemyProfiles, modelEditorEnemyProfiles);
 
         function createEnemyGeometry(shape) {
             if (shape === 'sphere') return new THREE.SphereGeometry(0.5, 16, 12);

@@ -203,6 +203,18 @@ async function main() {
   assert(profile.health === 9 && profile.damage === 14 && profile.reward === 222, 'model stats should map to runtime profile');
   assert(Math.abs(profile.parts[0][5][1] - Math.PI / 2) < 0.0001, 'model rotations should convert degrees to radians');
   assert(profile.parts[0][7] === 0.75, 'model opacity should be preserved');
+  const mergedProfiles = schema.mergeRuntimeEnemyProfiles(
+    [
+      { id: 'base-a', health: 1, parts: [['a']] },
+      { id: 'base-b', health: 2, parts: [['b']] }
+    ],
+    [
+      { id: 'base-b', health: 20, parts: [['override']] },
+      { id: 'empty-parts', health: 30, parts: [] }
+    ]
+  );
+  assert(mergedProfiles.length === 2, 'runtime profile merge should ignore invalid overrides');
+  assert(mergedProfiles.find((item) => item.id === 'base-b').health === 20, 'runtime profile merge should let editor models override built-ins');
 
   const staleModels = schema.buildRuntimeModelProfilesFromModelProject({
     ...createModelProjectFixture(schema),
