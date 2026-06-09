@@ -58,6 +58,7 @@ const pages = [
         'partFactory',
         'partNormalizer',
         'pathTools',
+        'clamp',
         'htmlEscapes',
         'projectNormalizer'
       ])],

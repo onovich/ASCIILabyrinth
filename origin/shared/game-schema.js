@@ -137,6 +137,14 @@
     }, {});
   }
 
+  function clamp(value, min, max) {
+    const lower = Math.min(Number(min), Number(max));
+    const upper = Math.max(Number(min), Number(max));
+    const number = Number(value);
+    if (!Number.isFinite(number)) return lower;
+    return Math.max(lower, Math.min(upper, number));
+  }
+
   function escapeHtml(value) {
     return String(value)
       .replaceAll('&', '&amp;')
@@ -649,6 +657,7 @@
     setValueByPath,
     getValueByPath,
     countBy,
+    clamp,
     escapeHtml,
     escapeAttr,
     PALETTE_ORDER,

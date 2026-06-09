@@ -136,6 +136,8 @@ async function main() {
   assert(/^legacy-[a-z0-9]+-[a-z0-9]{5}$/.test(schema.createEditorId('legacy')), 'shared editor id alias should stay compatible');
   assert(schema.countBy([{ type: 'a' }, { type: 'a' }, { type: 'b' }], 'type').a === 2, 'shared countBy should count object keys');
   assert(schema.countBy([{ kind: '' }, {}], (item) => item.kind || 'unknown').unknown === 2, 'shared countBy should support derived keys');
+  assert(schema.clamp(7, 0, 5) === 5 && schema.clamp(-2, 0, 5) === 0, 'shared clamp should bound values');
+  assert(schema.clamp(3, 5, 0) === 3 && schema.clamp('bad', 2, 8) === 2, 'shared clamp should normalize reversed limits and invalid values');
   assert(schema.countTiles(['102', '200'])[schema.TILE.AMMO] === 2, 'shared tile counter should count runtime map symbols');
   assert(schema.isValidRuntimeLevel({ map: ['00', '11'] }), 'shared runtime level validator should accept rectangular string maps');
   assert(!schema.isValidRuntimeLevel({ map: ['00', '1'] }), 'shared runtime level validator should reject ragged maps');

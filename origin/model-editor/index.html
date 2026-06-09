@@ -505,6 +505,7 @@
         if (key) acc[key] = (acc[key] || 0) + 1;
         return acc;
       }, {}));
+      const clamp = SHARED_DATA.clamp || ((value, min, max) => Math.max(min, Math.min(max, value)));
       const createSharedId = SHARED_DATA.createId || SHARED_DATA.createEditorId || ((prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`);
       const degreesToRadians = SHARED_DATA.degreesToRadians || ((values) => (Array.isArray(values) ? values : [0, 0, 0]).map((value) => (Number(value) || 0) * Math.PI / 180));
 
@@ -1242,6 +1243,7 @@
             partFactory: typeof SHARED_DATA.createModelPart === 'function',
             partNormalizer: typeof SHARED_DATA.normalizeModelPart === 'function',
             pathTools: typeof SHARED_DATA.setValueByPath === 'function',
+            clamp: typeof SHARED_DATA.clamp === 'function',
             htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeModelProject === 'function'
           },
