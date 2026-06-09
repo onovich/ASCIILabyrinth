@@ -28,6 +28,7 @@ The root page redirects into the runtime so pointer-lock mouse controls work as 
 - Install dependencies with npm install.<br/>**使用 npm install 安装依赖。**
 - Start the local Vite server with npm run dev.<br/>**使用 npm run dev 启动本地 Vite 开发服务。**
 - Create a production build with npm run build.<br/>**使用 npm run build 生成生产构建。**
+- Run the low-cost refactor guard with npm run smoke, or run npm run validate for build plus smoke checks.<br/>**使用 npm run smoke 运行低成本重构守卫，或使用 npm run validate 串联构建与 smoke 检查。**
 - Preview the built site with npm run preview.<br/>**使用 npm run preview 预览构建产物。**
 
 ## Deployment

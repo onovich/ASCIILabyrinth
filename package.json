@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "node scripts/sync-runtime.mjs && vite",
     "build": "node scripts/sync-runtime.mjs && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "smoke": "node scripts/smoke.mjs",
+    "validate": "npm run build && npm run smoke"
   },
   "dependencies": {
     "react": "^19.2.7",
