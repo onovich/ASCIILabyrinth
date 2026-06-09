@@ -751,6 +751,16 @@
         if (key) acc[key] = (acc[key] || 0) + 1;
         return acc;
       }, {}));
+      const allLevelObjects = SHARED_DATA.allLevelObjects || ((level) => [...(level?.objects || []), ...(level?.triggers || [])]);
+      const objectFloorSpanOf = SHARED_DATA.objectFloorSpan || ((object) => Math.max(1, Number(object?.floorSpan) || 1));
+      const objectOnLevelFloor = SHARED_DATA.objectOnFloor || ((object, floorId) => {
+        if (!object) return false;
+        if (object.type === 'ramp') {
+          return object.floorFrom === floorId || object.floorTo === floorId || object.floor === floorId;
+        }
+        const baseFloor = Number(object.floor) || 0;
+        return floorId >= baseFloor && floorId < baseFloor + objectFloorSpanOf(object);
+      });
 
       const ENEMY_KIND_OPTIONS = SHARED_DATA.ENEMY_KIND_OPTIONS || [
         ['longlimb', '走廊瘦长人'],
@@ -947,7 +957,7 @@
       }
 
       function allObjects(level = getLevel()) {
-        return [...level.objects, ...level.triggers];
+        return allLevelObjects(level);
       }
 
       function findObject(id) {
@@ -967,16 +977,8 @@
         return FLOORS.some((floor) => floor.id === floorId);
       }
 
-      function objectFloorSpan(object) {
-        return Math.max(1, Number(object.floorSpan) || 1);
-      }
-
       function objectOnFloor(object, floorId = currentFloor) {
-        if (object.type === 'ramp') {
-          return object.floorFrom === floorId || object.floorTo === floorId || object.floor === floorId;
-        }
-        const baseFloor = Number(object.floor) || 0;
-        return floorId >= baseFloor && floorId < baseFloor + objectFloorSpan(object);
+        return objectOnLevelFloor(object, floorId);
       }
 
       function visibleOnFloor(object) {
