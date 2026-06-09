@@ -111,6 +111,10 @@
     weapon: TILE.WEAPON
   });
 
+  function getFloorLabel(floorId, floors = FLOORS) {
+    return floors.find((floor) => floor.id === floorId)?.label || String(floorId);
+  }
+
   function setValueByPath(object, path, value) {
     const parts = String(path).split('.');
     let cursor = object;
@@ -672,6 +676,7 @@
     MODEL_TEMPLATE_IDS,
     WEAPON_DEFS,
     OBJECT_TO_TILE,
+    getFloorLabel,
     setValueByPath,
     getValueByPath,
     countBy,

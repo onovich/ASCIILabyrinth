@@ -45,6 +45,7 @@ const pages = [
         'optionHtml',
         'parseJson',
         'jsonExport',
+        'floorLabels',
         'htmlEscapes',
         'projectNormalizer'
       ])],

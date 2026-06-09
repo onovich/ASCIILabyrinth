@@ -766,6 +766,7 @@
         const baseFloor = Number(object.floor) || 0;
         return floorId >= baseFloor && floorId < baseFloor + objectFloorSpanOf(object);
       });
+      const getFloorLabel = SHARED_DATA.getFloorLabel || ((floorId, floors = FLOORS) => floors.find((floor) => floor.id === floorId)?.label || String(floorId));
       const createSharedId = SHARED_DATA.createId || SHARED_DATA.createEditorId || ((prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`);
 
       const ENEMY_KIND_OPTIONS = SHARED_DATA.ENEMY_KIND_OPTIONS || [
@@ -971,7 +972,7 @@
       }
 
       function floorLabel(floorId) {
-        return FLOORS.find((floor) => floor.id === floorId)?.label || String(floorId);
+        return getFloorLabel(floorId, FLOORS);
       }
 
       function adjacentFloorId(direction) {
@@ -1265,6 +1266,7 @@
             optionHtml: typeof SHARED_DATA.optionHtml === 'function',
             parseJson: typeof SHARED_DATA.parseJson === 'function',
             jsonExport: typeof SHARED_DATA.stringifyJson === 'function' && typeof SHARED_DATA.createJsonExportName === 'function',
+            floorLabels: typeof SHARED_DATA.getFloorLabel === 'function',
             htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeEditorProject === 'function'
           },
@@ -1658,7 +1660,7 @@
       function showObjectTooltip(object, event) {
         const meta = TYPE_META[object.type];
         if (!dom.objectTooltip || !meta) return;
-        const floorLabel = FLOORS.find((floor) => floor.id === (object.floor ?? currentFloor))?.label || object.floor;
+        const floorLabel = getFloorLabel(object.floor ?? currentFloor, FLOORS);
         dom.objectTooltip.innerHTML = `
           <strong>${escapeHtml(objectDisplayName(object))}</strong>
           <span>${escapeHtml(meta.name)} · ${escapeHtml(object.type)}</span>
