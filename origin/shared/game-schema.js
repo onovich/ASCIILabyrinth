@@ -158,6 +158,11 @@
     return escapeHtml(value);
   }
 
+  function optionHtml(value, label, selected) {
+    const selectedAttr = String(value) === String(selected) ? ' selected' : '';
+    return `<option value="${escapeAttr(value)}"${selectedAttr}>${escapeHtml(label)}</option>`;
+  }
+
   const PALETTE_ORDER = Object.freeze([
     'select',
     'wall',
@@ -660,6 +665,7 @@
     clamp,
     escapeHtml,
     escapeAttr,
+    optionHtml,
     PALETTE_ORDER,
     createDefaultEffect,
     createDefaultInteraction,

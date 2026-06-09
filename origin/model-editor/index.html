@@ -500,6 +500,7 @@
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;'));
       const escapeAttr = SHARED_DATA.escapeAttr || escapeHtml;
+      const optionHtml = SHARED_DATA.optionHtml || ((value, label, selected) => `<option value="${escapeAttr(value)}" ${String(value) === String(selected) ? 'selected' : ''}>${escapeHtml(label)}</option>`);
       const countBy = SHARED_DATA.countBy || ((items, getKey) => (Array.isArray(items) ? items : []).reduce((acc, item, index) => {
         const key = typeof getKey === 'function' ? getKey(item, index) : item?.[getKey];
         if (key) acc[key] = (acc[key] || 0) + 1;
@@ -930,9 +931,9 @@
       function renderTemplates() {
         dom.templateSelect.innerHTML = TEMPLATE_IDS.map((id) => {
           const model = createTemplateModel(id);
-          return `<option value="${escapeAttr(id)}">${escapeHtml(model.name)}</option>`;
+          return option(id, model.name);
         }).join('');
-        dom.shapeSelect.innerHTML = SHAPES.map((shape) => `<option value="${shape}">${shape}</option>`).join('');
+        dom.shapeSelect.innerHTML = SHAPES.map((shape) => option(shape, shape)).join('');
       }
 
       function renderLists() {
@@ -1038,7 +1039,7 @@
       }
 
       function option(value, label, selected) {
-        return `<option value="${escapeAttr(value)}" ${String(value) === String(selected) ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+        return optionHtml(value, label, selected);
       }
 
       function updateModelField(target) {
@@ -1244,6 +1245,7 @@
             partNormalizer: typeof SHARED_DATA.normalizeModelPart === 'function',
             pathTools: typeof SHARED_DATA.setValueByPath === 'function',
             clamp: typeof SHARED_DATA.clamp === 'function',
+            optionHtml: typeof SHARED_DATA.optionHtml === 'function',
             htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeModelProject === 'function'
           },

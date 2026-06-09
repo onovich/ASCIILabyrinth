@@ -42,6 +42,7 @@ const pages = [
         'levelFactory',
         'pathTools',
         'clamp',
+        'optionHtml',
         'htmlEscapes',
         'projectNormalizer'
       ])],
@@ -61,6 +62,7 @@ const pages = [
         'partNormalizer',
         'pathTools',
         'clamp',
+        'optionHtml',
         'htmlEscapes',
         'projectNormalizer'
       ])],

@@ -746,6 +746,7 @@
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;'));
       const escapeAttr = SHARED_DATA.escapeAttr || escapeHtml;
+      const optionHtml = SHARED_DATA.optionHtml || ((value, label, selected) => `<option value="${escapeAttr(value)}" ${String(value) === String(selected) ? 'selected' : ''}>${escapeHtml(label)}</option>`);
       const countBy = SHARED_DATA.countBy || ((items, getKey) => (Array.isArray(items) ? items : []).reduce((acc, item, index) => {
         const key = typeof getKey === 'function' ? getKey(item, index) : item?.[getKey];
         if (key) acc[key] = (acc[key] || 0) + 1;
@@ -1258,6 +1259,7 @@
             levelFactory: typeof SHARED_DATA.createEditorLevel === 'function',
             pathTools: typeof SHARED_DATA.setValueByPath === 'function' && typeof SHARED_DATA.getValueByPath === 'function',
             clamp: typeof SHARED_DATA.clamp === 'function',
+            optionHtml: typeof SHARED_DATA.optionHtml === 'function',
             htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeEditorProject === 'function'
           },
@@ -1294,7 +1296,7 @@
 
       function renderLevelControls() {
         dom.levelSelect.innerHTML = project.levels
-          .map((level) => `<option value="${escapeHtml(level.id)}">${escapeHtml(level.name)}</option>`)
+          .map((level) => option(level.id, level.name))
           .join('');
         dom.levelSelect.value = currentLevelId;
 
@@ -1579,7 +1581,7 @@
       }
 
       function option(value, label, selected) {
-        return `<option value="${escapeAttr(value)}" ${String(value) === String(selected) ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+        return optionHtml(value, label, selected);
       }
 
       function canvasPoint(event) {
