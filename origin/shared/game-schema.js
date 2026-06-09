@@ -301,6 +301,14 @@
     return project.levels.length ? project : null;
   }
 
+  function normalizeEditorProject(project, options = {}) {
+    const normalized = normalizeProject(project);
+    if (!normalized) return null;
+    normalized.settings ||= {};
+    normalized.settings.cellSize ||= options.cellSize || 32;
+    return normalized;
+  }
+
   function getCellKey(x, y) {
     return `${x},${y}`;
   }
@@ -385,7 +393,7 @@
     try {
       const raw = storage?.getItem(STORAGE_KEYS.editorProject);
       if (!raw) return null;
-      return normalizeProject(JSON.parse(raw));
+      return normalizeEditorProject(JSON.parse(raw));
     } catch {
       return null;
     }
@@ -474,21 +482,40 @@
     };
   }
 
-  function normalizeModelProject(project) {
+  function normalizeModelProject(project, options = {}) {
     if (!project || typeof project !== 'object') return null;
     if (!Array.isArray(project.models) || !project.models.length) return null;
+    const createId = typeof options.createId === 'function' ? options.createId : null;
+    const createPartId = typeof options.createPartId === 'function' ? options.createPartId : null;
+    const createFallbackPart = typeof options.createFallbackPart === 'function' ? options.createFallbackPart : null;
     project.version ||= 1;
+    if (options.modelSchema && !project.modelSchema) project.modelSchema = options.modelSchema;
     project.models = project.models
       .filter((model) => model && typeof model === 'object')
-      .map((model) => ({
-        ...model,
-        id: model.id || 'model',
-        name: model.name || model.id || 'model',
-        category: model.category || 'enemy',
-        role: model.role || 'custom',
-        stats: model.stats || {},
-        parts: Array.isArray(model.parts) ? model.parts.map(normalizeModelPart) : []
-      }))
+      .map((model) => {
+        let parts = Array.isArray(model.parts)
+          ? model.parts.map((part) => {
+            const normalizedPart = normalizeModelPart(part);
+            if ((!part?.id || normalizedPart.id === 'part') && createPartId) {
+              normalizedPart.id = createPartId('part');
+            }
+            return normalizedPart;
+          })
+          : [];
+        if (!parts.length && createFallbackPart) {
+          parts = [normalizeModelPart(createFallbackPart(model))];
+        }
+        const id = model.id || createId?.('model') || 'model';
+        return {
+          ...model,
+          id,
+          name: model.name || id,
+          category: model.category || 'enemy',
+          role: model.role || 'custom',
+          stats: model.stats || {},
+          parts
+        };
+      })
       .filter((model) => model.parts.length);
     return project.models.length ? project : null;
   }
@@ -590,6 +617,7 @@
     objectOnFloor,
     allLevelObjects,
     normalizeProject,
+    normalizeEditorProject,
     buildRuntimeLevelFromEditorProject,
     loadEditorProject,
     loadRuntimeLevelFromLocalStorage,

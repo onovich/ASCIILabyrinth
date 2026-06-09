@@ -1174,8 +1174,7 @@
 
       function loadFromJson(raw, message) {
         try {
-          const next = JSON.parse(raw);
-          validateProject(next);
+          const next = validateProject(JSON.parse(raw));
           project = next;
           selectedModelId = project.models[0].id;
           selectedPartId = project.models[0].parts[0]?.id || null;
@@ -1187,6 +1186,14 @@
       }
 
       function validateProject(data) {
+        const normalized = SHARED_DATA.normalizeModelProject?.(data, {
+          modelSchema: SHARED_DATA.MODEL_RUNTIME_SCHEMA || 'indoor-horror-v1',
+          createId: makeId,
+          createPartId: makeId,
+          createFallbackPart: () => part('core', 'Core', 'box', '#d8d0c0', '#222222', [0, 0.5, 0], [0, 0, 0], [0.5, 0.5, 0.5])
+        });
+        if (normalized) return normalized;
+
         if (!data || typeof data !== 'object') throw new Error('invalid project');
         if (!Array.isArray(data.models) || data.models.length === 0) throw new Error('missing models');
         data.version ||= 1;
@@ -1199,6 +1206,7 @@
           if (!Array.isArray(model.parts) || model.parts.length === 0) model.parts = [part('core', '核心', 'box', '#d8d0c0', '#222222', [0, 0.5, 0], [0, 0, 0], [0.5, 0.5, 0.5])];
           model.parts.forEach(normalizePart);
         });
+        return data;
       }
 
       function exportProject() {
@@ -1231,7 +1239,8 @@
             partFactory: typeof SHARED_DATA.createModelPart === 'function',
             partNormalizer: typeof SHARED_DATA.normalizeModelPart === 'function',
             pathTools: typeof SHARED_DATA.setValueByPath === 'function',
-            htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function'
+            htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
+            projectNormalizer: typeof SHARED_DATA.normalizeModelProject === 'function'
           },
           modelCount: project.models.length,
           selectedModelId,

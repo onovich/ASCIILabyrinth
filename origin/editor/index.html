@@ -1007,7 +1007,7 @@
 
       function restoreUndoSnapshot(snapshot) {
         project = structuredClone(snapshot.project);
-        validateProject(project);
+        project = validateProject(project);
         currentLevelId = project.levels.some((level) => level.id === snapshot.currentLevelId)
           ? snapshot.currentLevelId
           : project.levels[0].id;
@@ -1251,7 +1251,8 @@
             objectFactory: typeof SHARED_DATA.createEditorObject === 'function',
             levelFactory: typeof SHARED_DATA.createEditorLevel === 'function',
             pathTools: typeof SHARED_DATA.setValueByPath === 'function' && typeof SHARED_DATA.getValueByPath === 'function',
-            htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function'
+            htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
+            projectNormalizer: typeof SHARED_DATA.normalizeEditorProject === 'function'
           },
           levelCount: project.levels.length,
           currentLevelId,
@@ -1786,8 +1787,7 @@
 
       function loadFromJson(raw, message) {
         try {
-          const next = JSON.parse(raw);
-          validateProject(next);
+          const next = validateProject(JSON.parse(raw));
           recordUndo('读取项目');
           project = next;
           currentLevelId = project.levels[0].id;
@@ -1803,6 +1803,9 @@
       }
 
       function validateProject(data) {
+        const normalized = SHARED_DATA.normalizeEditorProject?.(data, { cellSize: CELL_SIZE });
+        if (normalized) return normalized;
+
         if (!data || typeof data !== 'object') throw new Error('invalid data');
         if (!Array.isArray(data.levels) || !data.levels.length) throw new Error('missing levels');
         for (const level of data.levels) {
@@ -1815,6 +1818,8 @@
         }
         data.version ||= 1;
         data.settings ||= { cellSize: CELL_SIZE };
+        data.settings.cellSize ||= CELL_SIZE;
+        return data;
       }
 
       function exportProject() {
