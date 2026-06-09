@@ -1000,6 +1000,20 @@
             }
         ];
 
+        const modelProfileBundle = SHARED_DATA.loadRuntimeModelProfilesFromLocalStorage?.() || null;
+        const modelEditorEnemyProfiles = modelProfileBundle?.enemyProfiles || [];
+        const activeEnemyProfiles = mergeEnemyProfiles(enemyProfiles, modelEditorEnemyProfiles);
+
+        function mergeEnemyProfiles(baseProfiles, overrideProfiles) {
+            const merged = new Map(baseProfiles.map((profile) => [profile.id, profile]));
+            overrideProfiles.forEach((profile) => {
+                if (profile?.id && Array.isArray(profile.parts) && profile.parts.length) {
+                    merged.set(profile.id, profile);
+                }
+            });
+            return [...merged.values()];
+        }
+
         function createEnemyGeometry(shape) {
             if (shape === 'sphere') return new THREE.SphereGeometry(0.5, 16, 12);
             if (shape === 'cylinder') return new THREE.CylinderGeometry(0.5, 0.5, 1, 16);
@@ -1012,10 +1026,17 @@
         }
 
         function createEnemyPart(part) {
-            const [, shape, color, emissive, position, rotation, scale] = part;
+            const [, shape, color, emissive, position, rotation, scale, opacity = 1] = part;
             const mesh = new THREE.Mesh(
                 createEnemyGeometry(shape),
-                new THREE.MeshStandardMaterial({ color, emissive, roughness: 0.58, metalness: shape === 'torus' ? 0.25 : 0.05 })
+                new THREE.MeshStandardMaterial({
+                    color,
+                    emissive,
+                    roughness: 0.58,
+                    metalness: shape === 'torus' ? 0.25 : 0.05,
+                    transparent: opacity < 1,
+                    opacity
+                })
             );
             mesh.position.set(...position);
             mesh.rotation.set(...rotation);
@@ -1047,8 +1068,8 @@
 
         function spawnEnemy(x, z, config = {}) {
             const requestedKind = typeof config === 'string' ? config : config?.enemyKind;
-            const profile = enemyProfiles.find((enemy) => enemy.id === requestedKind)
-                || enemyProfiles[Math.floor(Math.random() * enemyProfiles.length)];
+            const profile = activeEnemyProfiles.find((enemy) => enemy.id === requestedKind)
+                || activeEnemyProfiles[Math.floor(Math.random() * activeEnemyProfiles.length)];
             const enemyGroup = buildEnemyModel(profile);
             enemyGroup.position.set(x, 0, z);
             scene.add(enemyGroup);
@@ -1057,6 +1078,9 @@
                 kind: profile.id,
                 name: profile.name,
                 health: profile.health,
+                damage: profile.damage || 10,
+                reward: profile.reward || 100,
+                source: profile.source || 'built-in',
                 active: true,
                 speed: profile.speed + Math.random() * 0.12,
                 flashTimer: 0,
@@ -1147,7 +1171,7 @@
         }
 
         function takeDamage(sourceEnemy = null) {
-            gameState.health = Math.max(0, gameState.health - 10);
+            gameState.health = Math.max(0, gameState.health - (sourceEnemy?.damage || 10));
             playSfx('damage');
             
             const flash = document.getElementById('damage-flash');
@@ -1643,9 +1667,9 @@
                             if (enemy.health <= 0) {
                                 enemy.active = false;
                                 scene.remove(enemy.group);
-                                gameState.score += 100;
+                                gameState.score += enemy.reward || 100;
                                 playSfx('enemyDown');
-                                pushLog(`击败敌人：${enemy.name || '未知敌人'}。+100 分。`);
+                                pushLog(`击败敌人：${enemy.name || '未知敌人'}。+${enemy.reward || 100} 分。`);
                                 
                                 // 触发击杀特效：相机震动 + 爆炸粒子与强光
                                 cameraShake = 0.5; 
@@ -1777,6 +1801,12 @@
                     floor: runtimeLevel.floor,
                     startCell: runtimeLevel.startCell,
                     triggerCount: runtimeLevel.triggers?.length || 0
+                },
+                runtimeModels: {
+                    source: modelProfileBundle?.source || 'built-in',
+                    modelEditorEnemyCount: modelEditorEnemyProfiles.length,
+                    activeEnemyCount: activeEnemyProfiles.length,
+                    itemModelCount: modelProfileBundle?.itemModels?.length || 0
                 },
                 levelSize: { rows: levelMap.length, cols: levelMap[0].length },
                 tileCounts: levelMap.join('').split('').reduce((acc, ch) => {

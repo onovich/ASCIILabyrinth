@@ -522,6 +522,7 @@
       function createDefaultProject() {
         return {
           version: 1,
+          modelSchema: SHARED_DATA.MODEL_RUNTIME_SCHEMA || 'indoor-horror-v1',
           updatedAt: new Date().toISOString(),
           models: TEMPLATE_IDS.map((id) => createTemplateModel(id))
         };

@@ -17,6 +17,8 @@
     modelProject: 'ascii-labyrinth-model-editor-v1'
   });
 
+  const MODEL_RUNTIME_SCHEMA = 'indoor-horror-v1';
+
   const FLOORS = Object.freeze([
     Object.freeze({ id: 0, label: 'B1' }),
     Object.freeze({ id: 1, label: '1F' })
@@ -243,9 +245,144 @@
     return buildRuntimeLevelFromEditorProject(project, options);
   }
 
+  function normalizeVector(value, fallback) {
+    if (!Array.isArray(value)) return [...fallback];
+    return [0, 1, 2].map((index) => (Number.isFinite(Number(value[index])) ? Number(value[index]) : fallback[index]));
+  }
+
+  function normalizeHex(value, fallback = '#000000') {
+    return /^#[0-9a-f]{6}$/i.test(String(value)) ? String(value) : fallback;
+  }
+
+  function hexToNumber(value, fallback = 0x000000) {
+    const normalized = normalizeHex(value, '');
+    if (!normalized) return fallback;
+    return Number.parseInt(normalized.slice(1), 16);
+  }
+
+  function degreesToRadians(values) {
+    return normalizeVector(values, [0, 0, 0]).map((value) => (value * Math.PI) / 180);
+  }
+
+  function normalizeModelPart(part) {
+    const fallback = {
+      id: 'part',
+      name: 'part',
+      shape: 'box',
+      color: '#d8d0c0',
+      emissive: '#000000',
+      position: [0, 0.5, 0],
+      rotation: [0, 0, 0],
+      scale: [0.4, 0.4, 0.4],
+      opacity: 1
+    };
+    const shape = MODEL_SHAPES.includes(part?.shape) ? part.shape : fallback.shape;
+    return {
+      id: part?.id || fallback.id,
+      name: part?.name || part?.id || fallback.name,
+      shape,
+      color: normalizeHex(part?.color, fallback.color),
+      emissive: normalizeHex(part?.emissive, fallback.emissive),
+      position: normalizeVector(part?.position, fallback.position),
+      rotation: normalizeVector(part?.rotation, fallback.rotation),
+      scale: normalizeVector(part?.scale, fallback.scale).map((value) => Math.max(0.03, Math.min(4, value))),
+      opacity: Math.max(0.1, Math.min(1, Number(part?.opacity ?? fallback.opacity)))
+    };
+  }
+
+  function normalizeModelProject(project) {
+    if (!project || typeof project !== 'object') return null;
+    if (!Array.isArray(project.models) || !project.models.length) return null;
+    project.version ||= 1;
+    project.models = project.models
+      .filter((model) => model && typeof model === 'object')
+      .map((model) => ({
+        ...model,
+        id: model.id || 'model',
+        name: model.name || model.id || 'model',
+        category: model.category || 'enemy',
+        role: model.role || 'custom',
+        stats: model.stats || {},
+        parts: Array.isArray(model.parts) ? model.parts.map(normalizeModelPart) : []
+      }))
+      .filter((model) => model.parts.length);
+    return project.models.length ? project : null;
+  }
+
+  function modelToRuntimeProfile(model) {
+    const stats = model.stats || {};
+    const firstPart = model.parts[0];
+    return {
+      id: getRuntimeModelId(model),
+      name: model.name,
+      role: model.role || 'custom',
+      source: 'model-editor',
+      health: Math.max(1, Number(stats.hp) || 3),
+      damage: Math.max(1, Number(stats.damage) || 10),
+      speed: Math.max(0.1, Number(stats.speed) || 0.75),
+      reward: Math.max(0, Number(stats.reward) || 100),
+      light: hexToNumber(firstPart?.emissive !== '#000000' ? firstPart?.emissive : firstPart?.color, 0xd8d0b8),
+      parts: model.parts.map((part) => [
+        part.id,
+        part.shape,
+        hexToNumber(part.color, 0xd8d0c0),
+        hexToNumber(part.emissive, 0x000000),
+        part.position,
+        degreesToRadians(part.rotation),
+        part.scale,
+        part.opacity
+      ])
+    };
+  }
+
+  function getRuntimeModelId(model) {
+    if (model.category === 'enemy' && String(model.id).startsWith('enemy-')) {
+      return String(model.id).slice('enemy-'.length);
+    }
+    if (model.category === 'item' && String(model.id).startsWith('item-')) {
+      return String(model.id).slice('item-'.length);
+    }
+    return model.id;
+  }
+
+  function buildRuntimeModelProfilesFromModelProject(project) {
+    const normalized = normalizeModelProject(structuredClone(project));
+    if (!normalized) return null;
+    if (normalized.modelSchema !== MODEL_RUNTIME_SCHEMA) return null;
+    const enemyProfiles = normalized.models
+      .filter((model) => model.category === 'enemy')
+      .map(modelToRuntimeProfile);
+    const itemModels = normalized.models
+      .filter((model) => model.category === 'item')
+      .map(modelToRuntimeProfile);
+    return {
+      source: 'model-local',
+      projectVersion: normalized.version,
+      enemyProfiles,
+      itemModels
+    };
+  }
+
+  function loadModelProject(storage = window.localStorage) {
+    try {
+      const raw = storage?.getItem(STORAGE_KEYS.modelProject);
+      if (!raw) return null;
+      return normalizeModelProject(JSON.parse(raw));
+    } catch {
+      return null;
+    }
+  }
+
+  function loadRuntimeModelProfilesFromLocalStorage(options = {}) {
+    const project = loadModelProject(options.storage || window.localStorage);
+    if (!project) return null;
+    return buildRuntimeModelProfilesFromModelProject(project);
+  }
+
   window.ASCII_LABYRINTH_DATA = Object.freeze({
     TILE,
     STORAGE_KEYS,
+    MODEL_RUNTIME_SCHEMA,
     FLOORS,
     ENEMY_KIND_OPTIONS,
     MODEL_SHAPES,
@@ -258,6 +395,10 @@
     normalizeProject,
     buildRuntimeLevelFromEditorProject,
     loadEditorProject,
-    loadRuntimeLevelFromLocalStorage
+    loadRuntimeLevelFromLocalStorage,
+    normalizeModelProject,
+    buildRuntimeModelProfilesFromModelProject,
+    loadModelProject,
+    loadRuntimeModelProfilesFromLocalStorage
   });
 })();

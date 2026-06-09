@@ -19,6 +19,7 @@ The root page redirects into the runtime so pointer-lock mouse controls work as 
 
 - origin/index.html is the authoritative runtime source for gameplay, rendering, controls, HUD, and objective flow.<br/>**origin/index.html 是玩法、渲染、控制、HUD 和目标流程的权威运行时来源。**
 - origin/shared/game-schema.js defines shared editor/model/runtime contracts and converts saved editor projects into runtime tile maps.<br/>**origin/shared/game-schema.js 定义地编、模型编辑器与运行时共享的契约，并把地编保存的项目转换为运行时 tile map。**
+- Model editor projects marked with the current runtime model schema can be converted into runtime enemy profiles; stale unmarked local model saves are ignored by the game.<br/>**带有当前运行时模型 schema 标记的模型编辑器项目可以转换为运行时敌人配置；未标记的旧本地模型存档会被游戏忽略。**
 - scripts/sync-runtime.mjs copies the runtime and audio assets into public/runtime before dev and production builds.<br/>**scripts/sync-runtime.mjs 会在开发和生产构建前把运行时与音频资源复制到 public/runtime。**
 - index.html is intentionally tiny: it redirects to runtime/index.html so the game runs as the top-level page instead of inside an iframe.<br/>**index.html 有意保持很小：它会跳转到 runtime/index.html，让游戏作为顶层页面运行，而不是放在 iframe 中。**
 
