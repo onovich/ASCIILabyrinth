@@ -538,7 +538,7 @@
         exit: { group: '场景', name: '出口', icon: 'EX', color: '#50d6cf', default: { w: 1, h: 1, exitId: 'exit-a', targetLevelId: '', targetEntranceId: '' } },
         key: { group: '物品', name: '钥匙', icon: 'K', color: '#f1d36d', default: { w: 1, h: 1, keyId: 'key-a', boundDoorId: 'door-a' } },
         terminal: { group: '物品', name: '终端', icon: 'T', color: '#66d99c', default: { w: 1, h: 1, message: 'EXIT CODE :: 3142', interaction: defaultInteraction('dialog') } },
-        enemy: { group: '单位', name: '敌人', icon: 'E', color: '#e06f6b', default: { w: 1, h: 1, enemyKind: 'scout', patrol: 'idle' } },
+        enemy: { group: '单位', name: '敌人', icon: 'E', color: '#e06f6b', default: { w: 1, h: 1, enemyKind: 'longlimb', patrol: 'idle' } },
         npc: { group: '单位', name: 'NPC', icon: 'N', color: '#c6c0a5', default: { w: 1, h: 1, npcId: 'npc-a', interaction: defaultInteraction('dialog') } },
         ammo: { group: '补给', name: '弹药', icon: 'A', color: '#71c7ff', default: { w: 1, h: 1, amount: 15 } },
         medkit: { group: '补给', name: '医疗包', icon: '+', color: '#72d47e', default: { w: 1, h: 1, amount: 30 } },
@@ -566,14 +566,14 @@
       ];
 
       const ENEMY_KIND_OPTIONS = [
-        ['scout', '棱镜侦察体'],
-        ['brute', '熔核冲锋兽'],
-        ['spine', '裂脊潜伏体'],
-        ['warden', '幽环守望者'],
-        ['crawler', '蛛行切割者'],
-        ['spore', '孢群增殖体'],
-        ['screamer', '尖啸信标体'],
-        ['boss', '深层门卫核心']
+        ['longlimb', '走廊瘦长人'],
+        ['orderly', '无脸护理员'],
+        ['inverted', '倒行爬行者'],
+        ['splitjaw', '裂颌病患'],
+        ['cultist', '触须信徒'],
+        ['watcher', '门缝窥视者'],
+        ['stitched', '缝合巨人'],
+        ['priest', '深井祭司']
       ];
 
       const dom = {
@@ -671,8 +671,8 @@
         add('ammo', 5, 8, 0);
         add('ammo', 16, 11, 0);
         add('medkit', 10, 12, 0);
-        add('enemy', 12, 3, 0, { label: '侦察体', enemyKind: 'scout' });
-        add('enemy', 18, 7, 0, { label: '冲锋兽', enemyKind: 'brute' });
+        add('enemy', 12, 3, 0, { label: '走廊瘦长人', enemyKind: 'longlimb' });
+        add('enemy', 18, 7, 0, { label: '无脸护理员', enemyKind: 'orderly' });
         add('npc', 3, 12, 0, {
           label: '幸存者',
           npcId: 'survivor-a',
@@ -699,7 +699,7 @@
         for (let y = 3; y <= 7; y++) add('wall', 13, y, 1);
         add('entrance', 11, 7, 1, { label: '上层入口', entranceId: 'entry-ramp' });
         add('ammo', 10, 4, 1);
-        add('enemy', 12, 6, 1, { label: '守望者', enemyKind: 'warden' });
+        add('enemy', 12, 6, 1, { label: '门缝窥视者', enemyKind: 'watcher' });
         return level;
       }
 
