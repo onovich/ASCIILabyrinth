@@ -504,6 +504,11 @@
       const parseJson = SHARED_DATA.parseJson || JSON.parse;
       const stringifyJson = SHARED_DATA.stringifyJson || ((value) => JSON.stringify(value, null, 2));
       const createJsonExportName = SHARED_DATA.createJsonExportName || ((prefix) => `${prefix}-${new Date().toISOString().slice(0, 10)}.json`);
+      const toIsoTimestamp = SHARED_DATA.toIsoTimestamp || ((date = new Date()) => (date instanceof Date ? date : new Date(date)).toISOString());
+      const touchSharedProject = SHARED_DATA.touchProject || ((target) => {
+        if (target && typeof target === 'object') target.updatedAt = toIsoTimestamp();
+        return target;
+      });
       const countBy = SHARED_DATA.countBy || ((items, getKey) => (Array.isArray(items) ? items : []).reduce((acc, item, index) => {
         const key = typeof getKey === 'function' ? getKey(item, index) : item?.[getKey];
         if (key) acc[key] = (acc[key] || 0) + 1;
@@ -553,7 +558,7 @@
         return SHARED_DATA.createDefaultModelProject?.(TEMPLATE_IDS, createTemplateModel) || {
           version: 1,
           modelSchema: SHARED_DATA.MODEL_RUNTIME_SCHEMA || 'indoor-horror-v1',
-          updatedAt: new Date().toISOString(),
+          updatedAt: toIsoTimestamp(),
           models: TEMPLATE_IDS.map((id) => createTemplateModel(id))
         };
       }
@@ -1230,7 +1235,7 @@
       }
 
       function touchProject() {
-        project.updatedAt = new Date().toISOString();
+        touchSharedProject(project);
       }
 
       function setStatus(message) {
@@ -1251,6 +1256,7 @@
             optionHtml: typeof SHARED_DATA.optionHtml === 'function',
             parseJson: typeof SHARED_DATA.parseJson === 'function',
             jsonExport: typeof SHARED_DATA.stringifyJson === 'function' && typeof SHARED_DATA.createJsonExportName === 'function',
+            timestamps: typeof SHARED_DATA.toIsoTimestamp === 'function' && typeof SHARED_DATA.touchProject === 'function',
             htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeModelProject === 'function'
           },

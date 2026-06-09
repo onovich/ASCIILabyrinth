@@ -45,6 +45,7 @@ const pages = [
         'optionHtml',
         'parseJson',
         'jsonExport',
+        'timestamps',
         'floorTools',
         'htmlEscapes',
         'projectNormalizer'
@@ -68,6 +69,7 @@ const pages = [
         'optionHtml',
         'parseJson',
         'jsonExport',
+        'timestamps',
         'htmlEscapes',
         'projectNormalizer'
       ])],

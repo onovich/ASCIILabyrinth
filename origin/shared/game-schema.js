@@ -190,6 +190,17 @@
     return `${prefix}-${stamp}.json`;
   }
 
+  function toIsoTimestamp(date = new Date()) {
+    return (date instanceof Date ? date : new Date(date)).toISOString();
+  }
+
+  function touchProject(project, date = new Date()) {
+    if (project && typeof project === 'object') {
+      project.updatedAt = toIsoTimestamp(date);
+    }
+    return project;
+  }
+
   const PALETTE_ORDER = Object.freeze([
     'select',
     'wall',
@@ -521,7 +532,7 @@
     return {
       version: 1,
       modelSchema: MODEL_RUNTIME_SCHEMA,
-      updatedAt: new Date().toISOString(),
+      updatedAt: toIsoTimestamp(),
       models: templateIds.map((id) => createTemplateModel(id))
     };
   }
@@ -699,6 +710,8 @@
     parseJson,
     stringifyJson,
     createJsonExportName,
+    toIsoTimestamp,
+    touchProject,
     PALETTE_ORDER,
     createDefaultEffect,
     createDefaultInteraction,
