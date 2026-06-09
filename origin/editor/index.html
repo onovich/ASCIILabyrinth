@@ -751,6 +751,7 @@
         if (key) acc[key] = (acc[key] || 0) + 1;
         return acc;
       }, {}));
+      const clamp = SHARED_DATA.clamp || ((value, min, max) => Math.max(Math.min(min, max), Math.min(Math.max(min, max), Number(value) || Math.min(min, max))));
       const allLevelObjects = SHARED_DATA.allLevelObjects || ((level) => [...(level?.objects || []), ...(level?.triggers || [])]);
       const objectFloorSpanOf = SHARED_DATA.objectFloorSpan || ((object) => Math.max(1, Number(object?.floorSpan) || 1));
       const objectOnLevelFloor = SHARED_DATA.objectOnFloor || ((object, floorId) => {
@@ -1050,10 +1051,10 @@
       }
 
       function clampObject(object, level = getLevel()) {
-        object.x = Math.max(0, Math.min(level.width - Math.max(1, object.w || 1), Number(object.x) || 0));
-        object.y = Math.max(0, Math.min(level.height - Math.max(1, object.h || 1), Number(object.y) || 0));
-        object.w = Math.max(1, Math.min(level.width, Number(object.w) || 1));
-        object.h = Math.max(1, Math.min(level.height, Number(object.h) || 1));
+        object.x = clamp(Number(object.x) || 0, 0, level.width - Math.max(1, object.w || 1));
+        object.y = clamp(Number(object.y) || 0, 0, level.height - Math.max(1, object.h || 1));
+        object.w = clamp(Number(object.w) || 1, 1, level.width);
+        object.h = clamp(Number(object.h) || 1, 1, level.height);
         if (object.type !== 'ramp') {
           const floorIds = FLOORS.map((floor) => floor.id);
           const minFloor = Math.min(...floorIds);
@@ -1061,7 +1062,7 @@
           object.floor = floorExists(Number(object.floor)) ? Number(object.floor) : minFloor;
           if ('floorSpan' in object) {
             const maxSpan = Math.max(1, maxFloor - object.floor + 1);
-            object.floorSpan = Math.max(1, Math.min(maxSpan, Number(object.floorSpan) || 1));
+            object.floorSpan = clamp(Number(object.floorSpan) || 1, 1, maxSpan);
           }
         }
       }
@@ -1229,7 +1230,7 @@
         const value = hex.replace('#', '');
         const channels = [0, 2, 4]
           .map((index) => parseInt(value.slice(index, index + 2), 16))
-          .map((channel) => Math.max(0, Math.min(255, channel + amount)));
+          .map((channel) => clamp(channel + amount, 0, 255));
         return `#${channels.map((channel) => channel.toString(16).padStart(2, '0')).join('')}`;
       }
 
@@ -1256,6 +1257,7 @@
             objectFactory: typeof SHARED_DATA.createEditorObject === 'function',
             levelFactory: typeof SHARED_DATA.createEditorLevel === 'function',
             pathTools: typeof SHARED_DATA.setValueByPath === 'function' && typeof SHARED_DATA.getValueByPath === 'function',
+            clamp: typeof SHARED_DATA.clamp === 'function',
             htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeEditorProject === 'function'
           },
@@ -1585,8 +1587,8 @@
         const x = Math.floor((event.clientX - rect.left) / CELL_SIZE);
         const y = Math.floor((event.clientY - rect.top) / CELL_SIZE);
         return {
-          x: Math.max(0, Math.min(getLevel().width - 1, x)),
-          y: Math.max(0, Math.min(getLevel().height - 1, y))
+          x: clamp(x, 0, getLevel().width - 1),
+          y: clamp(y, 0, getLevel().height - 1)
         };
       }
 
@@ -1756,8 +1758,8 @@
         const clone = structuredClone(object);
         clone.id = makeId(object.type);
         clone.label = `${object.label || TYPE_META[object.type].name} copy`;
-        clone.x = Math.min(level.width - Math.max(1, clone.w || 1), clone.x + 1);
-        clone.y = Math.min(level.height - Math.max(1, clone.h || 1), clone.y + 1);
+        clone.x = clamp(clone.x + 1, 0, level.width - Math.max(1, clone.w || 1));
+        clone.y = clamp(clone.y + 1, 0, level.height - Math.max(1, clone.h || 1));
         getCollectionForObject(level, clone).push(clone);
         selectedId = clone.id;
         touchProject();

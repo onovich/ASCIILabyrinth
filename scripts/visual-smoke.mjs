@@ -40,6 +40,7 @@ const pages = [
         'objectFactory',
         'levelFactory',
         'pathTools',
+        'clamp',
         'htmlEscapes',
         'projectNormalizer'
       ])],
