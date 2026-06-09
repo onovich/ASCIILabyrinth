@@ -39,6 +39,56 @@ async function loadSharedData() {
   return context.window.ASCII_LABYRINTH_DATA;
 }
 
+function createDomElement(tagName) {
+  const element = {
+    tagName,
+    className: '',
+    dataset: {},
+    textContent: '',
+    children: [],
+    appendChild(child) {
+      this.children.push(child);
+    },
+    replaceChildren(...children) {
+      this.children = children;
+    },
+    querySelectorAll(selector) {
+      const matches = [];
+      const visit = (node) => {
+        if (selector === '.al-panel-line' && String(node.className || '').split(/\s+/).includes('al-panel-line')) {
+          matches.push(node);
+        }
+        (node.children || []).forEach(visit);
+      };
+      visit(this);
+      return matches;
+    }
+  };
+  element.classList = {
+    contains: (name) => String(element.className || '').split(/\s+/).includes(name)
+  };
+  return element;
+}
+
+async function loadSharedUi() {
+  const uiPath = resolve(projectRoot, 'origin', 'shared', 'ui-system.js');
+  const source = await readFile(uiPath, 'utf8');
+  const elements = new Map();
+  const context = {
+    window: {},
+    document: {
+      createElement: createDomElement,
+      getElementById: (id) => elements.get(id) || null
+    },
+    String,
+    Object
+  };
+
+  vm.createContext(context);
+  vm.runInContext(source, context, { filename: uiPath });
+  return { ui: context.window.ASCIIUI, elements };
+}
+
 function createLevelProjectFixture(schema) {
   let nextId = 0;
   const makeId = (prefix) => `${prefix}-fixture-${nextId++}`;
@@ -129,6 +179,18 @@ async function assertSyncedFiles() {
 
 async function main() {
   const schema = await loadSharedData();
+  const { ui, elements } = await loadSharedUi();
+  const smokePanel = createDomElement('div');
+  smokePanel.className = 'al-hud al-panel';
+  elements.set('smoke-panel', smokePanel);
+  ui.renderPanel('smoke-panel', {
+    title: 'SMOKE',
+    tone: 'cyan',
+    lines: ['alpha', { text: 'beta', tone: 'amber' }]
+  });
+  assert(smokePanel.dataset.title === 'SMOKE' && smokePanel.dataset.tone === 'cyan', 'shared UI panel helper should set panel metadata');
+  assert(ui.getPanelState('smoke-panel').isPanel && ui.getPanelState('smoke-panel').lineCount === 2, 'shared UI panel state should report rendered design-system panels');
+
   assert(schema?.TILE?.WEAPON === '9', 'shared tile contract should expose weapon tile');
   assert(schema.MODEL_RUNTIME_SCHEMA === 'indoor-horror-v1', 'model runtime schema should be stable');
   assert(schema.getCellKey(2, 3) === '2,3', 'shared cell key should match runtime grid key contract');

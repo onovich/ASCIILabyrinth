@@ -1801,6 +1801,16 @@
                 sharedContract: {
                     clamp: typeof SHARED_DATA.clamp === 'function'
                 },
+                sharedUiContract: {
+                    renderPanel: typeof window.ASCIIUI?.renderPanel === 'function',
+                    setPanelLines: typeof window.ASCIIUI?.setPanelLines === 'function',
+                    getPanelState: typeof window.ASCIIUI?.getPanelState === 'function'
+                },
+                hudPanels: {
+                    status: window.ASCIIUI?.getPanelState?.('ui-layer') || { exists: false },
+                    mission: window.ASCIIUI?.getPanelState?.('mission-layer') || { exists: false },
+                    log: window.ASCIIUI?.getPanelState?.('log-layer') || { exists: false }
+                },
                 runtimeLevel: {
                     source: runtimeLevel.source,
                     levelId: runtimeLevel.levelId,

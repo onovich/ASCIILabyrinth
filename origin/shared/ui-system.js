@@ -47,8 +47,21 @@
     });
   }
 
+  function getPanelState(target) {
+    const panel = resolveElement(target);
+    if (!panel) return { exists: false };
+    return {
+      exists: true,
+      title: panel.dataset.title || '',
+      tone: panel.dataset.tone || '',
+      isPanel: panel.classList?.contains('al-panel') === true,
+      lineCount: panel.querySelectorAll?.('.al-panel-line')?.length || 0
+    };
+  }
+
   window.ASCIIUI = Object.freeze({
     renderPanel,
-    setPanelLines
+    setPanelLines,
+    getPanelState
   });
 })();

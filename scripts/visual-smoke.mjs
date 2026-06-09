@@ -21,6 +21,11 @@ const pages = [
     snapshotAttr: 'data-debug-snapshot',
     snapshotChecks: [
       ['runtime shared contract', (snapshot) => allTrue(snapshot.sharedContract, ['clamp'])],
+      ['runtime shared UI contract', (snapshot) => allTrue(snapshot.sharedUiContract, ['renderPanel', 'setPanelLines', 'getPanelState'])],
+      ['runtime HUD panels', (snapshot) => ['status', 'mission', 'log'].every((key) => {
+        const panel = snapshot.hudPanels?.[key];
+        return panel?.exists === true && panel.isPanel === true && Number(panel.lineCount) > 0;
+      })],
       ['runtime level source', (snapshot) => Boolean(snapshot.runtimeLevel?.source)],
       ['runtime level size', (snapshot) => Number(snapshot.levelSize?.rows) > 0 && Number(snapshot.levelSize?.cols) > 0],
       ['runtime enemy profiles', (snapshot) => Number(snapshot.runtimeModels?.activeEnemyCount) > 0],
