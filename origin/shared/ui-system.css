@@ -137,6 +137,31 @@
   outline: none;
 }
 
+.al-input-code {
+  width: 100%;
+  margin: 6px 0 10px;
+  padding: 9px 10px;
+  border: 1px solid var(--al-color-green);
+  background: #020604;
+  color: var(--al-color-green);
+  text-align: center;
+  letter-spacing: 0.3em;
+}
+
+.al-button-terminal {
+  margin: 6px 4px 0;
+  padding: 9px 14px;
+  border: 1px solid var(--al-color-green);
+  background: #03140c;
+  color: var(--al-color-green);
+  font-weight: 700;
+}
+
+.al-button-terminal:hover {
+  background: var(--al-color-green);
+  color: #000;
+}
+
 .al-button-primary {
   background: #254d3a;
   border-color: #3e8867;

@@ -101,32 +101,6 @@
             white-space: pre-wrap;
         }
 
-        .terminal-modal .al-input {
-            width: 100%;
-            margin: 6px 0 10px;
-            padding: 9px 10px;
-            border: 1px solid var(--term-green);
-            background: #020604;
-            color: var(--term-green);
-            font: inherit;
-            text-align: center;
-            letter-spacing: 0.3em;
-            outline: none;
-        }
-
-        .terminal-modal .al-button {
-            margin: 6px 4px 0;
-            padding: 9px 14px;
-            background: #03140c;
-            color: var(--term-green);
-            border: 1px solid var(--term-green);
-            font-weight: bold;
-        }
-
-        .terminal-modal .al-button:hover {
-            background: var(--term-green);
-            color: #000;
-        }
     </style>
 </head>
 <body>
@@ -150,21 +124,21 @@
     <div id="password-panel" class="terminal-modal al-modal al-modal-centered">
         <h2>┌─[ EXIT ACCESS ]─┐</h2>
         <pre>输入隐藏房间获得的四位撤离密码。</pre>
-        <input id="password-input" class="al-input" maxlength="4" inputmode="numeric" autocomplete="off">
-        <button id="password-submit" class="al-button">确认 (ENTER)</button>
-        <button id="password-cancel" class="al-button">取消 (ESC)</button>
+        <input id="password-input" class="al-input al-input-code" maxlength="4" inputmode="numeric" autocomplete="off">
+        <button id="password-submit" class="al-button al-button-terminal">确认 (ENTER)</button>
+        <button id="password-cancel" class="al-button al-button-terminal">取消 (ESC)</button>
     </div>
 
     <div id="ending-panel" class="terminal-modal al-modal al-modal-centered">
         <h1>┌─[ EXTRACTION COMPLETE ]─┐</h1>
         <pre id="ending-text"></pre>
-        <button id="ending-restart" class="al-button" onclick="location.reload()">再次部署 (RESTART)</button>
+        <button id="ending-restart" class="al-button al-button-terminal" onclick="location.reload()">再次部署 (RESTART)</button>
     </div>
 
     <div id="game-over" class="terminal-modal al-modal al-modal-centered">
         <h1>任务失败 (YOU DIED)</h1>
         <p>最终得分: <span id="final-score">0</span></p>
-        <button id="game-over-restart" class="al-button" onclick="location.reload()">重新部署 (RESTART)</button>
+        <button id="game-over-restart" class="al-button al-button-terminal" onclick="location.reload()">重新部署 (RESTART)</button>
     </div>
 
     <!-- 引入 Three.js -->
@@ -1806,11 +1780,11 @@
                     passwordPanel: getUiClassState('password-panel', ['terminal-modal', 'al-modal', 'al-modal-centered']),
                     endingPanel: getUiClassState('ending-panel', ['terminal-modal', 'al-modal', 'al-modal-centered']),
                     gameOverPanel: getUiClassState('game-over', ['terminal-modal', 'al-modal', 'al-modal-centered']),
-                    passwordInput: getUiClassState('password-input', ['al-input']),
-                    passwordSubmit: getUiClassState('password-submit', ['al-button']),
-                    passwordCancel: getUiClassState('password-cancel', ['al-button']),
-                    endingRestart: getUiClassState('ending-restart', ['al-button']),
-                    gameOverRestart: getUiClassState('game-over-restart', ['al-button'])
+                    passwordInput: getUiClassState('password-input', ['al-input', 'al-input-code']),
+                    passwordSubmit: getUiClassState('password-submit', ['al-button', 'al-button-terminal']),
+                    passwordCancel: getUiClassState('password-cancel', ['al-button', 'al-button-terminal']),
+                    endingRestart: getUiClassState('ending-restart', ['al-button', 'al-button-terminal']),
+                    gameOverRestart: getUiClassState('game-over-restart', ['al-button', 'al-button-terminal'])
                 },
                 runtimeLevel: {
                     source: runtimeLevel.source,
