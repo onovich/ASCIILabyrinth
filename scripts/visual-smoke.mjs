@@ -17,22 +17,95 @@ const pages = [
   {
     name: 'runtime',
     path: '/runtime/index.html?verify=visual-smoke',
-    mustContain: ['ASCII 3D FPS', 'data-debug-snapshot', 'ascii-canvas']
+    mustContain: ['ASCII 3D FPS', 'data-debug-snapshot', 'ascii-canvas'],
+    snapshotAttr: 'data-debug-snapshot',
+    snapshotChecks: [
+      ['runtime level source', (snapshot) => Boolean(snapshot.runtimeLevel?.source)],
+      ['runtime level size', (snapshot) => Number(snapshot.levelSize?.rows) > 0 && Number(snapshot.levelSize?.cols) > 0],
+      ['runtime enemy profiles', (snapshot) => Number(snapshot.runtimeModels?.activeEnemyCount) > 0],
+      ['runtime shader pipeline', (snapshot) => snapshot.shaderPipeline === true]
+    ]
   },
   {
     name: 'editor',
     path: '/editor/index.html?verify=visual-smoke',
-    mustContain: ['ASCII Labyrinth Level Editor', 'data-editor-snapshot', 'mapCanvas']
+    mustContain: ['ASCII Labyrinth Level Editor', 'data-editor-snapshot', 'mapCanvas'],
+    snapshotAttr: 'data-editor-snapshot',
+    snapshotChecks: [
+      ['editor shared contract', (snapshot) => allTrue(snapshot.sharedContract, [
+        'typeMeta',
+        'defaultEffect',
+        'defaultInteraction',
+        'paletteOrder',
+        'objectFactory',
+        'levelFactory',
+        'pathTools',
+        'htmlEscapes',
+        'projectNormalizer'
+      ])],
+      ['editor levels', (snapshot) => Number(snapshot.levelCount) > 0],
+      ['editor canvas', (snapshot) => Number(snapshot.canvas?.width) > 0 && Number(snapshot.canvas?.height) > 0]
+    ]
   },
   {
     name: 'model-editor',
     path: '/model-editor/index.html?verify=visual-smoke',
-    mustContain: ['ASCII Labyrinth Model Editor', 'data-model-editor-snapshot', 'previewCanvas']
+    mustContain: ['ASCII Labyrinth Model Editor', 'data-model-editor-snapshot', 'previewCanvas'],
+    snapshotAttr: 'data-model-editor-snapshot',
+    snapshotChecks: [
+      ['model editor shared contract', (snapshot) => allTrue(snapshot.sharedContract, [
+        'defaultProjectFactory',
+        'partFactory',
+        'partNormalizer',
+        'pathTools',
+        'htmlEscapes',
+        'projectNormalizer'
+      ])],
+      ['model editor models', (snapshot) => Number(snapshot.modelCount) > 0],
+      ['model editor selected model', (snapshot) => Boolean(snapshot.selectedModelId)]
+    ]
   }
 ];
 
 function normalizeBase(value) {
   return String(value).replace(/\/+$/, '');
+}
+
+function allTrue(object, keys) {
+  return keys.every((key) => object?.[key] === true);
+}
+
+function decodeHtmlAttribute(value) {
+  return String(value).replace(/&(?:quot|amp|lt|gt|#039|#x27);/g, (entity) => ({
+    '&quot;': '"',
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&#039;': "'",
+    '&#x27;': "'"
+  })[entity] || entity);
+}
+
+function readSnapshot(dom, page) {
+  if (!page.snapshotAttr) return null;
+  const match = dom.match(new RegExp(`${page.snapshotAttr}="([^"]*)"`));
+  if (!match) {
+    throw new Error(`${page.name} DOM is missing snapshot attribute: ${page.snapshotAttr}`);
+  }
+
+  try {
+    return JSON.parse(decodeHtmlAttribute(match[1]));
+  } catch (error) {
+    throw new Error(`${page.name} snapshot JSON could not be parsed: ${error.message}`);
+  }
+}
+
+function assertSnapshot(page, snapshot) {
+  for (const [label, check] of page.snapshotChecks || []) {
+    if (!check(snapshot)) {
+      throw new Error(`${page.name} snapshot check failed: ${label}`);
+    }
+  }
 }
 
 async function exists(filePath) {
@@ -244,19 +317,22 @@ async function main() {
           throw new Error(`${page.name} DOM is missing expected marker: ${expected}`);
         }
       }
+      const snapshot = readSnapshot(dom, page);
+      assertSnapshot(page, snapshot);
       const screenshotPath = resolve(outDir, `${page.name}.png`);
       const screenshot = await capture(page, profileDir, screenshotPath);
       results.push({
         page: page.name,
         screenshot: screenshotPath,
-        bytes: screenshot.size
+        bytes: screenshot.size,
+        snapshot: Boolean(snapshot)
       });
     }
   } finally {
     await cleanupDevServer();
   }
 
-  console.log(`visual smoke ok: ${results.map((item) => `${item.page} ${item.bytes}b`).join(', ')}`);
+  console.log(`visual smoke ok: ${results.map((item) => `${item.page} ${item.bytes}b${item.snapshot ? ' snapshot' : ''}`).join(', ')}`);
   console.log(`screenshots: ${outDir}`);
 }
 
