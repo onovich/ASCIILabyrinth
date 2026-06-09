@@ -727,6 +727,25 @@
         'trigger',
         'eraser'
       ];
+      const setByPath = SHARED_DATA.setValueByPath || ((object, path, value) => {
+        const parts = String(path).split('.');
+        let cursor = object;
+        for (let i = 0; i < parts.length - 1; i++) {
+          const key = parts[i];
+          cursor[key] ||= Number.isInteger(Number(parts[i + 1])) ? [] : {};
+          cursor = cursor[key];
+        }
+        cursor[parts.at(-1)] = value;
+        return object;
+      });
+      const getByPath = SHARED_DATA.getValueByPath || ((object, path) => String(path).split('.').reduce((cursor, part) => cursor?.[part], object));
+      const escapeHtml = SHARED_DATA.escapeHtml || ((value) => String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;'));
+      const escapeAttr = SHARED_DATA.escapeAttr || escapeHtml;
 
       const ENEMY_KIND_OPTIONS = SHARED_DATA.ENEMY_KIND_OPTIONS || [
         ['longlimb', '走廊瘦长人'],
@@ -1230,7 +1249,9 @@
             defaultInteraction: typeof SHARED_DATA.createDefaultInteraction === 'function',
             paletteOrder: Array.isArray(SHARED_DATA.PALETTE_ORDER),
             objectFactory: typeof SHARED_DATA.createEditorObject === 'function',
-            levelFactory: typeof SHARED_DATA.createEditorLevel === 'function'
+            levelFactory: typeof SHARED_DATA.createEditorLevel === 'function',
+            pathTools: typeof SHARED_DATA.setValueByPath === 'function' && typeof SHARED_DATA.getValueByPath === 'function',
+            htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function'
           },
           levelCount: project.levels.length,
           currentLevelId,
@@ -1905,33 +1926,6 @@
         clampObject(object);
         touchProject();
         render();
-      }
-
-      function setByPath(object, path, value) {
-        const parts = path.split('.');
-        let cursor = object;
-        for (let i = 0; i < parts.length - 1; i++) {
-          cursor[parts[i]] ||= {};
-          cursor = cursor[parts[i]];
-        }
-        cursor[parts.at(-1)] = value;
-      }
-
-      function getByPath(object, path) {
-        return path.split('.').reduce((cursor, part) => cursor?.[part], object);
-      }
-
-      function escapeHtml(value) {
-        return String(value)
-          .replaceAll('&', '&amp;')
-          .replaceAll('<', '&lt;')
-          .replaceAll('>', '&gt;')
-          .replaceAll('"', '&quot;')
-          .replaceAll("'", '&#039;');
-      }
-
-      function escapeAttr(value) {
-        return escapeHtml(value);
       }
 
       dom.palettePanel.addEventListener('click', (event) => {

@@ -111,6 +111,35 @@
     weapon: TILE.WEAPON
   });
 
+  function setValueByPath(object, path, value) {
+    const parts = String(path).split('.');
+    let cursor = object;
+    for (let i = 0; i < parts.length - 1; i += 1) {
+      const key = parts[i];
+      cursor[key] ||= Number.isInteger(Number(parts[i + 1])) ? [] : {};
+      cursor = cursor[key];
+    }
+    cursor[parts.at(-1)] = value;
+    return object;
+  }
+
+  function getValueByPath(object, path) {
+    return String(path).split('.').reduce((cursor, part) => cursor?.[part], object);
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  function escapeAttr(value) {
+    return escapeHtml(value);
+  }
+
   const PALETTE_ORDER = Object.freeze([
     'select',
     'wall',
@@ -544,6 +573,10 @@
     MODEL_TEMPLATE_IDS,
     WEAPON_DEFS,
     OBJECT_TO_TILE,
+    setValueByPath,
+    getValueByPath,
+    escapeHtml,
+    escapeAttr,
     PALETTE_ORDER,
     createDefaultEffect,
     createDefaultInteraction,

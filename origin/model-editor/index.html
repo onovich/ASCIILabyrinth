@@ -482,6 +482,24 @@
         'item-key',
         'item-scatter'
       ];
+      const setByPath = SHARED_DATA.setValueByPath || ((object, path, value) => {
+        const parts = String(path).split('.');
+        let cursor = object;
+        for (let i = 0; i < parts.length - 1; i++) {
+          const key = parts[i];
+          cursor[key] ||= Number.isInteger(Number(parts[i + 1])) ? [] : {};
+          cursor = cursor[key];
+        }
+        cursor[parts.at(-1)] = value;
+        return object;
+      });
+      const escapeHtml = SHARED_DATA.escapeHtml || ((value) => String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;'));
+      const escapeAttr = SHARED_DATA.escapeAttr || escapeHtml;
 
       const dom = {
         templateSelect: document.getElementById('templateSelect'),
@@ -1047,17 +1065,6 @@
         render();
       }
 
-      function setByPath(object, path, value) {
-        const parts = path.split('.');
-        let cursor = object;
-        for (let i = 0; i < parts.length - 1; i++) {
-          const key = parts[i];
-          cursor[key] ||= Number.isInteger(Number(parts[i + 1])) ? [] : {};
-          cursor = cursor[key];
-        }
-        cursor[parts.at(-1)] = value;
-      }
-
       function applyTemplate() {
         const template = createTemplateModel(dom.templateSelect.value);
         const index = project.models.findIndex((model) => model.id === selectedModelId);
@@ -1222,7 +1229,9 @@
           sharedContract: {
             defaultProjectFactory: typeof SHARED_DATA.createDefaultModelProject === 'function',
             partFactory: typeof SHARED_DATA.createModelPart === 'function',
-            partNormalizer: typeof SHARED_DATA.normalizeModelPart === 'function'
+            partNormalizer: typeof SHARED_DATA.normalizeModelPart === 'function',
+            pathTools: typeof SHARED_DATA.setValueByPath === 'function',
+            htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function'
           },
           modelCount: project.models.length,
           selectedModelId,
@@ -1240,19 +1249,6 @@
           },
           hasLocalSave: Boolean(window.localStorage.getItem(STORAGE_KEY))
         };
-      }
-
-      function escapeHtml(value) {
-        return String(value)
-          .replaceAll('&', '&amp;')
-          .replaceAll('<', '&lt;')
-          .replaceAll('>', '&gt;')
-          .replaceAll('"', '&quot;')
-          .replaceAll("'", '&#039;');
-      }
-
-      function escapeAttr(value) {
-        return escapeHtml(value);
       }
 
       dom.modelList.addEventListener('click', (event) => {

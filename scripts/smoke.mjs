@@ -144,6 +144,11 @@ async function main() {
   assert(editorTypeMeta.weapon.default.weaponKind === 'scatter', 'shared weapon meta should keep weapon default');
   assert(editorTypeMeta.terminal.default.interaction.effect.type === 'dialog', 'shared terminal meta should keep dialog interaction');
   assert(schema.createDefaultEffect('heal').healAmount === 20, 'shared default effects should keep heal amount');
+  const pathTarget = {};
+  schema.setValueByPath(pathTarget, 'parts.0.position.1', 7);
+  assert(Array.isArray(pathTarget.parts) && Array.isArray(pathTarget.parts[0].position), 'shared path setter should create arrays for numeric segments');
+  assert(schema.getValueByPath(pathTarget, 'parts.0.position.1') === 7, 'shared path getter should read nested array values');
+  assert(schema.escapeHtml("<tag class=\"x\">&'") === '&lt;tag class=&quot;x&quot;&gt;&amp;&#039;', 'shared html escape should encode inspector text');
   const editorObject = schema.createEditorObject('weapon', 1, 2, 0, { weaponKind: 'rail' }, { makeId: (prefix) => `${prefix}-fixed` });
   assert(editorObject.id === 'weapon-fixed', 'shared editor object factory should accept injected ids');
   assert(editorObject.ammo === 6 && editorObject.weaponKind === 'rail', 'shared editor object factory should merge defaults before overrides');
