@@ -14,6 +14,20 @@
     return { text: String(line ?? ''), tone: '' };
   }
 
+  function clampNumber(value, min, max) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return min;
+    return Math.max(min, Math.min(max, number));
+  }
+
+  function formatMeter(value, max, { width = 12, filledChar = '\u2588', emptyChar = '\u2591' } = {}) {
+    const safeWidth = Math.max(0, Math.floor(Number.isFinite(Number(width)) ? Number(width) : 12));
+    const safeMax = Number(max);
+    const ratio = safeMax > 0 ? Number(value) / safeMax : 0;
+    const filled = clampNumber(Math.round(ratio * safeWidth), 0, safeWidth);
+    return `${String(filledChar).repeat(filled)}${String(emptyChar).repeat(safeWidth - filled)}`;
+  }
+
   function renderPanel(target, { title = '', lines = [], tone = '' } = {}) {
     const panel = resolveElement(target);
     if (!panel) return null;
@@ -60,6 +74,7 @@
   }
 
   window.ASCIIUI = Object.freeze({
+    formatMeter,
     renderPanel,
     setPanelLines,
     getPanelState

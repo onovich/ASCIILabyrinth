@@ -1548,6 +1548,9 @@
         }
 
         function bar(value, max, width = 12) {
+            if (window.ASCIIUI?.formatMeter) {
+                return window.ASCIIUI.formatMeter(value, max, { width });
+            }
             const filled = clamp(Math.round((value / max) * width), 0, width);
             return `${'█'.repeat(filled)}${'░'.repeat(width - filled)}`;
         }
@@ -1802,6 +1805,7 @@
                     clamp: typeof SHARED_DATA.clamp === 'function'
                 },
                 sharedUiContract: {
+                    formatMeter: typeof window.ASCIIUI?.formatMeter === 'function',
                     renderPanel: typeof window.ASCIIUI?.renderPanel === 'function',
                     setPanelLines: typeof window.ASCIIUI?.setPanelLines === 'function',
                     getPanelState: typeof window.ASCIIUI?.getPanelState === 'function'

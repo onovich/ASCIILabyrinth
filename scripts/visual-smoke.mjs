@@ -21,7 +21,7 @@ const pages = [
     snapshotAttr: 'data-debug-snapshot',
     snapshotChecks: [
       ['runtime shared contract', (snapshot) => allTrue(snapshot.sharedContract, ['clamp'])],
-      ['runtime shared UI contract', (snapshot) => allTrue(snapshot.sharedUiContract, ['renderPanel', 'setPanelLines', 'getPanelState'])],
+      ['runtime shared UI contract', (snapshot) => allTrue(snapshot.sharedUiContract, ['formatMeter', 'renderPanel', 'setPanelLines', 'getPanelState'])],
       ['runtime HUD panels', (snapshot) => ['status', 'mission', 'log'].every((key) => {
         const panel = snapshot.hudPanels?.[key];
         return panel?.exists === true && panel.isPanel === true && Number(panel.lineCount) > 0;
