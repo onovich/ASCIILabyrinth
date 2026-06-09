@@ -1,4 +1,6 @@
 (() => {
+  let publicApi = null;
+
   function resolveElement(target) {
     if (typeof target === 'string') return document.getElementById(target);
     return target;
@@ -150,7 +152,16 @@
     };
   }
 
-  window.ASCIIUI = Object.freeze({
+  function getContractState(keys = []) {
+    const api = publicApi || {};
+    const selectedKeys = Array.isArray(keys) && keys.length ? keys : Object.keys(api);
+    return selectedKeys.reduce((state, key) => {
+      state[key] = typeof api[key] === 'function';
+      return state;
+    }, {});
+  }
+
+  publicApi = Object.freeze({
     formatMeter,
     colorVarStyle,
     swatchHtml,
@@ -160,6 +171,9 @@
     setElementVisible,
     isElementVisible,
     getElementState,
-    getPanelState
+    getPanelState,
+    getContractState
   });
+
+  window.ASCIIUI = publicApi;
 })();

@@ -1030,11 +1030,12 @@
             optionsWithEmptyHtml: typeof SHARED_DATA.optionsWithEmptyHtml === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeEditorProject === 'function'
           },
-          sharedUiContract: {
-            swatchHtml: typeof SHARED_UI.swatchHtml === 'function',
-            colorVarStyle: typeof SHARED_UI.colorVarStyle === 'function',
-            downloadTextFile: typeof SHARED_UI.downloadTextFile === 'function'
-          },
+          sharedUiContract: SHARED_UI.getContractState?.([
+            'swatchHtml',
+            'colorVarStyle',
+            'downloadTextFile',
+            'getContractState'
+          ]) || {},
           toolUi: {
             bodyClass: document.body.classList.contains('al-tool-page')
           },

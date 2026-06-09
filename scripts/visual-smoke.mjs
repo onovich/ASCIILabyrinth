@@ -24,7 +24,8 @@ const runtimeSharedUiKeys = [
   'setElementVisible',
   'isElementVisible',
   'getElementState',
-  'getPanelState'
+  'getPanelState',
+  'getContractState'
 ];
 
 const editorSharedContractKeys = [
@@ -138,7 +139,7 @@ function allTrue(object, keys) {
 function toolPageChecks(label, contractKeys, checks) {
   return [
     [`${label} shared contract`, (snapshot) => allTrue(snapshot.sharedContract, contractKeys)],
-    [`${label} shared UI contract`, (snapshot) => allTrue(snapshot.sharedUiContract, ['swatchHtml', 'downloadTextFile'])],
+    [`${label} shared UI contract`, (snapshot) => allTrue(snapshot.sharedUiContract, ['swatchHtml', 'downloadTextFile', 'getContractState'])],
     [`${label} shared tool UI class`, (snapshot) => snapshot.toolUi?.bodyClass === true],
     ...checks
   ];

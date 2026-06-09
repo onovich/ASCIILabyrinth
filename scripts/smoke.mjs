@@ -244,6 +244,8 @@ async function main() {
   assert(ui.swatchHtml('bad color') === '<span class="swatch" style="--al-swatch-color:#777777"></span>', 'shared UI swatch helper should repair unsafe colors');
   const downloaded = ui.downloadTextFile({ text: 'abc', fileName: 'smoke.json', mimeType: 'application/json' });
   assert(downloaded.fileName === 'smoke.json' && downloaded.size === 3, 'shared UI download helper should create named text downloads');
+  const uiContract = ui.getContractState(['formatMeter', 'downloadTextFile', 'missingHelper']);
+  assert(uiContract.formatMeter && uiContract.downloadTextFile && uiContract.missingHelper === false, 'shared UI contract helper should report available functions');
   assert(ui.getElementState('smoke-panel', ['al-panel']).classes['al-panel'] === true, 'shared UI element state should report requested classes');
   assert(ui.getPanelState('smoke-panel').isPanel && ui.getPanelState('smoke-panel').lineCount === 2, 'shared UI panel state should report rendered design-system panels');
   assert(ui.setElementVisible('smoke-panel', false)?.style.display === 'none', 'shared UI visibility helper should hide elements');

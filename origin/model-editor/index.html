@@ -990,10 +990,11 @@
             htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
             projectNormalizer: typeof SHARED_DATA.normalizeModelProject === 'function'
           },
-          sharedUiContract: {
-            swatchHtml: typeof SHARED_UI.swatchHtml === 'function',
-            downloadTextFile: typeof SHARED_UI.downloadTextFile === 'function'
-          },
+          sharedUiContract: SHARED_UI.getContractState?.([
+            'swatchHtml',
+            'downloadTextFile',
+            'getContractState'
+          ]) || {},
           toolUi: {
             bodyClass: document.body.classList.contains('al-tool-page')
           },
