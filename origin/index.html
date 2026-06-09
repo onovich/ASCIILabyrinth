@@ -630,12 +630,12 @@
             };
         }
 
-        function isValidRuntimeLevel(candidate) {
-            return candidate
-                && Array.isArray(candidate.map)
-                && candidate.map.length > 0
-                && candidate.map.every((row) => typeof row === 'string' && row.length === candidate.map[0].length);
-        }
+        const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel || ((candidate) => Boolean(
+            candidate
+            && Array.isArray(candidate.map)
+            && candidate.map.length > 0
+            && candidate.map.every((row) => typeof row === 'string' && row.length === candidate.map[0].length)
+        ));
 
         function loadRuntimeLevel() {
             const editorLevel = SHARED_DATA.loadRuntimeLevelFromLocalStorage?.({ floor: 0 });
@@ -649,6 +649,7 @@
             acc[ch] = (acc[ch] || 0) + 1;
             return acc;
         }, {}));
+        const gridKey = SHARED_DATA.getCellKey || ((x, z) => `${x},${z}`);
 
         const mapSize = 2; 
         const startCell = runtimeLevel.startCell || { x: 1, y: 1 };
@@ -672,10 +673,6 @@
         const floorMat = new THREE.MeshStandardMaterial({ color: 0x112233, roughness: 1.0 }); // 暗蓝色地板
         const ceilMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 1.0 });  // 近黑天花板
         const doorMat = new THREE.MeshStandardMaterial({ color: 0x223355, emissive: 0x001133, roughness: 0.65, metalness: 0.2 });
-
-        function gridKey(x, z) {
-            return `${x},${z}`;
-        }
 
         function getRuntimeCellObjects(x, z) {
             return runtimeLevel.objectsByCell?.[gridKey(x, z)] || [];

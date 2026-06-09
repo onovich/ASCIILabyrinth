@@ -131,7 +131,10 @@ async function main() {
   const schema = await loadSharedData();
   assert(schema?.TILE?.WEAPON === '9', 'shared tile contract should expose weapon tile');
   assert(schema.MODEL_RUNTIME_SCHEMA === 'indoor-horror-v1', 'model runtime schema should be stable');
+  assert(schema.getCellKey(2, 3) === '2,3', 'shared cell key should match runtime grid key contract');
   assert(schema.countTiles(['102', '200'])[schema.TILE.AMMO] === 2, 'shared tile counter should count runtime map symbols');
+  assert(schema.isValidRuntimeLevel({ map: ['00', '11'] }), 'shared runtime level validator should accept rectangular string maps');
+  assert(!schema.isValidRuntimeLevel({ map: ['00', '1'] }), 'shared runtime level validator should reject ragged maps');
   const editorTypeMeta = schema.createEditorTypeMeta();
   assert(schema.PALETTE_ORDER.includes('trigger'), 'shared palette order should include trigger tool');
   assert(editorTypeMeta.wall.default.blocking === true, 'shared wall meta should keep blocking default');

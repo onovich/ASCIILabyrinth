@@ -323,6 +323,15 @@
       }, {});
   }
 
+  function isValidRuntimeLevel(candidate) {
+    return Boolean(
+      candidate
+      && Array.isArray(candidate.map)
+      && candidate.map.length > 0
+      && candidate.map.every((row) => typeof row === 'string' && row.length === candidate.map[0].length)
+    );
+  }
+
   function pickRuntimeLevel(project, options = {}) {
     const normalized = normalizeProject(structuredClone(project));
     if (!normalized) return null;
@@ -639,7 +648,9 @@
     objectFloorSpan,
     objectOnFloor,
     allLevelObjects,
+    getCellKey,
     countTiles,
+    isValidRuntimeLevel,
     normalizeProject,
     normalizeEditorProject,
     buildRuntimeLevelFromEditorProject,

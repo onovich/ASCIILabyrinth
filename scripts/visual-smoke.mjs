@@ -68,10 +68,18 @@ function runChrome(args, options = {}) {
     });
     let stdout = '';
     let stderr = '';
-    const timeoutMs = options.timeoutMs || 30000;
+    let settled = false;
+    const timeoutMs = options.timeoutMs || 60000;
+    const finish = (callback, value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      callback(value);
+    };
     const timer = setTimeout(() => {
-      child.kill('SIGKILL');
-      rejectRun(new Error(`Chrome timed out after ${timeoutMs}ms: ${args.join(' ')}`));
+      killProcessTree(child).finally(() => {
+        finish(rejectRun, new Error(`Chrome timed out after ${timeoutMs}ms: ${args.join(' ')}`));
+      });
     }, timeoutMs);
 
     child.stdout.on('data', (chunk) => {
@@ -81,16 +89,14 @@ function runChrome(args, options = {}) {
       stderr += chunk.toString();
     });
     child.on('error', (error) => {
-      clearTimeout(timer);
-      rejectRun(error);
+      finish(rejectRun, error);
     });
     child.on('exit', (code) => {
-      clearTimeout(timer);
       if (code !== 0) {
-        rejectRun(new Error(`Chrome exited with ${code}: ${stderr || stdout}`));
+        finish(rejectRun, new Error(`Chrome exited with ${code}: ${stderr || stdout}`));
         return;
       }
-      resolveRun({ stdout, stderr });
+      finish(resolveRun, { stdout, stderr });
     });
   });
 }
@@ -182,15 +188,18 @@ async function dumpDom(page, profileDir) {
   const result = await runChrome([
     '--headless=new',
     '--disable-gpu',
+    '--disable-background-networking',
     '--disable-dev-shm-usage',
+    '--disable-extensions',
     '--no-first-run',
     '--hide-scrollbars',
+    '--mute-audio',
     '--window-size=1280,720',
     `--user-data-dir=${profileDir}`,
     '--virtual-time-budget=3000',
     '--dump-dom',
     url
-  ]);
+  ], { timeoutMs: 60000 });
   return result.stdout;
 }
 
@@ -201,14 +210,17 @@ async function capture(page, profileDir, screenshotPath) {
   await runChrome([
     '--headless=new',
     '--disable-gpu',
+    '--disable-background-networking',
     '--disable-dev-shm-usage',
+    '--disable-extensions',
     '--no-first-run',
     '--hide-scrollbars',
+    '--mute-audio',
     '--window-size=1280,720',
     `--user-data-dir=${profileDir}`,
     `--screenshot=${screenshotPath}`,
     url
-  ]);
+  ], { timeoutMs: 60000 });
   const info = await stat(screenshotPath);
   if (info.size < 1000) {
     throw new Error(`${page.name} screenshot looks too small: ${screenshotPath}`);
