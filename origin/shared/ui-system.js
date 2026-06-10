@@ -16,6 +16,24 @@
     }, {});
   }
 
+  async function importTextFile(event, onText) {
+    const input = event?.target || null;
+    const file = input?.files?.[0] || null;
+    if (!file) return null;
+
+    try {
+      const text = await file.text();
+      const result = {
+        fileName: file.name || '',
+        text
+      };
+      if (typeof onText === 'function') onText(text, `${result.fileName} imported`, file);
+      return result;
+    } finally {
+      if (input) input.value = '';
+    }
+  }
+
   function normalizeLine(line) {
     if (line && typeof line === 'object') {
       return {
@@ -179,6 +197,7 @@
     ]),
     editor: Object.freeze([
       'bindElements',
+      'importTextFile',
       'swatchHtml',
       'colorVarStyle',
       'downloadTextFile',
@@ -186,6 +205,7 @@
     ]),
     modelEditor: Object.freeze([
       'bindElements',
+      'importTextFile',
       'swatchHtml',
       'downloadTextFile',
       'getContractState'
@@ -204,6 +224,7 @@
 
   publicApi = Object.freeze({
     bindElements,
+    importTextFile,
     formatMeter,
     colorVarStyle,
     swatchHtml,

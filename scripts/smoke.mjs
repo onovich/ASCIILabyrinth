@@ -243,6 +243,12 @@ async function main() {
   const boundElements = ui.bindElements(['smoke-panel', 'smoke-secondary']);
   const namedBoundElements = ui.bindElements({ panel: 'smoke-panel' });
   assert(boundElements['smoke-panel'] === smokePanel && boundElements['smoke-secondary'] === smokeSecondary && namedBoundElements.panel === smokePanel, 'shared UI element binder should resolve arrays and named id maps');
+  const importInput = { files: [{ name: 'fixture.json', text: async () => '{"ok":true}' }], value: 'fixture.json' };
+  let importedMessage = '';
+  const importedFile = await ui.importTextFile({ target: importInput }, (text, message) => {
+    importedMessage = `${message}:${text}`;
+  });
+  assert(importedFile.fileName === 'fixture.json' && importedMessage === 'fixture.json imported:{"ok":true}' && importInput.value === '', 'shared UI import helper should read text files and reset file inputs');
   ui.renderPanel('smoke-panel', {
     title: 'SMOKE',
     tone: 'cyan',

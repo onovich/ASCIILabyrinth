@@ -193,6 +193,7 @@
       const SHARED_UI = window.ASCIIUI || {};
       const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
       const bindElements = SHARED_UI.bindElements || ((ids) => Object.fromEntries(ids.map((id) => [id, document.getElementById(id)])));
+      const importTextFile = SHARED_UI.importTextFile;
       const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS?.modelProject || 'ascii-labyrinth-model-editor-v1';
       const SHAPES = SHARED_DATA.MODEL_SHAPES || ['box', 'sphere', 'cylinder', 'cone', 'torus', 'octahedron', 'icosahedron', 'dodecahedron'];
       const TEMPLATE_IDS = SHARED_DATA.MODEL_TEMPLATE_IDS || [
@@ -1053,10 +1054,7 @@
       dom.exportBtn.addEventListener('click', exportProject);
       dom.importBtn.addEventListener('click', () => dom.importFile.click());
       dom.importFile.addEventListener('change', async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        loadFromJson(await file.text(), `${file.name} imported`);
-        event.target.value = '';
+        await importTextFile(event, loadFromJson);
       });
 
       dom.previewCanvas.addEventListener('pointerdown', (event) => {
