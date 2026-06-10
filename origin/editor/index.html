@@ -485,6 +485,9 @@
       const downloadTextFile = SHARED_UI.downloadTextFile;
       const parseJson = SHARED_DATA.parseJson || JSON.parse;
       const createJsonDownloadPayload = SHARED_DATA.createJsonDownloadPayload;
+      const readStorageText = SHARED_DATA.readStorageText;
+      const hasStorageText = SHARED_DATA.hasStorageText;
+      const saveStorageJson = SHARED_DATA.saveStorageJson;
       const toIsoTimestamp = SHARED_DATA.toIsoTimestamp || ((date = new Date()) => (date instanceof Date ? date : new Date(date)).toISOString());
       const touchSharedProject = SHARED_DATA.touchProject || ((target) => {
         if (target && typeof target === 'object') target.updatedAt = toIsoTimestamp();
@@ -1038,7 +1041,7 @@
               .length,
             counts: countBy(objects, 'type')
           },
-          hasLocalSave: Boolean(localStorage.getItem(STORAGE_KEY))
+          hasLocalSave: hasStorageText(STORAGE_KEY)
         };
       }
 
@@ -1524,12 +1527,12 @@
 
       function saveProject() {
         touchProject();
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
+        saveStorageJson(STORAGE_KEY, project);
         setStatus(`Saved ${new Date().toLocaleTimeString()}`);
       }
 
       function loadProject() {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = readStorageText(STORAGE_KEY);
         if (!raw) {
           setStatus('No local save');
           return;

@@ -302,6 +302,13 @@ async function main() {
   assert(schema.createJsonExportName('ascii-test', new Date('2026-06-10T00:00:00Z')) === 'ascii-test-2026-06-10.json', 'shared export names should include stable date stamps');
   const jsonDownload = schema.createJsonDownloadPayload({ ok: true }, 'ascii-test', { date: new Date('2026-06-10T00:00:00Z') });
   assert(jsonDownload.fileName === 'ascii-test-2026-06-10.json' && jsonDownload.mimeType === 'application/json' && jsonDownload.text.includes('"ok": true'), 'shared json download payload should combine text, filename, and mime type');
+  const storageFixture = new Map();
+  const storageApi = {
+    getItem: (key) => storageFixture.get(key) || null,
+    setItem: (key, value) => storageFixture.set(key, String(value))
+  };
+  schema.saveStorageJson('smoke-storage', { ok: true }, storageApi);
+  assert(schema.hasStorageText('smoke-storage', storageApi) && schema.readStorageText('smoke-storage', storageApi) === '{"ok":true}', 'shared storage helpers should write and read compact JSON saves');
   assert(schema.toIsoTimestamp(new Date('2026-06-10T01:02:03Z')) === '2026-06-10T01:02:03.000Z', 'shared timestamp helper should produce ISO strings');
   const touchedProject = {};
   assert(schema.touchProject(touchedProject, new Date('2026-06-10T01:02:03Z')) === touchedProject && touchedProject.updatedAt === '2026-06-10T01:02:03.000Z', 'shared project touch helper should stamp and return projects');

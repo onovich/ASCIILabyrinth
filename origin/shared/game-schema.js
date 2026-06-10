@@ -236,6 +236,19 @@
     };
   }
 
+  function readStorageText(key, storage = window.localStorage) {
+    return storage?.getItem(key) || '';
+  }
+
+  function hasStorageText(key, storage = window.localStorage) {
+    return readStorageText(key, storage) !== '';
+  }
+
+  function saveStorageJson(key, value, storage = window.localStorage) {
+    storage?.setItem(key, JSON.stringify(value));
+    return value;
+  }
+
   function toIsoTimestamp(date = new Date()) {
     return (date instanceof Date ? date : new Date(date)).toISOString();
   }
@@ -750,6 +763,7 @@
       optionHtml: 'optionHtml',
       parseJson: 'parseJson',
       jsonExport: Object.freeze(['stringifyJson', 'createJsonExportName', 'createJsonDownloadPayload']),
+      storageTools: Object.freeze(['readStorageText', 'hasStorageText', 'saveStorageJson']),
       timestamps: Object.freeze(['toIsoTimestamp', 'touchProject']),
       floorTools: Object.freeze(['getFloorLabel', 'hasFloor', 'getFloorIds', 'getMaxFloorSpan', 'getAdjacentFloorId']),
       htmlEscapes: Object.freeze(['escapeHtml', 'escapeAttr']),
@@ -769,6 +783,7 @@
       optionsWithEmptyHtml: 'optionsWithEmptyHtml',
       parseJson: 'parseJson',
       jsonExport: Object.freeze(['stringifyJson', 'createJsonExportName', 'createJsonDownloadPayload']),
+      storageTools: Object.freeze(['readStorageText', 'hasStorageText', 'saveStorageJson']),
       timestamps: Object.freeze(['toIsoTimestamp', 'touchProject']),
       htmlEscapes: Object.freeze(['escapeHtml', 'escapeAttr']),
       projectNormalizer: 'normalizeModelProject',
@@ -820,6 +835,9 @@
     stringifyJson,
     createJsonExportName,
     createJsonDownloadPayload,
+    readStorageText,
+    hasStorageText,
+    saveStorageJson,
     toIsoTimestamp,
     touchProject,
     PALETTE_ORDER,

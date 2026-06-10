@@ -237,6 +237,9 @@
       const parseJson = SHARED_DATA.parseJson || JSON.parse;
       const stringifyJson = SHARED_DATA.stringifyJson || ((value) => JSON.stringify(value, null, 2));
       const createJsonDownloadPayload = SHARED_DATA.createJsonDownloadPayload;
+      const readStorageText = SHARED_DATA.readStorageText;
+      const hasStorageText = SHARED_DATA.hasStorageText;
+      const saveStorageJson = SHARED_DATA.saveStorageJson;
       const toIsoTimestamp = SHARED_DATA.toIsoTimestamp || ((date = new Date()) => (date instanceof Date ? date : new Date(date)).toISOString());
       const touchSharedProject = SHARED_DATA.touchProject || ((target) => {
         if (target && typeof target === 'object') target.updatedAt = toIsoTimestamp();
@@ -901,13 +904,13 @@
 
       function saveProject() {
         touchProject();
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
+        saveStorageJson(STORAGE_KEY, project);
         setStatus('Saved locally');
         render();
       }
 
       function loadProject() {
-        const raw = window.localStorage.getItem(STORAGE_KEY);
+        const raw = readStorageText(STORAGE_KEY);
         if (!raw) {
           setStatus('No local save');
           return;
@@ -987,7 +990,7 @@
             partCount: model.parts.length,
             shapes: countBy(model.parts, 'shape')
           },
-          hasLocalSave: Boolean(window.localStorage.getItem(STORAGE_KEY))
+          hasLocalSave: hasStorageText(STORAGE_KEY)
         };
       }
 

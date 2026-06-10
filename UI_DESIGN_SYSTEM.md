@@ -77,6 +77,7 @@ Preferred local patterns:
 - Shared list-item primitives include `.palette-item`, `.model-row`, `.part-row`, and their compact title overflow rules; keep page-specific columns, padding, and active colors local.
 - Use `ASCIIUI.swatchHtml(color)` and `--al-swatch-color` for palette/model color chips instead of hand-writing `style="background:..."`.
 - Use `ASCII_LABYRINTH_DATA.createJsonDownloadPayload()` to prepare editor JSON export payloads.
+- Use `ASCII_LABYRINTH_DATA.saveStorageJson()` / `readStorageText()` / `hasStorageText()` for editor local saves.
 - Use `ASCIIUI.downloadTextFile()` for editor JSON exports so Blob/link cleanup remains shared.
 - Use named shared UI snapshots such as `ASCIIUI.getContractState('runtime')` instead of repeating `typeof ASCIIUI.*` checks.
 - Use named shared schema snapshots such as `ASCII_LABYRINTH_DATA.getContractState('editor')` instead of repeating `typeof SHARED_DATA.*` checks.
