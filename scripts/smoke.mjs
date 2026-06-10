@@ -444,7 +444,14 @@ async function assertToolPageSharedUiContract() {
         'const countBy = SHARED_DATA.countBy;',
         'const clamp = SHARED_DATA.clamp;',
         'const createSharedId = SHARED_DATA.createId;',
-        'const degreesToRadians = SHARED_DATA.degreesToRadians;'
+        'const degreesToRadians = SHARED_DATA.degreesToRadians;',
+        'return SHARED_DATA.createDefaultModelProject(TEMPLATE_IDS, createTemplateModel);',
+        'return SHARED_DATA.createModelPart(id, name, shape, color, edgeColor, position, rotation, scale);',
+        'const normalized = SHARED_DATA.normalizeModelPart(raw);',
+        'const normalized = SHARED_DATA.normalizeModelProject(data, {',
+        'modelSchema: SHARED_DATA.MODEL_RUNTIME_SCHEMA,',
+        "sharedContract: SHARED_DATA.getContractState('modelEditor'),",
+        "sharedUiContract: SHARED_UI.getContractState('modelEditor'),"
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
@@ -461,7 +468,14 @@ async function assertToolPageSharedUiContract() {
         'const countBy = SHARED_DATA.countBy ||',
         'const clamp = SHARED_DATA.clamp ||',
         'const createSharedId = SHARED_DATA.createId ||',
-        'const degreesToRadians = SHARED_DATA.degreesToRadians ||'
+        'const degreesToRadians = SHARED_DATA.degreesToRadians ||',
+        'SHARED_DATA.createDefaultModelProject?.',
+        'SHARED_DATA.createModelPart?.',
+        'SHARED_DATA.normalizeModelPart?.',
+        'SHARED_DATA.normalizeModelProject?.',
+        'SHARED_DATA.MODEL_RUNTIME_SCHEMA ||',
+        "SHARED_DATA.getContractState?.('modelEditor') || {}",
+        "SHARED_UI.getContractState?.('modelEditor') || {}"
       ]
     },
     {
@@ -481,7 +495,14 @@ async function assertToolPageSharedUiContract() {
         'const countBy = SHARED_DATA.countBy;',
         'const clamp = SHARED_DATA.clamp;',
         'const createSharedId = SHARED_DATA.createId;',
-        'const degreesToRadians = SHARED_DATA.degreesToRadians;'
+        'const degreesToRadians = SHARED_DATA.degreesToRadians;',
+        'return SHARED_DATA.createDefaultModelProject(TEMPLATE_IDS, createTemplateModel);',
+        'return SHARED_DATA.createModelPart(id, name, shape, color, edgeColor, position, rotation, scale);',
+        'const normalized = SHARED_DATA.normalizeModelPart(raw);',
+        'const normalized = SHARED_DATA.normalizeModelProject(data, {',
+        'modelSchema: SHARED_DATA.MODEL_RUNTIME_SCHEMA,',
+        "sharedContract: SHARED_DATA.getContractState('modelEditor'),",
+        "sharedUiContract: SHARED_UI.getContractState('modelEditor'),"
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
@@ -498,7 +519,14 @@ async function assertToolPageSharedUiContract() {
         'const countBy = SHARED_DATA.countBy ||',
         'const clamp = SHARED_DATA.clamp ||',
         'const createSharedId = SHARED_DATA.createId ||',
-        'const degreesToRadians = SHARED_DATA.degreesToRadians ||'
+        'const degreesToRadians = SHARED_DATA.degreesToRadians ||',
+        'SHARED_DATA.createDefaultModelProject?.',
+        'SHARED_DATA.createModelPart?.',
+        'SHARED_DATA.normalizeModelPart?.',
+        'SHARED_DATA.normalizeModelProject?.',
+        'SHARED_DATA.MODEL_RUNTIME_SCHEMA ||',
+        "SHARED_DATA.getContractState?.('modelEditor') || {}",
+        "SHARED_UI.getContractState?.('modelEditor') || {}"
       ]
     }
   ];

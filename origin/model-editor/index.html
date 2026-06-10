@@ -271,12 +271,7 @@
       let controls = { yaw: -0.65, pitch: -0.45, distance: 4.2, dragging: false, lastX: 0, lastY: 0 };
 
       function createDefaultProject() {
-        return SHARED_DATA.createDefaultModelProject?.(TEMPLATE_IDS, createTemplateModel) || {
-          version: 1,
-          modelSchema: SHARED_DATA.MODEL_RUNTIME_SCHEMA || 'indoor-horror-v1',
-          updatedAt: toIsoTimestamp(),
-          models: TEMPLATE_IDS.map((id) => createTemplateModel(id))
-        };
+        return SHARED_DATA.createDefaultModelProject(TEMPLATE_IDS, createTemplateModel);
       }
 
       function createTemplateModel(templateId) {
@@ -461,30 +456,13 @@
       };
 
       function part(id, name, shape, color, edgeColor, position, rotation, scale) {
-        return SHARED_DATA.createModelPart?.(id, name, shape, color, edgeColor, position, rotation, scale) || {
-          id, name, shape, color, edgeColor, emissive: '#000000', opacity: 1, position, rotation, scale, wire: true
-        };
+        return SHARED_DATA.createModelPart(id, name, shape, color, edgeColor, position, rotation, scale);
       }
 
       function normalizePart(raw) {
-        const normalized = SHARED_DATA.normalizeModelPart?.(raw);
-        if (normalized) {
-          Object.assign(raw, normalized);
-          if (raw.id === 'part') raw.id = makeId('part');
-        } else {
-          raw.id ||= makeId('part');
-          raw.name ||= raw.id;
-          raw.shape = SHAPES.includes(raw.shape) ? raw.shape : 'box';
-          raw.color = /^#[0-9a-f]{6}$/i.test(String(raw.color)) ? String(raw.color) : '#d8d0c0';
-          raw.edgeColor = /^#[0-9a-f]{6}$/i.test(String(raw.edgeColor)) ? String(raw.edgeColor) : '#111111';
-          raw.emissive = /^#[0-9a-f]{6}$/i.test(String(raw.emissive)) ? String(raw.emissive) : '#000000';
-          raw.opacity = Math.max(0.1, Math.min(1, Number(raw.opacity ?? 1)));
-          raw.position = Array.isArray(raw.position) ? [0, 1, 2].map((index) => Number(raw.position[index]) || 0) : [0, 0.5, 0];
-          raw.rotation = Array.isArray(raw.rotation) ? [0, 1, 2].map((index) => Number(raw.rotation[index]) || 0) : [0, 0, 0];
-          raw.scale = (Array.isArray(raw.scale) ? [0, 1, 2].map((index) => Number(raw.scale[index]) || 0.4) : [0.4, 0.4, 0.4])
-            .map((value) => Math.max(0.03, Math.min(4, value)));
-          raw.wire = raw.wire !== false;
-        }
+        const normalized = SHARED_DATA.normalizeModelPart(raw);
+        Object.assign(raw, normalized);
+        if (raw.id === 'part') raw.id = makeId('part');
         return raw;
       }
 
@@ -933,27 +911,14 @@
       }
 
       function validateProject(data) {
-        const normalized = SHARED_DATA.normalizeModelProject?.(data, {
-          modelSchema: SHARED_DATA.MODEL_RUNTIME_SCHEMA || 'indoor-horror-v1',
+        const normalized = SHARED_DATA.normalizeModelProject(data, {
+          modelSchema: SHARED_DATA.MODEL_RUNTIME_SCHEMA,
           createId: makeId,
           createPartId: makeId,
           createFallbackPart: () => part('core', 'Core', 'box', '#d8d0c0', '#222222', [0, 0.5, 0], [0, 0, 0], [0.5, 0.5, 0.5])
         });
-        if (normalized) return normalized;
-
-        if (!data || typeof data !== 'object') throw new Error('invalid project');
-        if (!Array.isArray(data.models) || data.models.length === 0) throw new Error('missing models');
-        data.version ||= 1;
-        data.models.forEach((model) => {
-          model.id ||= makeId('model');
-          model.name ||= model.id;
-          model.category ||= 'enemy';
-          model.role ||= 'custom';
-          model.stats ||= { hp: 0, damage: 0, speed: 0, reward: 0 };
-          if (!Array.isArray(model.parts) || model.parts.length === 0) model.parts = [part('core', '核心', 'box', '#d8d0c0', '#222222', [0, 0.5, 0], [0, 0, 0], [0.5, 0.5, 0.5])];
-          model.parts.forEach(normalizePart);
-        });
-        return data;
+        if (!normalized) throw new Error('invalid model project');
+        return normalized;
       }
 
       function exportProject() {
@@ -975,8 +940,8 @@
         return {
           version: project.version,
           modelSchema: project.modelSchema || '',
-          sharedContract: SHARED_DATA.getContractState?.('modelEditor') || {},
-          sharedUiContract: SHARED_UI.getContractState?.('modelEditor') || {},
+          sharedContract: SHARED_DATA.getContractState('modelEditor'),
+          sharedUiContract: SHARED_UI.getContractState('modelEditor'),
           toolUi: {
             bodyClass: document.body.classList.contains('al-tool-page')
           },
