@@ -260,6 +260,13 @@ async function main() {
   assert(/^editor-[a-z0-9]+-[a-z0-9]{5}$/.test(schema.createEditorId('editor')), 'shared editor id helper should create prefixed editor ids');
   assert(schema.countBy([{ type: 'a' }, { type: 'a' }, { type: 'b' }], 'type').a === 2, 'shared countBy should count object keys');
   assert(schema.countBy([{ kind: '' }, {}], (item) => item.kind || 'unknown').unknown === 2, 'shared countBy should support derived keys');
+  const schemaContract = schema.getContractState({
+    clamp: 'clamp',
+    pathTools: ['setValueByPath', 'getValueByPath'],
+    paletteOrder: (api) => Array.isArray(api.PALETTE_ORDER),
+    missing: 'missingHelper'
+  });
+  assert(schemaContract.clamp && schemaContract.pathTools && schemaContract.paletteOrder && schemaContract.missing === false, 'shared schema contract helper should report grouped capabilities');
   assert(schema.clamp(7, 0, 5) === 5 && schema.clamp(-2, 0, 5) === 0, 'shared clamp should bound values');
   assert(schema.clamp(3, 5, 0) === 3 && schema.clamp('bad', 2, 8) === 2, 'shared clamp should normalize reversed limits and invalid values');
   assert(schema.getFloorLabel(1) === '1F' && schema.getFloorLabel(99) === '99', 'shared floor label helper should map known floors and fallback ids');

@@ -45,7 +45,8 @@ const editorSharedContractKeys = [
   'htmlEscapes',
   'optionsHtml',
   'optionsWithEmptyHtml',
-  'projectNormalizer'
+  'projectNormalizer',
+  'contractState'
 ];
 
 const modelEditorSharedContractKeys = [
@@ -61,11 +62,12 @@ const modelEditorSharedContractKeys = [
   'htmlEscapes',
   'optionsHtml',
   'optionsWithEmptyHtml',
-  'projectNormalizer'
+  'projectNormalizer',
+  'contractState'
 ];
 
 const runtimeSnapshotChecks = [
-  ['runtime shared contract', (snapshot) => allTrue(snapshot.sharedContract, ['clamp'])],
+  ['runtime shared contract', (snapshot) => allTrue(snapshot.sharedContract, ['clamp', 'contractState'])],
   ['runtime shared UI contract', (snapshot) => allTrue(snapshot.sharedUiContract, runtimeSharedUiKeys)],
   ['runtime HUD panels', (snapshot) => ['status', 'mission', 'log'].every((key) => {
     const panel = snapshot.hudPanels?.[key];

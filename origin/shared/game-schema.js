@@ -725,6 +725,21 @@
     return buildRuntimeModelProfilesFromModelProject(project);
   }
 
+  function getContractState(spec = {}, api = window.ASCII_LABYRINTH_DATA || {}) {
+    return Object.entries(spec || {}).reduce((state, [key, rule]) => {
+      if (typeof rule === 'function') {
+        state[key] = rule(api) === true;
+      } else if (Array.isArray(rule)) {
+        state[key] = rule.every((name) => typeof api[name] === 'function');
+      } else if (typeof rule === 'string') {
+        state[key] = typeof api[rule] === 'function';
+      } else {
+        state[key] = Boolean(api[key]);
+      }
+      return state;
+    }, {});
+  }
+
   window.ASCII_LABYRINTH_DATA = Object.freeze({
     TILE,
     STORAGE_KEYS,
@@ -781,6 +796,7 @@
     buildRuntimeModelProfilesFromModelProject,
     mergeRuntimeEnemyProfiles,
     loadModelProject,
-    loadRuntimeModelProfilesFromLocalStorage
+    loadRuntimeModelProfilesFromLocalStorage,
+    getContractState
   });
 })();

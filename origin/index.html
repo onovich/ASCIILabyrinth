@@ -1724,9 +1724,10 @@
 
         function getDebugSnapshot() {
             return {
-                sharedContract: {
-                    clamp: typeof SHARED_DATA.clamp === 'function'
-                },
+                sharedContract: SHARED_DATA.getContractState?.({
+                    clamp: 'clamp',
+                    contractState: 'getContractState'
+                }) || {},
                 sharedUiContract: window.ASCIIUI?.getContractState?.([
                     'formatMeter',
                     'colorVarStyle',

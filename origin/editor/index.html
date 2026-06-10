@@ -1007,29 +1007,26 @@
         const objects = allObjects(level);
         return {
           version: project.version,
-          sharedContract: {
-            typeMeta: typeof SHARED_DATA.createEditorTypeMeta === 'function',
-            defaultEffect: typeof SHARED_DATA.createDefaultEffect === 'function',
-            defaultInteraction: typeof SHARED_DATA.createDefaultInteraction === 'function',
-            paletteOrder: Array.isArray(SHARED_DATA.PALETTE_ORDER),
-            objectFactory: typeof SHARED_DATA.createEditorObject === 'function',
-            levelFactory: typeof SHARED_DATA.createEditorLevel === 'function',
-            pathTools: typeof SHARED_DATA.setValueByPath === 'function' && typeof SHARED_DATA.getValueByPath === 'function',
-            clamp: typeof SHARED_DATA.clamp === 'function',
-            optionHtml: typeof SHARED_DATA.optionHtml === 'function',
-            parseJson: typeof SHARED_DATA.parseJson === 'function',
-            jsonExport: typeof SHARED_DATA.stringifyJson === 'function' && typeof SHARED_DATA.createJsonExportName === 'function',
-            timestamps: typeof SHARED_DATA.toIsoTimestamp === 'function' && typeof SHARED_DATA.touchProject === 'function',
-            floorTools: typeof SHARED_DATA.getFloorLabel === 'function'
-              && typeof SHARED_DATA.hasFloor === 'function'
-              && typeof SHARED_DATA.getFloorIds === 'function'
-              && typeof SHARED_DATA.getMaxFloorSpan === 'function'
-              && typeof SHARED_DATA.getAdjacentFloorId === 'function',
-            htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
-            optionsHtml: typeof SHARED_DATA.optionsHtml === 'function',
-            optionsWithEmptyHtml: typeof SHARED_DATA.optionsWithEmptyHtml === 'function',
-            projectNormalizer: typeof SHARED_DATA.normalizeEditorProject === 'function'
-          },
+          sharedContract: SHARED_DATA.getContractState?.({
+            typeMeta: 'createEditorTypeMeta',
+            defaultEffect: 'createDefaultEffect',
+            defaultInteraction: 'createDefaultInteraction',
+            paletteOrder: (api) => Array.isArray(api.PALETTE_ORDER),
+            objectFactory: 'createEditorObject',
+            levelFactory: 'createEditorLevel',
+            pathTools: ['setValueByPath', 'getValueByPath'],
+            clamp: 'clamp',
+            optionHtml: 'optionHtml',
+            parseJson: 'parseJson',
+            jsonExport: ['stringifyJson', 'createJsonExportName'],
+            timestamps: ['toIsoTimestamp', 'touchProject'],
+            floorTools: ['getFloorLabel', 'hasFloor', 'getFloorIds', 'getMaxFloorSpan', 'getAdjacentFloorId'],
+            htmlEscapes: ['escapeHtml', 'escapeAttr'],
+            optionsHtml: 'optionsHtml',
+            optionsWithEmptyHtml: 'optionsWithEmptyHtml',
+            projectNormalizer: 'normalizeEditorProject',
+            contractState: 'getContractState'
+          }) || {},
           sharedUiContract: SHARED_UI.getContractState?.([
             'swatchHtml',
             'colorVarStyle',

@@ -975,21 +975,22 @@
         return {
           version: project.version,
           modelSchema: project.modelSchema || '',
-          sharedContract: {
-            defaultProjectFactory: typeof SHARED_DATA.createDefaultModelProject === 'function',
-            partFactory: typeof SHARED_DATA.createModelPart === 'function',
-            partNormalizer: typeof SHARED_DATA.normalizeModelPart === 'function',
-            pathTools: typeof SHARED_DATA.setValueByPath === 'function',
-            clamp: typeof SHARED_DATA.clamp === 'function',
-            optionHtml: typeof SHARED_DATA.optionHtml === 'function',
-            optionsHtml: typeof SHARED_DATA.optionsHtml === 'function',
-            optionsWithEmptyHtml: typeof SHARED_DATA.optionsWithEmptyHtml === 'function',
-            parseJson: typeof SHARED_DATA.parseJson === 'function',
-            jsonExport: typeof SHARED_DATA.stringifyJson === 'function' && typeof SHARED_DATA.createJsonExportName === 'function',
-            timestamps: typeof SHARED_DATA.toIsoTimestamp === 'function' && typeof SHARED_DATA.touchProject === 'function',
-            htmlEscapes: typeof SHARED_DATA.escapeHtml === 'function' && typeof SHARED_DATA.escapeAttr === 'function',
-            projectNormalizer: typeof SHARED_DATA.normalizeModelProject === 'function'
-          },
+          sharedContract: SHARED_DATA.getContractState?.({
+            defaultProjectFactory: 'createDefaultModelProject',
+            partFactory: 'createModelPart',
+            partNormalizer: 'normalizeModelPart',
+            pathTools: 'setValueByPath',
+            clamp: 'clamp',
+            optionHtml: 'optionHtml',
+            optionsHtml: 'optionsHtml',
+            optionsWithEmptyHtml: 'optionsWithEmptyHtml',
+            parseJson: 'parseJson',
+            jsonExport: ['stringifyJson', 'createJsonExportName'],
+            timestamps: ['toIsoTimestamp', 'touchProject'],
+            htmlEscapes: ['escapeHtml', 'escapeAttr'],
+            projectNormalizer: 'normalizeModelProject',
+            contractState: 'getContractState'
+          }) || {},
           sharedUiContract: SHARED_UI.getContractState?.([
             'swatchHtml',
             'downloadTextFile',

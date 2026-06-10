@@ -78,6 +78,7 @@ Preferred local patterns:
 - Use `ASCIIUI.swatchHtml(color)` and `--al-swatch-color` for palette/model color chips instead of hand-writing `style="background:..."`.
 - Use `ASCIIUI.downloadTextFile()` for editor JSON exports so Blob/link cleanup remains shared.
 - Use `ASCIIUI.getContractState()` for debug snapshots instead of repeating `typeof ASCIIUI.*` checks.
+- Use `ASCII_LABYRINTH_DATA.getContractState()` for shared schema debug snapshots instead of repeating `typeof SHARED_DATA.*` checks.
 - Repeated command buttons should use familiar icon text or concise labels.
 - New major panel surfaces should be implemented with shared `--al-*` tokens first.
 
