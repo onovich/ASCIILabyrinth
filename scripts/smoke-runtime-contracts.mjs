@@ -8,6 +8,7 @@ export const runtimeSharedUiContract = {
     '<script src="./runtime/hud.js"></script>',
     '<script src="./runtime/level-source.js"></script>',
     '<script src="./runtime/debug-snapshot.js"></script>',
+    '<script src="./runtime/enemy-profiles.js"></script>',
     'const SHARED_UI = window.ASCIIUI || {};',
     'const weapons = SHARED_DATA.WEAPON_DEFS.map((weapon) => ({ ...weapon }));',
     'const runtimeHud = window.ASCII_LABYRINTH_RUNTIME_HUD.createRuntimeHudController({',
@@ -24,8 +25,9 @@ export const runtimeSharedUiContract = {
     'const countBy = SHARED_DATA.countBy;',
     'const clamp = SHARED_DATA.clamp;',
     'const gridKey = SHARED_DATA.getCellKey;',
-    'const modelProfileBundle = SHARED_DATA.loadRuntimeModelProfilesFromLocalStorage() || null;',
-    'const mergeEnemyProfiles = SHARED_DATA.mergeRuntimeEnemyProfiles;',
+    'const runtimeEnemyProfiles = window.ASCII_LABYRINTH_RUNTIME_ENEMY_PROFILES.createRuntimeEnemyProfileSource({',
+    'activeEnemyProfiles',
+    "enemyProfiles: typeof window.ASCII_LABYRINTH_RUNTIME_ENEMY_PROFILES?.createRuntimeEnemyProfileSource === 'function'",
     "SHARED_UI.setElementVisible('password-panel', true)",
     "SHARED_UI.isElementVisible('password-panel')",
     "audio: typeof window.ASCII_LABYRINTH_RUNTIME_AUDIO?.createRuntimeAudioController === 'function'",
@@ -55,6 +57,10 @@ export const runtimeSharedUiContract = {
     'function loadRuntimeLevel()',
     'function getDebugSnapshot()',
     "document.body.dataset.debugSnapshot = JSON.stringify(getDebugSnapshot());",
+    'const enemyProfiles = [',
+    'const modelProfileBundle = SHARED_DATA.loadRuntimeModelProfilesFromLocalStorage() || null;',
+    'const modelEditorEnemyProfiles = modelProfileBundle?.enemyProfiles || [];',
+    'const mergeEnemyProfiles = SHARED_DATA.mergeRuntimeEnemyProfiles;',
     'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel;',
     'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel ||',
     'const editorLevel = SHARED_DATA.loadRuntimeLevelFromLocalStorage({ floor: 0 });',
@@ -181,10 +187,33 @@ export const runtimeDebugSnapshotContract = {
   ]
 };
 
+export const runtimeEnemyProfileContract = {
+  files: [
+    'origin/runtime/enemy-profiles.js',
+    'public/runtime/runtime/enemy-profiles.js'
+  ],
+  required: [
+    'const BUILT_IN_ENEMY_PROFILES = [',
+    "id: 'longlimb',",
+    "id: 'priest',",
+    'function createRuntimeEnemyProfileSource({ sharedData }) {',
+    'function loadActiveEnemyProfiles() {',
+    'const modelProfileBundle = sharedData.loadRuntimeModelProfilesFromLocalStorage() || null;',
+    'const modelEditorEnemyProfiles = modelProfileBundle?.enemyProfiles || [];',
+    'const activeEnemyProfiles = sharedData.mergeRuntimeEnemyProfiles(',
+    'window.ASCII_LABYRINTH_RUNTIME_ENEMY_PROFILES = {'
+  ],
+  forbidden: [
+    'window.ASCIIUI?.',
+    'onclick='
+  ]
+};
+
 export const runtimeSharedUiContracts = [
   runtimeSharedUiContract,
   runtimeAudioContract,
   runtimeDebugSnapshotContract,
+  runtimeEnemyProfileContract,
   runtimeHudContract,
   runtimeLevelSourceContract
 ];

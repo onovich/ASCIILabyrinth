@@ -13,6 +13,7 @@ async function assertSyncedFiles(assert) {
     'public/runtime/index.html',
     'public/runtime/runtime/audio.js',
     'public/runtime/runtime/debug-snapshot.js',
+    'public/runtime/runtime/enemy-profiles.js',
     'public/runtime/runtime/hud.js',
     'public/runtime/runtime/level-source.js',
     'public/editor/index.html',
