@@ -1,6 +1,11 @@
 import { readFile, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import vm from 'node:vm';
+import {
+  runtimeSharedUiContract,
+  sharedCssContract,
+  toolPageSharedUiContracts
+} from './smoke-contracts.mjs';
 
 await import('./sync-runtime.mjs');
 
@@ -211,239 +216,28 @@ async function assertSyncedFiles() {
 }
 
 async function assertSharedCssContract() {
-  const requiredSelectors = [
-    '.al-panel',
-    '.al-modal',
-    '.al-hidden',
-    '.al-mt-2',
-    '.al-tool-page',
-    '.al-tool-page :where(.app)',
-    '.al-tool-page :where(.swatch)',
-    '.al-tool-page :where(.palette-icon)',
-    '.al-tool-page :where(.workspace)',
-    '.al-tool-page :where(.canvas-shell, .preview-shell)',
-    '.al-tool-page :where(.palette-item, .model-row, .part-row)'
-  ];
-  const files = [
-    'origin/shared/ui-system.css',
-    'public/runtime/shared/ui-system.css'
-  ];
-
-  for (const file of files) {
+  for (const file of sharedCssContract.files) {
     const css = await readFile(resolve(projectRoot, file), 'utf8');
-    for (const selector of requiredSelectors) {
+    for (const selector of sharedCssContract.requiredSelectors) {
       assert(css.includes(selector), `${file} should include shared UI selector ${selector}`);
     }
   }
 }
 
 async function assertRuntimeSharedUiContract() {
-  const files = [
-    'origin/index.html',
-    'public/runtime/index.html'
-  ];
-  const requiredFragments = [
-    'const SHARED_UI = window.ASCIIUI || {};',
-    'const weapons = SHARED_DATA.WEAPON_DEFS.map((weapon) => ({ ...weapon }));',
-    'const TILE = SHARED_DATA.TILE;',
-    'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel;',
-    'const editorLevel = SHARED_DATA.loadRuntimeLevelFromLocalStorage({ floor: 0 });',
-    'const countTiles = SHARED_DATA.countTiles;',
-    'const countBy = SHARED_DATA.countBy;',
-    'const clamp = SHARED_DATA.clamp;',
-    'const gridKey = SHARED_DATA.getCellKey;',
-    'const modelProfileBundle = SHARED_DATA.loadRuntimeModelProfilesFromLocalStorage() || null;',
-    'const mergeEnemyProfiles = SHARED_DATA.mergeRuntimeEnemyProfiles;',
-    'SHARED_UI.renderPanel(id, { title, lines, tone });',
-    'return SHARED_UI.formatMeter(value, max, { width });',
-    'return SHARED_UI.setElementVisible(id, visible, display);',
-    'return SHARED_UI.isElementVisible(id);',
-    'return SHARED_UI.getElementState(id, classNames);',
-    "sharedContract: SHARED_DATA.getContractState('runtime'),",
-    "sharedUiContract: SHARED_UI.getContractState('runtime'),",
-    "status: SHARED_UI.getPanelState('ui-layer'),",
-    'const runtimeButtonBindings = SHARED_UI.bindClickHandlers(null, {',
-    "'password-submit': submitPassword,",
-    "'password-cancel': hidePasswordPrompt,",
-    "'ending-restart': restartGame,",
-    "'game-over-restart': restartGame"
-  ];
-  const forbiddenFragments = [
-    'window.ASCIIUI?.renderPanel',
-    'window.ASCIIUI?.formatMeter',
-    'window.ASCIIUI?.setElementVisible',
-    'window.ASCIIUI?.isElementVisible',
-    'window.ASCIIUI?.getElementState',
-    'window.ASCIIUI?.getContractState',
-    'window.ASCIIUI?.getPanelState',
-    'SHARED_DATA.WEAPON_DEFS ||',
-    'const TILE = SHARED_DATA.TILE ||',
-    'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel ||',
-    'SHARED_DATA.loadRuntimeLevelFromLocalStorage?.',
-    'const countTiles = SHARED_DATA.countTiles ||',
-    'const countBy = SHARED_DATA.countBy ||',
-    'const clamp = SHARED_DATA.clamp ||',
-    'const gridKey = SHARED_DATA.getCellKey ||',
-    'SHARED_DATA.loadRuntimeModelProfilesFromLocalStorage?.',
-    'const mergeEnemyProfiles = SHARED_DATA.mergeRuntimeEnemyProfiles ||',
-    "SHARED_DATA.getContractState?.('runtime') || {}",
-    'panel.replaceChildren()',
-    "element.style.display = visible ? display : 'none'",
-    'onclick=',
-    "document.getElementById('password-submit').addEventListener('click'",
-    "document.getElementById('password-cancel').addEventListener('click'"
-  ];
-
-  for (const file of files) {
+  for (const file of runtimeSharedUiContract.files) {
     const source = await readFile(resolve(projectRoot, file), 'utf8');
-    for (const fragment of requiredFragments) {
+    for (const fragment of runtimeSharedUiContract.required) {
       assert(source.includes(fragment), `${file} should call shared runtime UI helper: ${fragment}`);
     }
-    for (const fragment of forbiddenFragments) {
+    for (const fragment of runtimeSharedUiContract.forbidden) {
       assert(!source.includes(fragment), `${file} should not keep runtime UI fallback: ${fragment}`);
     }
   }
 }
 
 async function assertToolPageSharedUiContract() {
-  const editorContract = {
-    files: ['origin/editor/index.html', 'public/editor/index.html'],
-    required: [
-      'const bindElements = SHARED_UI.bindElements;',
-      'const colorVarStyle = SHARED_UI.colorVarStyle;',
-      'const swatchHtml = SHARED_UI.swatchHtml;',
-      'const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS.editorProject;',
-      'const FLOORS = SHARED_DATA.FLOORS;',
-      'const defaultEffect = SHARED_DATA.createDefaultEffect;',
-      'const defaultInteraction = SHARED_DATA.createDefaultInteraction;',
-      'const TYPE_META = SHARED_DATA.createEditorTypeMeta();',
-      'const PALETTE_ORDER = SHARED_DATA.PALETTE_ORDER;',
-      'const ENEMY_KIND_OPTIONS = SHARED_DATA.ENEMY_KIND_OPTIONS;',
-      'const escapeHtml = SHARED_DATA.escapeHtml;',
-      'const escapeAttr = SHARED_DATA.escapeAttr;',
-      'const optionHtml = SHARED_DATA.optionHtml;',
-      'const optionsHtml = SHARED_DATA.optionsHtml;',
-      'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml;',
-      'const setByPath = SHARED_DATA.setValueByPath;',
-      'const getByPath = SHARED_DATA.getValueByPath;',
-      'const parseJson = SHARED_DATA.parseJson;',
-      'const toIsoTimestamp = SHARED_DATA.toIsoTimestamp;',
-      'const touchSharedProject = SHARED_DATA.touchProject;',
-      'const countBy = SHARED_DATA.countBy;',
-      'const clamp = SHARED_DATA.clamp;',
-      'const allLevelObjects = SHARED_DATA.allLevelObjects;',
-      'const objectOnLevelFloor = SHARED_DATA.objectOnFloor;',
-      'const getFloorLabel = SHARED_DATA.getFloorLabel;',
-      'const hasFloor = SHARED_DATA.hasFloor;',
-      'const getFloorIds = SHARED_DATA.getFloorIds;',
-      'const getMaxFloorSpan = SHARED_DATA.getMaxFloorSpan;',
-      'const getAdjacentFloorId = SHARED_DATA.getAdjacentFloorId;',
-      'const createSharedId = SHARED_DATA.createId;',
-      'return SHARED_DATA.createEditorLevel(id, name, width, height, {',
-      'return SHARED_DATA.createEditorObject(type, x, y, floor, extra, {',
-      'const normalized = SHARED_DATA.normalizeEditorProject(data, { cellSize: CELL_SIZE });',
-      "sharedContract: SHARED_DATA.getContractState('editor'),",
-      "sharedUiContract: SHARED_UI.getContractState('editor'),"
-    ],
-    forbidden: [
-      'const bindElements = SHARED_UI.bindElements ||',
-      'const colorVarStyle = SHARED_UI.colorVarStyle ||',
-      'const swatchHtml = SHARED_UI.swatchHtml ||',
-      'SHARED_DATA.STORAGE_KEYS?.editorProject ||',
-      'const FLOORS = SHARED_DATA.FLOORS ||',
-      'const defaultEffect = SHARED_DATA.createDefaultEffect ||',
-      'const defaultInteraction = SHARED_DATA.createDefaultInteraction ||',
-      'const TYPE_META = SHARED_DATA.createEditorTypeMeta?.() ||',
-      'const PALETTE_ORDER = SHARED_DATA.PALETTE_ORDER ||',
-      'const ENEMY_KIND_OPTIONS = SHARED_DATA.ENEMY_KIND_OPTIONS ||',
-      'const escapeHtml = SHARED_DATA.escapeHtml ||',
-      'const escapeAttr = SHARED_DATA.escapeAttr ||',
-      'const optionHtml = SHARED_DATA.optionHtml ||',
-      'const optionsHtml = SHARED_DATA.optionsHtml ||',
-      'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml ||',
-      'const setByPath = SHARED_DATA.setValueByPath ||',
-      'const getByPath = SHARED_DATA.getValueByPath ||',
-      'const parseJson = SHARED_DATA.parseJson ||',
-      'const toIsoTimestamp = SHARED_DATA.toIsoTimestamp ||',
-      'const touchSharedProject = SHARED_DATA.touchProject ||',
-      'const countBy = SHARED_DATA.countBy ||',
-      'const clamp = SHARED_DATA.clamp ||',
-      'const allLevelObjects = SHARED_DATA.allLevelObjects ||',
-      'const objectFloorSpanOf = SHARED_DATA.objectFloorSpan ||',
-      'const objectOnLevelFloor = SHARED_DATA.objectOnFloor ||',
-      'const getFloorLabel = SHARED_DATA.getFloorLabel ||',
-      'const hasFloor = SHARED_DATA.hasFloor ||',
-      'const getFloorIds = SHARED_DATA.getFloorIds ||',
-      'const getMaxFloorSpan = SHARED_DATA.getMaxFloorSpan ||',
-      'const getAdjacentFloorId = SHARED_DATA.getAdjacentFloorId ||',
-      'const createSharedId = SHARED_DATA.createId ||',
-      'const sharedLevel = SHARED_DATA.createEditorLevel?.',
-      'const sharedObject = SHARED_DATA.createEditorObject?.',
-      'const normalized = SHARED_DATA.normalizeEditorProject?.',
-      "SHARED_DATA.getContractState?.('editor') || {}",
-      "SHARED_UI.getContractState?.('editor') || {}"
-    ]
-  };
-
-  const modelEditorContract = {
-    files: ['origin/model-editor/index.html', 'public/model-editor/index.html'],
-    required: [
-      'const bindElements = SHARED_UI.bindElements;',
-      'const swatchHtml = SHARED_UI.swatchHtml;',
-      'const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS.modelProject;',
-      'const SHAPES = SHARED_DATA.MODEL_SHAPES;',
-      'const TEMPLATE_IDS = SHARED_DATA.MODEL_TEMPLATE_IDS;',
-      'const escapeHtml = SHARED_DATA.escapeHtml;',
-      'const escapeAttr = SHARED_DATA.escapeAttr;',
-      'const optionHtml = SHARED_DATA.optionHtml;',
-      'const optionsHtml = SHARED_DATA.optionsHtml;',
-      'const setByPath = SHARED_DATA.setValueByPath;',
-      'const parseJson = SHARED_DATA.parseJson;',
-      'const stringifyJson = SHARED_DATA.stringifyJson;',
-      'const toIsoTimestamp = SHARED_DATA.toIsoTimestamp;',
-      'const touchSharedProject = SHARED_DATA.touchProject;',
-      'const countBy = SHARED_DATA.countBy;',
-      'const clamp = SHARED_DATA.clamp;',
-      'const createSharedId = SHARED_DATA.createId;',
-      'const degreesToRadians = SHARED_DATA.degreesToRadians;',
-      'return SHARED_DATA.createDefaultModelProject(TEMPLATE_IDS, createTemplateModel);',
-      'return SHARED_DATA.createModelPart(id, name, shape, color, edgeColor, position, rotation, scale);',
-      'const normalized = SHARED_DATA.normalizeModelPart(raw);',
-      'const normalized = SHARED_DATA.normalizeModelProject(data, {',
-      'modelSchema: SHARED_DATA.MODEL_RUNTIME_SCHEMA,',
-      "sharedContract: SHARED_DATA.getContractState('modelEditor'),",
-      "sharedUiContract: SHARED_UI.getContractState('modelEditor'),"
-    ],
-    forbidden: [
-      'const bindElements = SHARED_UI.bindElements ||',
-      'const swatchHtml = SHARED_UI.swatchHtml ||',
-      'SHARED_DATA.STORAGE_KEYS?.modelProject ||',
-      'const SHAPES = SHARED_DATA.MODEL_SHAPES ||',
-      'const TEMPLATE_IDS = SHARED_DATA.MODEL_TEMPLATE_IDS ||',
-      'const escapeHtml = SHARED_DATA.escapeHtml ||',
-      'const escapeAttr = SHARED_DATA.escapeAttr ||',
-      'const optionHtml = SHARED_DATA.optionHtml ||',
-      'const optionsHtml = SHARED_DATA.optionsHtml ||',
-      'const setByPath = SHARED_DATA.setValueByPath ||',
-      'const parseJson = SHARED_DATA.parseJson ||',
-      'const stringifyJson = SHARED_DATA.stringifyJson ||',
-      'const toIsoTimestamp = SHARED_DATA.toIsoTimestamp ||',
-      'const touchSharedProject = SHARED_DATA.touchProject ||',
-      'const countBy = SHARED_DATA.countBy ||',
-      'const clamp = SHARED_DATA.clamp ||',
-      'const createSharedId = SHARED_DATA.createId ||',
-      'const degreesToRadians = SHARED_DATA.degreesToRadians ||',
-      'SHARED_DATA.createDefaultModelProject?.',
-      'SHARED_DATA.createModelPart?.',
-      'SHARED_DATA.normalizeModelPart?.',
-      'SHARED_DATA.normalizeModelProject?.',
-      'SHARED_DATA.MODEL_RUNTIME_SCHEMA ||',
-      "SHARED_DATA.getContractState?.('modelEditor') || {}",
-      "SHARED_UI.getContractState?.('modelEditor') || {}"
-    ]
-  };
-
-  const pageContracts = [editorContract, modelEditorContract].flatMap(({ files, required, forbidden }) =>
+  const pageContracts = toolPageSharedUiContracts.flatMap(({ files, required, forbidden }) =>
     files.map((file) => ({ file, required, forbidden }))
   );
 
