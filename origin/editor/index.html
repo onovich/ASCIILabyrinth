@@ -584,32 +584,16 @@
         return allObjects().find((object) => object.id === id) || null;
       }
 
-      function floorLabel(floorId) {
-        return getFloorLabel(floorId, FLOORS);
-      }
-
-      function adjacentFloorId(direction) {
-        return getAdjacentFloorId(currentFloor, direction, FLOORS);
-      }
-
-      function floorExists(floorId) {
-        return hasFloor(floorId, FLOORS);
-      }
-
-      function objectOnFloor(object, floorId = currentFloor) {
-        return objectOnLevelFloor(object, floorId);
-      }
-
       function visibleOnFloor(object) {
-        return objectOnFloor(object, currentFloor);
+        return objectOnLevelFloor(object, currentFloor);
       }
 
       function getPreviewFloorIds() {
         const floors = [];
-        const previous = adjacentFloorId(-1);
-        const next = adjacentFloorId(1);
-        if (floorPreview.previous && previous !== null && floorExists(previous)) floors.push(previous);
-        if (floorPreview.next && next !== null && floorExists(next)) floors.push(next);
+        const previous = getAdjacentFloorId(currentFloor, -1, FLOORS);
+        const next = getAdjacentFloorId(currentFloor, 1, FLOORS);
+        if (floorPreview.previous && previous !== null && hasFloor(previous, FLOORS)) floors.push(previous);
+        if (floorPreview.next && next !== null && hasFloor(next, FLOORS)) floors.push(next);
         return floors;
       }
 
@@ -637,7 +621,7 @@
         currentLevelId = project.levels.some((level) => level.id === snapshot.currentLevelId)
           ? snapshot.currentLevelId
           : project.levels[0].id;
-        currentFloor = floorExists(snapshot.currentFloor) ? snapshot.currentFloor : project.levels[0].floors?.[0] ?? 0;
+        currentFloor = hasFloor(snapshot.currentFloor, FLOORS) ? snapshot.currentFloor : project.levels[0].floors?.[0] ?? 0;
         floorPreview = {
           previous: Boolean(snapshot.floorPreview?.previous),
           next: Boolean(snapshot.floorPreview?.next)
@@ -673,7 +657,7 @@
         if (object.type !== 'ramp') {
           const floorIds = getFloorIds(FLOORS);
           const minFloor = Math.min(...floorIds);
-          object.floor = floorExists(Number(object.floor)) ? Number(object.floor) : minFloor;
+          object.floor = hasFloor(Number(object.floor), FLOORS) ? Number(object.floor) : minFloor;
           if ('floorSpan' in object) {
             const maxSpan = getMaxFloorSpan(object.floor, FLOORS);
             object.floorSpan = clamp(Number(object.floorSpan) || 1, 1, maxSpan);
@@ -710,7 +694,7 @@
 
         const all = allObjects(level);
         for (const floorId of getPreviewFloorIds()) {
-          const previewObjects = all.filter((object) => objectOnFloor(object, floorId) && !visibleOnFloor(object));
+          const previewObjects = all.filter((object) => objectOnLevelFloor(object, floorId) && !visibleOnFloor(object));
           drawObjectGroup(previewObjects, { preview: true, floorId });
         }
 
@@ -851,8 +835,8 @@
       function renderMeta() {
         const level = getLevel();
         const counts = countBy(allObjects(level), 'type');
-        const previewLabels = getPreviewFloorIds().map(floorLabel);
-        dom.sceneName.textContent = `${level.name} / ${floorLabel(currentFloor)}`;
+        const previewLabels = getPreviewFloorIds().map((floorId) => getFloorLabel(floorId, FLOORS));
+        dom.sceneName.textContent = `${level.name} / ${getFloorLabel(currentFloor, FLOORS)}`;
         dom.sceneStats.textContent = `${level.width}x${level.height} / ${Object.values(counts).reduce((a, b) => a + b, 0)} objects${previewLabels.length ? ` / 预览 ${previewLabels.join(', ')}` : ''}`;
         dom.projectMeta.textContent = `${project.levels.length} levels`;
         dom.schemaText.textContent = `schema v${project.version}`;
@@ -891,7 +875,7 @@
             height: level.height,
             visibleCount: objects.filter(visibleOnFloor).length,
             previewCount: getPreviewFloorIds()
-              .flatMap((floorId) => objects.filter((object) => objectOnFloor(object, floorId) && !visibleOnFloor(object)))
+              .flatMap((floorId) => objects.filter((object) => objectOnLevelFloor(object, floorId) && !visibleOnFloor(object)))
               .length,
             counts: countBy(objects, 'type')
           },
@@ -910,14 +894,14 @@
             `<button type="button" data-floor="${floor.id}" class="${floor.id === currentFloor ? 'active' : ''}">${floor.label}</button>`
         ).join('');
 
-        const previous = adjacentFloorId(-1);
-        const next = adjacentFloorId(1);
+        const previous = getAdjacentFloorId(currentFloor, -1, FLOORS);
+        const next = getAdjacentFloorId(currentFloor, 1, FLOORS);
         dom.showPrevFloor.checked = floorPreview.previous && previous !== null;
         dom.showPrevFloor.disabled = previous === null;
-        dom.prevFloorLabel.textContent = previous === null ? '无上一层' : `显示上一层 ${floorLabel(previous)}`;
+        dom.prevFloorLabel.textContent = previous === null ? '无上一层' : `显示上一层 ${getFloorLabel(previous, FLOORS)}`;
         dom.showNextFloor.checked = floorPreview.next && next !== null;
         dom.showNextFloor.disabled = next === null;
-        dom.nextFloorLabel.textContent = next === null ? '无下一层' : `显示下一层 ${floorLabel(next)}`;
+        dom.nextFloorLabel.textContent = next === null ? '无下一层' : `显示下一层 ${getFloorLabel(next, FLOORS)}`;
 
         const level = getLevel();
         dom.levelInspector.innerHTML = `

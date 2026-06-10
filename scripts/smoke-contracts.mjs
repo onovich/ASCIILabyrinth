@@ -158,6 +158,10 @@ export const toolPageSharedUiContracts = [
       'const normalized = SHARED_DATA.normalizeEditorProject?.',
       'function option(value, label, selected)',
       'function makeId(prefix)',
+      'function floorLabel(floorId)',
+      'function adjacentFloorId(direction)',
+      'function floorExists(floorId)',
+      'function objectOnFloor(object',
       "SHARED_DATA.getContractState?.('editor') || {}",
       "SHARED_UI.getContractState?.('editor') || {}"
     ]
