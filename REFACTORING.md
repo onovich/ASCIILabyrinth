@@ -7,6 +7,7 @@ This project is moving from prototype-heavy HTML pages toward shared runtime, ed
 - `origin/index.html`: authoritative playable runtime.
 - `origin/runtime/audio.js`: runtime BGM and SFX controller.
 - `origin/runtime/debug-snapshot.js`: runtime debug snapshot publisher used by visual smoke.
+- `origin/runtime/effects.js`: runtime projectile and explosion spawn factory.
 - `origin/runtime/enemy-models.js`: runtime enemy model geometry and flash-state factory.
 - `origin/runtime/enemy-profiles.js`: built-in runtime enemy profile catalog and model-editor profile merge.
 - `origin/runtime/hud.js`: runtime HUD, mission, and radio log rendering controller.

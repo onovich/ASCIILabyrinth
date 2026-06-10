@@ -23,6 +23,7 @@ const runtimeSnapshotChecks = [
   ['runtime shared UI contract', (snapshot) => contractHealthy(snapshot.sharedUiContract)],
   ['runtime audio module', (snapshot) => snapshot.runtimeModules?.audio === true && snapshot.audio?.sfxCount >= 9],
   ['runtime debug snapshot module', (snapshot) => snapshot.runtimeModules?.debugSnapshot === true],
+  ['runtime effects module', (snapshot) => snapshot.runtimeModules?.effects === true],
   ['runtime enemy model module', (snapshot) => snapshot.runtimeModules?.enemyModels === true],
   ['runtime enemy profile module', (snapshot) => snapshot.runtimeModules?.enemyProfiles === true],
   ['runtime HUD module', (snapshot) => snapshot.runtimeModules?.hud === true],

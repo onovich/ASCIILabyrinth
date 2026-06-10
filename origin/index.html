@@ -89,6 +89,7 @@
     <script src="./runtime/debug-snapshot.js"></script>
     <script src="./runtime/enemy-profiles.js"></script>
     <script src="./runtime/enemy-models.js"></script>
+    <script src="./runtime/effects.js"></script>
 
     <script>
         // ==========================================
@@ -602,6 +603,16 @@
         const runtimeEnemyModels = window.ASCII_LABYRINTH_RUNTIME_ENEMY_MODELS.createRuntimeEnemyModelFactory({ THREE });
         const buildEnemyModel = runtimeEnemyModels.buildEnemyModel;
         const setEnemyFlash = runtimeEnemyModels.setEnemyFlash;
+        const runtimeEffects = window.ASCII_LABYRINTH_RUNTIME_EFFECTS.createRuntimeEffectsFactory({
+            THREE,
+            scene,
+            player,
+            bullets,
+            particles,
+            effectLights
+        });
+        const spawnExplosion = runtimeEffects.spawnExplosion;
+        const spawnBullet = runtimeEffects.spawnBullet;
 
         function spawnEnemy(x, z, config = {}) {
             const requestedKind = typeof config === 'string' ? config : config?.enemyKind;
@@ -623,45 +634,6 @@
                 flashTimer: 0,
                 attackTimer: 0
             });
-        }
-
-        function spawnExplosion(pos) {
-            // 产生爆炸粒子
-            for (let i = 0; i < 15; i++) {
-                const size = 0.1 + Math.random() * 0.2;
-                const geo = new THREE.BoxGeometry(size, size, size);
-                const mat = new THREE.MeshBasicMaterial({ color: Math.random() > 0.5 ? 0xff3300 : 0xffaa00 });
-                const p = new THREE.Mesh(geo, mat);
-                p.position.copy(pos);
-                p.position.y += 0.6; 
-                // 给粒子随机抛射速度
-                const vx = (Math.random() - 0.5) * 8;
-                const vy = Math.random() * 8;
-                const vz = (Math.random() - 0.5) * 8;
-                scene.add(p);
-                particles.push({ mesh: p, vx, vy, vz, life: 20 + Math.random() * 15 });
-            }
-            // 产生爆炸瞬间的高亮闪光
-            const burstLight = new THREE.PointLight(0xff5500, 3.0, 8);
-            burstLight.position.copy(pos);
-            burstLight.position.y += 0.6;
-            scene.add(burstLight);
-            effectLights.push({ light: burstLight, life: 10 });
-        }
-
-        function spawnBullet(direction, weapon) {
-            const bulletGeo = new THREE.SphereGeometry(0.1, 4, 4);
-            const bulletMat = new THREE.MeshBasicMaterial({ color: weapon.lightColor });
-            const bullet = new THREE.Mesh(bulletGeo, bulletMat);
-
-            const bulletLight = new THREE.PointLight(weapon.lightColor, weapon.id === 'scatter' ? 1.35 : 2.0, 7);
-            bullet.add(bulletLight);
-
-            bullet.position.copy(player.position);
-            bullet.position.y += 0.8;
-
-            scene.add(bullet);
-            bullets.push({ mesh: bullet, dir: direction.normalize(), life: weapon.id === 'scatter' ? 34 : 60, damage: weapon.damage, speed: weapon.speed });
         }
 
         function shoot() {
@@ -1291,6 +1263,7 @@
             sharedUi: SHARED_UI,
             runtimeModules: {
                 audio: typeof window.ASCII_LABYRINTH_RUNTIME_AUDIO?.createRuntimeAudioController === 'function',
+                effects: typeof window.ASCII_LABYRINTH_RUNTIME_EFFECTS?.createRuntimeEffectsFactory === 'function',
                 enemyModels: typeof window.ASCII_LABYRINTH_RUNTIME_ENEMY_MODELS?.createRuntimeEnemyModelFactory === 'function',
                 enemyProfiles: typeof window.ASCII_LABYRINTH_RUNTIME_ENEMY_PROFILES?.createRuntimeEnemyProfileSource === 'function',
                 hud: typeof window.ASCII_LABYRINTH_RUNTIME_HUD?.createRuntimeHudController === 'function',

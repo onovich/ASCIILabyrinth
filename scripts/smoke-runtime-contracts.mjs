@@ -10,6 +10,7 @@ export const runtimeSharedUiContract = {
     '<script src="./runtime/debug-snapshot.js"></script>',
     '<script src="./runtime/enemy-profiles.js"></script>',
     '<script src="./runtime/enemy-models.js"></script>',
+    '<script src="./runtime/effects.js"></script>',
     'const SHARED_UI = window.ASCIIUI || {};',
     'const weapons = SHARED_DATA.WEAPON_DEFS.map((weapon) => ({ ...weapon }));',
     'const runtimeHud = window.ASCII_LABYRINTH_RUNTIME_HUD.createRuntimeHudController({',
@@ -31,6 +32,10 @@ export const runtimeSharedUiContract = {
     'const runtimeEnemyModels = window.ASCII_LABYRINTH_RUNTIME_ENEMY_MODELS.createRuntimeEnemyModelFactory({ THREE });',
     'const buildEnemyModel = runtimeEnemyModels.buildEnemyModel;',
     'const setEnemyFlash = runtimeEnemyModels.setEnemyFlash;',
+    'const runtimeEffects = window.ASCII_LABYRINTH_RUNTIME_EFFECTS.createRuntimeEffectsFactory({',
+    'const spawnExplosion = runtimeEffects.spawnExplosion;',
+    'const spawnBullet = runtimeEffects.spawnBullet;',
+    "effects: typeof window.ASCII_LABYRINTH_RUNTIME_EFFECTS?.createRuntimeEffectsFactory === 'function'",
     "enemyModels: typeof window.ASCII_LABYRINTH_RUNTIME_ENEMY_MODELS?.createRuntimeEnemyModelFactory === 'function'",
     "enemyProfiles: typeof window.ASCII_LABYRINTH_RUNTIME_ENEMY_PROFILES?.createRuntimeEnemyProfileSource === 'function'",
     "SHARED_UI.setElementVisible('password-panel', true)",
@@ -70,6 +75,8 @@ export const runtimeSharedUiContract = {
     'function createEnemyPart(part)',
     'function setEnemyFlash(enemy, flashing)',
     'function buildEnemyModel(profile)',
+    'function spawnExplosion(pos)',
+    'function spawnBullet(direction, weapon)',
     'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel;',
     'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel ||',
     'const editorLevel = SHARED_DATA.loadRuntimeLevelFromLocalStorage({ floor: 0 });',
@@ -238,10 +245,32 @@ export const runtimeEnemyModelContract = {
   ]
 };
 
+export const runtimeEffectsContract = {
+  files: [
+    'origin/runtime/effects.js',
+    'public/runtime/runtime/effects.js'
+  ],
+  required: [
+    'function createRuntimeEffectsFactory({',
+    'function spawnExplosion(pos) {',
+    'particles.push({ mesh: p, vx, vy, vz, life: 20 + Math.random() * 15 });',
+    'effectLights.push({ light: burstLight, life: 10 });',
+    'function spawnBullet(direction, weapon) {',
+    'bullets.push({',
+    'function getEffectsState() {',
+    'window.ASCII_LABYRINTH_RUNTIME_EFFECTS = {'
+  ],
+  forbidden: [
+    'window.ASCIIUI?.',
+    'onclick='
+  ]
+};
+
 export const runtimeSharedUiContracts = [
   runtimeSharedUiContract,
   runtimeAudioContract,
   runtimeDebugSnapshotContract,
+  runtimeEffectsContract,
   runtimeEnemyModelContract,
   runtimeEnemyProfileContract,
   runtimeHudContract,
