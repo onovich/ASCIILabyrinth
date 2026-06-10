@@ -1023,7 +1023,7 @@
                 gameState.isGameOver = true;
                 pushLog(`被 ${sourceEnemy?.name || '未知敌人'} 杀死。最终得分 ${gameState.score}。`);
                 if (document.pointerLockElement) document.exitPointerLock(); // 释放鼠标指针，允许点击 UI
-                setElementVisible('game-over', true);
+                SHARED_UI.setElementVisible('game-over', true);
                 document.getElementById('final-score').innerText = gameState.score;
             } else {
                 updateUI();
@@ -1061,13 +1061,13 @@
             gameState.isPaused = true;
             if (document.pointerLockElement) document.exitPointerLock();
             const input = document.getElementById('password-input');
-            setElementVisible('password-panel', true);
+            SHARED_UI.setElementVisible('password-panel', true);
             input.value = '';
             setTimeout(() => input.focus(), 0);
         }
 
         function hidePasswordPrompt() {
-            setElementVisible('password-panel', false);
+            SHARED_UI.setElementVisible('password-panel', false);
             gameState.isPaused = false;
             updateUI();
         }
@@ -1078,13 +1078,13 @@
             gameState.score += 1000;
             playSfx('success');
             if (document.pointerLockElement) document.exitPointerLock();
-            setElementVisible('password-panel', false);
+            SHARED_UI.setElementVisible('password-panel', false);
             document.getElementById('ending-text').textContent = [
                 'FACILITY LOCKDOWN BYPASSED',
                 'SURVIVOR SIGNAL ACQUIRED',
                 `FINAL SCORE ${String(gameState.score).padStart(6, '0')}`
             ].join('\n');
-            setElementVisible('ending-panel', true);
+            SHARED_UI.setElementVisible('ending-panel', true);
             updateUI();
         }
 
@@ -1319,7 +1319,7 @@
         const keys = { w: false, a: false, s: false, d: false };
         window.addEventListener('keydown', e => {
             const k = e.key.toLowerCase();
-            const passwordVisible = isElementVisible('password-panel');
+            const passwordVisible = SHARED_UI.isElementVisible('password-panel');
             if (passwordVisible) {
                 if (k === 'enter') submitPassword();
                 if (k === 'escape') hidePasswordPrompt();
@@ -1378,22 +1378,6 @@
             return false;
         }
 
-        function renderPanel(id, title, lines, tone = '') {
-            SHARED_UI.renderPanel(id, { title, lines, tone });
-        }
-
-        function bar(value, max, width = 12) {
-            return SHARED_UI.formatMeter(value, max, { width });
-        }
-
-        function setElementVisible(id, visible, display = 'block') {
-            return SHARED_UI.setElementVisible(id, visible, display);
-        }
-
-        function isElementVisible(id) {
-            return SHARED_UI.isElementVisible(id);
-        }
-
         function pushLog(text) {
             messageLog.unshift(`> ${text}`);
             messageLog.splice(5);
@@ -1411,23 +1395,34 @@
             document.getElementById('score-val').innerText = gameState.score;
 
             const weapon = weapons[gameState.weaponIndex];
-            renderPanel('ui-layer', 'OPS / STATUS', [
-                `HP   ${bar(gameState.health, 100)} ${String(gameState.health).padStart(3, '0')}`,
-                `AMMO ${String(gameState.ammo).padStart(3, '0')}    SCORE ${String(gameState.score).padStart(5, '0')}`,
-                `WEAP ${weapon.name.padEnd(8, ' ')} COST ${weapon.cost}`,
-                `KEY  ${gameState.hasKey ? 'YES' : 'NO '}    CODE ${gameState.foundCode ? EXIT_CODE : '----'}`,
-                ...(gameState.isPaused ? ['PAUSED / 调试面板已打开'] : [])
-            ]);
+            SHARED_UI.renderPanel('ui-layer', {
+                title: 'OPS / STATUS',
+                lines: [
+                    `HP   ${SHARED_UI.formatMeter(gameState.health, 100, { width: 12 })} ${String(gameState.health).padStart(3, '0')}`,
+                    `AMMO ${String(gameState.ammo).padStart(3, '0')}    SCORE ${String(gameState.score).padStart(5, '0')}`,
+                    `WEAP ${weapon.name.padEnd(8, ' ')} COST ${weapon.cost}`,
+                    `KEY  ${gameState.hasKey ? 'YES' : 'NO '}    CODE ${gameState.foundCode ? EXIT_CODE : '----'}`,
+                    ...(gameState.isPaused ? ['PAUSED / 调试面板已打开'] : [])
+                ]
+            });
 
-            renderPanel('mission-layer', 'MISSION / LINK', [
-                gameState.objective,
-                gameState.nearbyAction || 'WASD move | mouse look | LMB fire',
-                `${weapons.map((item, index) => `${index + 1} ${item.name.toLowerCase()}`).join(' | ')} | E interact`
-            ], 'cyan');
+            SHARED_UI.renderPanel('mission-layer', {
+                title: 'MISSION / LINK',
+                tone: 'cyan',
+                lines: [
+                    gameState.objective,
+                    gameState.nearbyAction || 'WASD move | mouse look | LMB fire',
+                    `${weapons.map((item, index) => `${index + 1} ${item.name.toLowerCase()}`).join(' | ')} | E interact`
+                ]
+            });
 
-            renderPanel('log-layer', 'RADIO / LOG', messageLog.length ? messageLog : [
-                '> 活下来，找到钥匙并逃离设施。'
-            ], 'amber');
+            SHARED_UI.renderPanel('log-layer', {
+                title: 'RADIO / LOG',
+                tone: 'amber',
+                lines: messageLog.length ? messageLog : [
+                    '> 活下来，找到钥匙并逃离设施。'
+                ]
+            });
         }
 
         const clock = new THREE.Clock();
@@ -1639,10 +1634,7 @@
             updateUI();
         }
         if (new URLSearchParams(window.location.search).get('debugModal') === 'password') {
-            setElementVisible('password-panel', true);
-        }
-        function getUiClassState(id, classNames) {
-            return SHARED_UI.getElementState(id, classNames);
+            SHARED_UI.setElementVisible('password-panel', true);
         }
 
         function getDebugSnapshot() {
@@ -1655,24 +1647,24 @@
                     log: SHARED_UI.getPanelState('log-layer')
                 },
                 screenUi: {
-                    asciiCanvas: getUiClassState('ascii-canvas', ['al-fullscreen-canvas']),
-                    crosshair: getUiClassState('crosshair', ['al-crosshair']),
-                    damageFlash: getUiClassState('damage-flash', ['al-damage-flash'])
+                    asciiCanvas: SHARED_UI.getElementState('ascii-canvas', ['al-fullscreen-canvas']),
+                    crosshair: SHARED_UI.getElementState('crosshair', ['al-crosshair']),
+                    damageFlash: SHARED_UI.getElementState('damage-flash', ['al-damage-flash'])
                 },
                 modalUi: {
-                    passwordPanel: getUiClassState('password-panel', ['terminal-modal', 'al-modal', 'al-modal-centered']),
-                    endingPanel: getUiClassState('ending-panel', ['terminal-modal', 'al-modal', 'al-modal-centered']),
-                    gameOverPanel: getUiClassState('game-over', ['terminal-modal', 'al-modal', 'al-modal-centered']),
-                    passwordTitle: getUiClassState('password-title', ['al-modal-title']),
-                    passwordCopy: getUiClassState('password-copy', ['al-modal-copy']),
-                    endingTitle: getUiClassState('ending-title', ['al-modal-title']),
-                    endingText: getUiClassState('ending-text', ['al-modal-copy']),
-                    gameOverTitle: getUiClassState('game-over-title', ['al-modal-title']),
-                    passwordInput: getUiClassState('password-input', ['al-input', 'al-input-code']),
-                    passwordSubmit: getUiClassState('password-submit', ['al-button', 'al-button-terminal']),
-                    passwordCancel: getUiClassState('password-cancel', ['al-button', 'al-button-terminal']),
-                    endingRestart: getUiClassState('ending-restart', ['al-button', 'al-button-terminal']),
-                    gameOverRestart: getUiClassState('game-over-restart', ['al-button', 'al-button-terminal'])
+                    passwordPanel: SHARED_UI.getElementState('password-panel', ['terminal-modal', 'al-modal', 'al-modal-centered']),
+                    endingPanel: SHARED_UI.getElementState('ending-panel', ['terminal-modal', 'al-modal', 'al-modal-centered']),
+                    gameOverPanel: SHARED_UI.getElementState('game-over', ['terminal-modal', 'al-modal', 'al-modal-centered']),
+                    passwordTitle: SHARED_UI.getElementState('password-title', ['al-modal-title']),
+                    passwordCopy: SHARED_UI.getElementState('password-copy', ['al-modal-copy']),
+                    endingTitle: SHARED_UI.getElementState('ending-title', ['al-modal-title']),
+                    endingText: SHARED_UI.getElementState('ending-text', ['al-modal-copy']),
+                    gameOverTitle: SHARED_UI.getElementState('game-over-title', ['al-modal-title']),
+                    passwordInput: SHARED_UI.getElementState('password-input', ['al-input', 'al-input-code']),
+                    passwordSubmit: SHARED_UI.getElementState('password-submit', ['al-button', 'al-button-terminal']),
+                    passwordCancel: SHARED_UI.getElementState('password-cancel', ['al-button', 'al-button-terminal']),
+                    endingRestart: SHARED_UI.getElementState('ending-restart', ['al-button', 'al-button-terminal']),
+                    gameOverRestart: SHARED_UI.getElementState('game-over-restart', ['al-button', 'al-button-terminal'])
                 },
                 modalText: {
                     passwordTitle: document.getElementById('password-title')?.textContent || '',
