@@ -6,6 +6,7 @@ export const runtimeSharedUiContract = {
   required: [
     '<script src="./runtime/audio.js"></script>',
     '<script src="./runtime/hud.js"></script>',
+    '<script src="./runtime/level-source.js"></script>',
     'const SHARED_UI = window.ASCIIUI || {};',
     'const weapons = SHARED_DATA.WEAPON_DEFS.map((weapon) => ({ ...weapon }));',
     'const runtimeHud = window.ASCII_LABYRINTH_RUNTIME_HUD.createRuntimeHudController({',
@@ -16,8 +17,8 @@ export const runtimeSharedUiContract = {
     'const playSfx = runtimeAudio.playSfx;',
     'const startBgm = runtimeAudio.startBgm;',
     'const TILE = SHARED_DATA.TILE;',
-    'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel;',
-    'const editorLevel = SHARED_DATA.loadRuntimeLevelFromLocalStorage({ floor: 0 });',
+    'const runtimeLevelSource = window.ASCII_LABYRINTH_RUNTIME_LEVEL_SOURCE.createRuntimeLevelSource({',
+    'const runtimeLevel = runtimeLevelSource.loadRuntimeLevel();',
     'const countTiles = SHARED_DATA.countTiles;',
     'const countBy = SHARED_DATA.countBy;',
     'const clamp = SHARED_DATA.clamp;',
@@ -31,6 +32,8 @@ export const runtimeSharedUiContract = {
     "sharedUiContract: SHARED_UI.getContractState('runtime'),",
     "audio: typeof window.ASCII_LABYRINTH_RUNTIME_AUDIO?.createRuntimeAudioController === 'function'",
     "hud: typeof window.ASCII_LABYRINTH_RUNTIME_HUD?.createRuntimeHudController === 'function'",
+    "levelSource: typeof window.ASCII_LABYRINTH_RUNTIME_LEVEL_SOURCE?.createRuntimeLevelSource === 'function'",
+    'levelSource: runtimeLevelSource.getLevelSourceState(runtimeLevel),',
     "status: SHARED_UI.getPanelState('ui-layer'),",
     'const runtimeButtonBindings = SHARED_UI.bindClickHandlers(null, {',
     "'password-submit': submitPassword,",
@@ -48,7 +51,12 @@ export const runtimeSharedUiContract = {
     'window.ASCIIUI?.getPanelState',
     'SHARED_DATA.WEAPON_DEFS ||',
     'const TILE = SHARED_DATA.TILE ||',
+    'function generateFacilityMap()',
+    'function createProceduralRuntimeLevel()',
+    'function loadRuntimeLevel()',
+    'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel;',
     'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel ||',
+    'const editorLevel = SHARED_DATA.loadRuntimeLevelFromLocalStorage({ floor: 0 });',
     'SHARED_DATA.loadRuntimeLevelFromLocalStorage?.',
     'const countTiles = SHARED_DATA.countTiles ||',
     'const countBy = SHARED_DATA.countBy ||',
@@ -126,8 +134,30 @@ export const runtimeAudioContract = {
   ]
 };
 
+export const runtimeLevelSourceContract = {
+  files: [
+    'origin/runtime/level-source.js',
+    'public/runtime/runtime/level-source.js'
+  ],
+  required: [
+    'function createRuntimeLevelSource({',
+    'function generateFacilityMap() {',
+    'function createProceduralRuntimeLevel() {',
+    'function loadRuntimeLevel() {',
+    'const editorLevel = sharedData.loadRuntimeLevelFromLocalStorage({ floor });',
+    'if (sharedData.isValidRuntimeLevel(editorLevel)) return editorLevel;',
+    'function getLevelSourceState(runtimeLevel) {',
+    'window.ASCII_LABYRINTH_RUNTIME_LEVEL_SOURCE = {'
+  ],
+  forbidden: [
+    'window.ASCIIUI?.',
+    'onclick='
+  ]
+};
+
 export const runtimeSharedUiContracts = [
   runtimeSharedUiContract,
   runtimeAudioContract,
-  runtimeHudContract
+  runtimeHudContract,
+  runtimeLevelSourceContract
 ];

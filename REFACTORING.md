@@ -7,6 +7,7 @@ This project is moving from prototype-heavy HTML pages toward shared runtime, ed
 - `origin/index.html`: authoritative playable runtime.
 - `origin/runtime/audio.js`: runtime BGM and SFX controller.
 - `origin/runtime/hud.js`: runtime HUD, mission, and radio log rendering controller.
+- `origin/runtime/level-source.js`: runtime editor-level loading and procedural fallback generation.
 - `origin/editor/index.html`: authoritative level editor.
 - `origin/model-editor/index.html`: authoritative model editor.
 - `origin/shared/game-schema.js`: shared data contracts, editor/runtime conversion, model/runtime conversion, storage helpers, and schema contract snapshots.

@@ -23,6 +23,7 @@ const runtimeSnapshotChecks = [
   ['runtime shared UI contract', (snapshot) => contractHealthy(snapshot.sharedUiContract)],
   ['runtime audio module', (snapshot) => snapshot.runtimeModules?.audio === true && snapshot.audio?.sfxCount >= 9],
   ['runtime HUD module', (snapshot) => snapshot.runtimeModules?.hud === true],
+  ['runtime level source module', (snapshot) => snapshot.runtimeModules?.levelSource === true && Boolean(snapshot.levelSource?.source)],
   ['runtime HUD panels', (snapshot) => ['status', 'mission', 'log'].every((key) => {
     const panel = snapshot.hudPanels?.[key];
     return panel?.exists === true && panel.isPanel === true && Number(panel.lineCount) > 0;
