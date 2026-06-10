@@ -3,6 +3,11 @@ import { access, mkdir, rm, stat } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { spawn } from 'node:child_process';
 import { assertNoBoxDrawingGuard, visualSmokePages } from './visual-smoke-contracts.mjs';
+import {
+  assertSnapshot,
+  missingExpectedMarkers,
+  readSnapshot
+} from './visual-smoke-page-assertions.mjs';
 
 await import('./sync-runtime.mjs');
 
@@ -19,39 +24,6 @@ const domDumpAttempts = Math.max(1, Math.floor(Number(process.env.VISUAL_SMOKE_D
 
 function normalizeBase(value) {
   return String(value).replace(/\/+$/, '');
-}
-
-function decodeHtmlAttribute(value) {
-  return String(value).replace(/&(?:quot|amp|lt|gt|#039|#x27);/g, (entity) => ({
-    '&quot;': '"',
-    '&amp;': '&',
-    '&lt;': '<',
-    '&gt;': '>',
-    '&#039;': "'",
-    '&#x27;': "'"
-  })[entity] || entity);
-}
-
-function readSnapshot(dom, page) {
-  if (!page.snapshotAttr) return null;
-  const match = dom.match(new RegExp(`${page.snapshotAttr}="([^"]*)"`));
-  if (!match) {
-    throw new Error(`${page.name} DOM is missing snapshot attribute: ${page.snapshotAttr}`);
-  }
-
-  try {
-    return JSON.parse(decodeHtmlAttribute(match[1]));
-  } catch (error) {
-    throw new Error(`${page.name} snapshot JSON could not be parsed: ${error.message}`);
-  }
-}
-
-function assertSnapshot(page, snapshot) {
-  for (const [label, check] of page.snapshotChecks || []) {
-    if (!check(snapshot)) {
-      throw new Error(`${page.name} snapshot check failed: ${label}`);
-    }
-  }
 }
 
 async function exists(filePath) {
@@ -235,10 +207,6 @@ async function dumpDom(page, profileDir) {
   }
 
   throw lastError;
-}
-
-function missingExpectedMarkers(page, dom) {
-  return (page.mustContain || []).filter((expected) => !dom.includes(expected));
 }
 
 async function capture(page, profileDir, screenshotPath) {
