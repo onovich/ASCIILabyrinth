@@ -15,6 +15,7 @@ const devServerPort = Number(process.env.VISUAL_SMOKE_DEV_PORT || baseUrlParts.p
 const domDumpBudgetMs = Number(process.env.VISUAL_SMOKE_DOM_BUDGET_MS || 12000);
 const domDumpTimeoutMs = Number(process.env.VISUAL_SMOKE_DOM_TIMEOUT_MS || 90000);
 const domDumpAttempts = Math.max(1, Math.floor(Number(process.env.VISUAL_SMOKE_DOM_ATTEMPTS || 2)));
+const boxDrawingTextPattern = /[\u250c\u2510\u2514\u2518\u2502\u2500]/;
 
 const runtimeSnapshotChecks = [
   ['runtime shared contract', (snapshot) => contractHealthy(snapshot.sharedContract)],
@@ -104,7 +105,16 @@ function toolPageChecks(label, checks) {
 }
 
 function noBoxDrawingText(values) {
-  return Object.values(values || {}).every((value) => !/[┌┐└┘│─]/.test(String(value)));
+  return Object.values(values || {}).every((value) => !boxDrawingTextPattern.test(String(value)));
+}
+
+function assertNoBoxDrawingGuard() {
+  if (
+    noBoxDrawingText({ border: '\u250cPASSWORD\u2510' })
+    || !noBoxDrawingText({ copy: 'Enter the access code.' })
+  ) {
+    throw new Error('visual smoke box-drawing text guard is not matching expected characters');
+  }
 }
 
 function decodeHtmlAttribute(value) {
@@ -353,6 +363,7 @@ async function capture(page, profileDir, screenshotPath) {
 }
 
 async function main() {
+  assertNoBoxDrawingGuard();
   const cleanupDevServer = await ensureDevServer();
   await mkdir(outDir, { recursive: true });
   const results = [];
