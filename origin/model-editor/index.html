@@ -975,22 +975,7 @@
         return {
           version: project.version,
           modelSchema: project.modelSchema || '',
-          sharedContract: SHARED_DATA.getContractState?.({
-            defaultProjectFactory: 'createDefaultModelProject',
-            partFactory: 'createModelPart',
-            partNormalizer: 'normalizeModelPart',
-            pathTools: 'setValueByPath',
-            clamp: 'clamp',
-            optionHtml: 'optionHtml',
-            optionsHtml: 'optionsHtml',
-            optionsWithEmptyHtml: 'optionsWithEmptyHtml',
-            parseJson: 'parseJson',
-            jsonExport: ['stringifyJson', 'createJsonExportName'],
-            timestamps: ['toIsoTimestamp', 'touchProject'],
-            htmlEscapes: ['escapeHtml', 'escapeAttr'],
-            projectNormalizer: 'normalizeModelProject',
-            contractState: 'getContractState'
-          }) || {},
+          sharedContract: SHARED_DATA.getContractState?.('modelEditor') || {},
           sharedUiContract: SHARED_UI.getContractState?.([
             'swatchHtml',
             'downloadTextFile',

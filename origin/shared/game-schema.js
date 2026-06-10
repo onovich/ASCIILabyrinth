@@ -725,8 +725,52 @@
     return buildRuntimeModelProfilesFromModelProject(project);
   }
 
+  const CONTRACT_SPECS = Object.freeze({
+    runtime: Object.freeze({
+      clamp: 'clamp',
+      contractState: 'getContractState'
+    }),
+    editor: Object.freeze({
+      typeMeta: 'createEditorTypeMeta',
+      defaultEffect: 'createDefaultEffect',
+      defaultInteraction: 'createDefaultInteraction',
+      paletteOrder: (api) => Array.isArray(api.PALETTE_ORDER),
+      objectFactory: 'createEditorObject',
+      levelFactory: 'createEditorLevel',
+      pathTools: Object.freeze(['setValueByPath', 'getValueByPath']),
+      clamp: 'clamp',
+      optionHtml: 'optionHtml',
+      parseJson: 'parseJson',
+      jsonExport: Object.freeze(['stringifyJson', 'createJsonExportName']),
+      timestamps: Object.freeze(['toIsoTimestamp', 'touchProject']),
+      floorTools: Object.freeze(['getFloorLabel', 'hasFloor', 'getFloorIds', 'getMaxFloorSpan', 'getAdjacentFloorId']),
+      htmlEscapes: Object.freeze(['escapeHtml', 'escapeAttr']),
+      optionsHtml: 'optionsHtml',
+      optionsWithEmptyHtml: 'optionsWithEmptyHtml',
+      projectNormalizer: 'normalizeEditorProject',
+      contractState: 'getContractState'
+    }),
+    modelEditor: Object.freeze({
+      defaultProjectFactory: 'createDefaultModelProject',
+      partFactory: 'createModelPart',
+      partNormalizer: 'normalizeModelPart',
+      pathTools: 'setValueByPath',
+      clamp: 'clamp',
+      optionHtml: 'optionHtml',
+      optionsHtml: 'optionsHtml',
+      optionsWithEmptyHtml: 'optionsWithEmptyHtml',
+      parseJson: 'parseJson',
+      jsonExport: Object.freeze(['stringifyJson', 'createJsonExportName']),
+      timestamps: Object.freeze(['toIsoTimestamp', 'touchProject']),
+      htmlEscapes: Object.freeze(['escapeHtml', 'escapeAttr']),
+      projectNormalizer: 'normalizeModelProject',
+      contractState: 'getContractState'
+    })
+  });
+
   function getContractState(spec = {}, api = window.ASCII_LABYRINTH_DATA || {}) {
-    return Object.entries(spec || {}).reduce((state, [key, rule]) => {
+    const resolvedSpec = typeof spec === 'string' ? CONTRACT_SPECS[spec] || {} : spec;
+    return Object.entries(resolvedSpec || {}).reduce((state, [key, rule]) => {
       if (typeof rule === 'function') {
         state[key] = rule(api) === true;
       } else if (Array.isArray(rule)) {
@@ -797,6 +841,7 @@
     mergeRuntimeEnemyProfiles,
     loadModelProject,
     loadRuntimeModelProfilesFromLocalStorage,
+    CONTRACT_SPECS,
     getContractState
   });
 })();

@@ -267,6 +267,8 @@ async function main() {
     missing: 'missingHelper'
   });
   assert(schemaContract.clamp && schemaContract.pathTools && schemaContract.paletteOrder && schemaContract.missing === false, 'shared schema contract helper should report grouped capabilities');
+  assert(schema.getContractState('editor').projectNormalizer && schema.getContractState('modelEditor').partFactory, 'shared schema contract helper should support named page specs');
+  assert(schema.CONTRACT_SPECS?.runtime?.clamp === 'clamp', 'shared schema should expose named contract specs');
   assert(schema.clamp(7, 0, 5) === 5 && schema.clamp(-2, 0, 5) === 0, 'shared clamp should bound values');
   assert(schema.clamp(3, 5, 0) === 3 && schema.clamp('bad', 2, 8) === 2, 'shared clamp should normalize reversed limits and invalid values');
   assert(schema.getFloorLabel(1) === '1F' && schema.getFloorLabel(99) === '99', 'shared floor label helper should map known floors and fallback ids');

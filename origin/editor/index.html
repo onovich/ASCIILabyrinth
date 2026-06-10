@@ -1007,26 +1007,7 @@
         const objects = allObjects(level);
         return {
           version: project.version,
-          sharedContract: SHARED_DATA.getContractState?.({
-            typeMeta: 'createEditorTypeMeta',
-            defaultEffect: 'createDefaultEffect',
-            defaultInteraction: 'createDefaultInteraction',
-            paletteOrder: (api) => Array.isArray(api.PALETTE_ORDER),
-            objectFactory: 'createEditorObject',
-            levelFactory: 'createEditorLevel',
-            pathTools: ['setValueByPath', 'getValueByPath'],
-            clamp: 'clamp',
-            optionHtml: 'optionHtml',
-            parseJson: 'parseJson',
-            jsonExport: ['stringifyJson', 'createJsonExportName'],
-            timestamps: ['toIsoTimestamp', 'touchProject'],
-            floorTools: ['getFloorLabel', 'hasFloor', 'getFloorIds', 'getMaxFloorSpan', 'getAdjacentFloorId'],
-            htmlEscapes: ['escapeHtml', 'escapeAttr'],
-            optionsHtml: 'optionsHtml',
-            optionsWithEmptyHtml: 'optionsWithEmptyHtml',
-            projectNormalizer: 'normalizeEditorProject',
-            contractState: 'getContractState'
-          }) || {},
+          sharedContract: SHARED_DATA.getContractState?.('editor') || {},
           sharedUiContract: SHARED_UI.getContractState?.([
             'swatchHtml',
             'colorVarStyle',
