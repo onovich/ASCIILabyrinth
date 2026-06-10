@@ -225,19 +225,10 @@
         cursor[parts.at(-1)] = value;
         return object;
       });
-      const escapeHtml = SHARED_DATA.escapeHtml || ((value) => String(value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;'));
-      const escapeAttr = SHARED_DATA.escapeAttr || escapeHtml;
-      const optionHtml = SHARED_DATA.optionHtml || ((value, label, selected) => `<option value="${escapeAttr(value)}" ${String(value) === String(selected) ? 'selected' : ''}>${escapeHtml(label)}</option>`);
-      const optionsHtml = SHARED_DATA.optionsHtml || ((items, selected, getValue, getLabel) => (Array.isArray(items) ? items : []).map((item, index) => {
-        const value = typeof getValue === 'function' ? getValue(item, index) : (Array.isArray(item) ? item[0] : item?.value ?? item?.id ?? item?.key ?? item);
-        const label = typeof getLabel === 'function' ? getLabel(item, index, value) : (Array.isArray(item) ? item[1] ?? item[0] : item?.label ?? item?.name ?? value);
-        return optionHtml(value, label, selected);
-      }).join(''));
+      const escapeHtml = SHARED_DATA.escapeHtml;
+      const escapeAttr = SHARED_DATA.escapeAttr;
+      const optionHtml = SHARED_DATA.optionHtml;
+      const optionsHtml = SHARED_DATA.optionsHtml;
       const swatchHtml = SHARED_UI.swatchHtml;
       const downloadTextFile = SHARED_UI.downloadTextFile;
       const parseJson = SHARED_DATA.parseJson || JSON.parse;

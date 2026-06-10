@@ -290,12 +290,22 @@ async function assertToolPageSharedUiContract() {
       required: [
         'const bindElements = SHARED_UI.bindElements;',
         'const colorVarStyle = SHARED_UI.colorVarStyle;',
-        'const swatchHtml = SHARED_UI.swatchHtml;'
+        'const swatchHtml = SHARED_UI.swatchHtml;',
+        'const escapeHtml = SHARED_DATA.escapeHtml;',
+        'const escapeAttr = SHARED_DATA.escapeAttr;',
+        'const optionHtml = SHARED_DATA.optionHtml;',
+        'const optionsHtml = SHARED_DATA.optionsHtml;',
+        'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml;'
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
         'const colorVarStyle = SHARED_UI.colorVarStyle ||',
-        'const swatchHtml = SHARED_UI.swatchHtml ||'
+        'const swatchHtml = SHARED_UI.swatchHtml ||',
+        'const escapeHtml = SHARED_DATA.escapeHtml ||',
+        'const escapeAttr = SHARED_DATA.escapeAttr ||',
+        'const optionHtml = SHARED_DATA.optionHtml ||',
+        'const optionsHtml = SHARED_DATA.optionsHtml ||',
+        'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml ||'
       ]
     },
     {
@@ -303,34 +313,60 @@ async function assertToolPageSharedUiContract() {
       required: [
         'const bindElements = SHARED_UI.bindElements;',
         'const colorVarStyle = SHARED_UI.colorVarStyle;',
-        'const swatchHtml = SHARED_UI.swatchHtml;'
+        'const swatchHtml = SHARED_UI.swatchHtml;',
+        'const escapeHtml = SHARED_DATA.escapeHtml;',
+        'const escapeAttr = SHARED_DATA.escapeAttr;',
+        'const optionHtml = SHARED_DATA.optionHtml;',
+        'const optionsHtml = SHARED_DATA.optionsHtml;',
+        'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml;'
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
         'const colorVarStyle = SHARED_UI.colorVarStyle ||',
-        'const swatchHtml = SHARED_UI.swatchHtml ||'
+        'const swatchHtml = SHARED_UI.swatchHtml ||',
+        'const escapeHtml = SHARED_DATA.escapeHtml ||',
+        'const escapeAttr = SHARED_DATA.escapeAttr ||',
+        'const optionHtml = SHARED_DATA.optionHtml ||',
+        'const optionsHtml = SHARED_DATA.optionsHtml ||',
+        'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml ||'
       ]
     },
     {
       file: 'origin/model-editor/index.html',
       required: [
         'const bindElements = SHARED_UI.bindElements;',
-        'const swatchHtml = SHARED_UI.swatchHtml;'
+        'const swatchHtml = SHARED_UI.swatchHtml;',
+        'const escapeHtml = SHARED_DATA.escapeHtml;',
+        'const escapeAttr = SHARED_DATA.escapeAttr;',
+        'const optionHtml = SHARED_DATA.optionHtml;',
+        'const optionsHtml = SHARED_DATA.optionsHtml;'
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
-        'const swatchHtml = SHARED_UI.swatchHtml ||'
+        'const swatchHtml = SHARED_UI.swatchHtml ||',
+        'const escapeHtml = SHARED_DATA.escapeHtml ||',
+        'const escapeAttr = SHARED_DATA.escapeAttr ||',
+        'const optionHtml = SHARED_DATA.optionHtml ||',
+        'const optionsHtml = SHARED_DATA.optionsHtml ||'
       ]
     },
     {
       file: 'public/model-editor/index.html',
       required: [
         'const bindElements = SHARED_UI.bindElements;',
-        'const swatchHtml = SHARED_UI.swatchHtml;'
+        'const swatchHtml = SHARED_UI.swatchHtml;',
+        'const escapeHtml = SHARED_DATA.escapeHtml;',
+        'const escapeAttr = SHARED_DATA.escapeAttr;',
+        'const optionHtml = SHARED_DATA.optionHtml;',
+        'const optionsHtml = SHARED_DATA.optionsHtml;'
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
-        'const swatchHtml = SHARED_UI.swatchHtml ||'
+        'const swatchHtml = SHARED_UI.swatchHtml ||',
+        'const escapeHtml = SHARED_DATA.escapeHtml ||',
+        'const escapeAttr = SHARED_DATA.escapeAttr ||',
+        'const optionHtml = SHARED_DATA.optionHtml ||',
+        'const optionsHtml = SHARED_DATA.optionsHtml ||'
       ]
     }
   ];
