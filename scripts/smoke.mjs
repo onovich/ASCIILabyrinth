@@ -215,40 +215,42 @@ async function assertSyncedFiles() {
   }
 }
 
-async function assertSharedCssContract() {
-  for (const file of sharedCssContract.files) {
-    const css = await readFile(resolve(projectRoot, file), 'utf8');
-    for (const selector of sharedCssContract.requiredSelectors) {
-      assert(css.includes(selector), `${file} should include shared UI selector ${selector}`);
+async function assertTextContract(files, { required = [], forbidden = [], requiredLabel, forbiddenLabel }) {
+  for (const file of files) {
+    const source = await readFile(resolve(projectRoot, file), 'utf8');
+    for (const fragment of required) {
+      assert(source.includes(fragment), `${file} ${requiredLabel}: ${fragment}`);
+    }
+    for (const fragment of forbidden) {
+      assert(!source.includes(fragment), `${file} ${forbiddenLabel}: ${fragment}`);
     }
   }
+}
+
+async function assertSharedCssContract() {
+  await assertTextContract(sharedCssContract.files, {
+    required: sharedCssContract.requiredSelectors,
+    requiredLabel: 'should include shared UI selector'
+  });
 }
 
 async function assertRuntimeSharedUiContract() {
-  for (const file of runtimeSharedUiContract.files) {
-    const source = await readFile(resolve(projectRoot, file), 'utf8');
-    for (const fragment of runtimeSharedUiContract.required) {
-      assert(source.includes(fragment), `${file} should call shared runtime UI helper: ${fragment}`);
-    }
-    for (const fragment of runtimeSharedUiContract.forbidden) {
-      assert(!source.includes(fragment), `${file} should not keep runtime UI fallback: ${fragment}`);
-    }
-  }
+  await assertTextContract(runtimeSharedUiContract.files, {
+    required: runtimeSharedUiContract.required,
+    forbidden: runtimeSharedUiContract.forbidden,
+    requiredLabel: 'should call shared runtime UI helper',
+    forbiddenLabel: 'should not keep runtime UI fallback'
+  });
 }
 
 async function assertToolPageSharedUiContract() {
-  const pageContracts = toolPageSharedUiContracts.flatMap(({ files, required, forbidden }) =>
-    files.map((file) => ({ file, required, forbidden }))
-  );
-
-  for (const contract of pageContracts) {
-    const source = await readFile(resolve(projectRoot, contract.file), 'utf8');
-    for (const fragment of contract.required) {
-      assert(source.includes(fragment), `${contract.file} should call shared tool UI helper: ${fragment}`);
-    }
-    for (const fragment of contract.forbidden) {
-      assert(!source.includes(fragment), `${contract.file} should not keep tool UI fallback: ${fragment}`);
-    }
+  for (const contract of toolPageSharedUiContracts) {
+    await assertTextContract(contract.files, {
+      required: contract.required,
+      forbidden: contract.forbidden,
+      requiredLabel: 'should call shared tool UI helper',
+      forbiddenLabel: 'should not keep tool UI fallback'
+    });
   }
 }
 
