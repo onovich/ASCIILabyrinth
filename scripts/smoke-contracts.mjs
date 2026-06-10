@@ -151,6 +151,7 @@ export const toolPageSharedUiContracts = [
       'const sharedLevel = SHARED_DATA.createEditorLevel?.',
       'const sharedObject = SHARED_DATA.createEditorObject?.',
       'const normalized = SHARED_DATA.normalizeEditorProject?.',
+      'function option(value, label, selected)',
       "SHARED_DATA.getContractState?.('editor') || {}",
       "SHARED_UI.getContractState?.('editor') || {}"
     ]
@@ -208,6 +209,7 @@ export const toolPageSharedUiContracts = [
       'SHARED_DATA.normalizeModelPart?.',
       'SHARED_DATA.normalizeModelProject?.',
       'SHARED_DATA.MODEL_RUNTIME_SCHEMA ||',
+      'function option(value, label, selected)',
       "SHARED_DATA.getContractState?.('modelEditor') || {}",
       "SHARED_UI.getContractState?.('modelEditor') || {}"
     ]

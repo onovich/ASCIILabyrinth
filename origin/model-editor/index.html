@@ -680,9 +680,9 @@
           <label>ID<input data-model-field="id" value="${escapeAttr(model.id)}" /></label>
           <div class="grid-two">
             <label>类别<select data-model-field="category">
-              ${option('enemy', '敌人', model.category)}
-              ${option('item', '物品', model.category)}
-              ${option('prop', '场景物件', model.category)}
+              ${optionHtml('enemy', '敌人', model.category)}
+              ${optionHtml('item', '物品', model.category)}
+              ${optionHtml('prop', '场景物件', model.category)}
             </select></label>
             <label>角色<input data-model-field="role" value="${escapeAttr(model.role)}" /></label>
           </div>
@@ -729,8 +729,8 @@
             ${vectorInput('scale', '缩放', partItem.scale, 0.05)}
           </div>
           <label>边线<select data-part-field="wire">
-            ${option('true', '显示', String(partItem.wire))}
-            ${option('false', '隐藏', String(partItem.wire))}
+            ${optionHtml('true', '显示', String(partItem.wire))}
+            ${optionHtml('false', '隐藏', String(partItem.wire))}
           </select></label>
         `;
         dom.jsonPreview.value = stringifyJson(model);
@@ -748,10 +748,6 @@
         dom.previewStats.textContent = `${model.category} / ${model.role} / ${model.parts.length} parts`;
         dom.modelMeta.textContent = `${project.models.length} models`;
         dom.schemaText.textContent = `schema v${project.version}`;
-      }
-
-      function option(value, label, selected) {
-        return optionHtml(value, label, selected);
       }
 
       function updateModelField(target) {

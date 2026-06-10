@@ -905,7 +905,7 @@
 
       function renderLevelControls() {
         dom.levelSelect.innerHTML = project.levels
-          .map((level) => option(level.id, level.name))
+          .map((level) => optionHtml(level.id, level.name))
           .join('');
         dom.levelSelect.value = currentLevelId;
 
@@ -1048,10 +1048,10 @@
               <label>高层<select data-path="floorTo">${floorOptions(object.floorTo)}</select></label>
             </div>
             <label>方向<select data-path="direction">
-              ${option('north', '北', object.direction)}
-              ${option('east', '东', object.direction)}
-              ${option('south', '南', object.direction)}
-              ${option('west', '西', object.direction)}
+              ${optionHtml('north', '北', object.direction)}
+              ${optionHtml('east', '东', object.direction)}
+              ${optionHtml('south', '南', object.direction)}
+              ${optionHtml('west', '西', object.direction)}
             </select></label>
           `;
         }
@@ -1062,9 +1062,9 @@
                 ${optionsHtml(ENEMY_KIND_OPTIONS, object.enemyKind)}
               </select></label>
               <label>巡逻<select data-path="patrol">
-                ${option('idle', '固定', object.patrol)}
-                ${option('loop', '循环', object.patrol)}
-                ${option('area', '区域', object.patrol)}
+                ${optionHtml('idle', '固定', object.patrol)}
+                ${optionHtml('loop', '循环', object.patrol)}
+                ${optionHtml('area', '区域', object.patrol)}
               </select></label>
             </div>
           `;
@@ -1076,9 +1076,9 @@
           return `
             <div class="grid-two">
               <label>武器<select data-path="weaponKind">
-                ${option('sidearm', 'SIDEARM', object.weaponKind)}
-                ${option('scatter', 'SCATTER', object.weaponKind)}
-                ${option('rail', 'RAIL', object.weaponKind)}
+                ${optionHtml('sidearm', 'SIDEARM', object.weaponKind)}
+                ${optionHtml('scatter', 'SCATTER', object.weaponKind)}
+                ${optionHtml('rail', 'RAIL', object.weaponKind)}
               </select></label>
               <label>附带弹药<input type="number" min="0" data-path="ammo" value="${object.ammo || 0}" /></label>
             </div>
@@ -1097,12 +1097,12 @@
           <h2 class="section-title">交互触发</h2>
           <div class="grid-two">
             <label>方式<select data-path="interaction.mode">
-              ${option('interact', '按键', object.interaction.mode)}
-              ${option('touch', '进入', object.interaction.mode)}
+              ${optionHtml('interact', '按键', object.interaction.mode)}
+              ${optionHtml('touch', '进入', object.interaction.mode)}
             </select></label>
             <label>次数<select data-path="interaction.once">
-              ${option('true', '一次', String(object.interaction.once))}
-              ${option('false', '重复', String(object.interaction.once))}
+              ${optionHtml('true', '一次', String(object.interaction.once))}
+              ${optionHtml('false', '重复', String(object.interaction.once))}
             </select></label>
           </div>
           ${renderEffectFields('interaction.effect', object.interaction.effect)}
@@ -1115,8 +1115,8 @@
           <div class="grid-two">
             <label>触发器 ID<input data-path="triggerId" value="${escapeAttr(object.triggerId || '')}" /></label>
             <label>次数<select data-path="once">
-              ${option('true', '一次', String(object.once))}
-              ${option('false', '重复', String(object.once))}
+              ${optionHtml('true', '一次', String(object.once))}
+              ${optionHtml('false', '重复', String(object.once))}
             </select></label>
           </div>
           ${renderEffectFields('effect', object.effect)}
@@ -1145,19 +1145,19 @@
         } else if (type === 'giveWeapon') {
           extra = `
             <label>武器<select data-path="${valuePath('weaponKind')}">
-              ${option('sidearm', 'SIDEARM', effect.weaponKind)}
-              ${option('scatter', 'SCATTER', effect.weaponKind)}
-              ${option('rail', 'RAIL', effect.weaponKind)}
+              ${optionHtml('sidearm', 'SIDEARM', effect.weaponKind)}
+              ${optionHtml('scatter', 'SCATTER', effect.weaponKind)}
+              ${optionHtml('rail', 'RAIL', effect.weaponKind)}
             </select></label>
           `;
         }
         return `
           <label>效果<select data-path="${valuePath('type')}">
-            ${option('dialog', '对话', type)}
-            ${option('heal', '回血', type)}
-            ${option('teleport', '传送', type)}
-            ${option('openDoor', '开门', type)}
-            ${option('giveWeapon', '给武器', type)}
+            ${optionHtml('dialog', '对话', type)}
+            ${optionHtml('heal', '回血', type)}
+            ${optionHtml('teleport', '传送', type)}
+            ${optionHtml('openDoor', '开门', type)}
+            ${optionHtml('giveWeapon', '给武器', type)}
           </select></label>
           ${extra}
         `;
@@ -1171,7 +1171,7 @@
         const maxSpan = getMaxFloorSpan(object.floor, FLOORS);
         return Array.from({ length: maxSpan }, (_, index) => {
           const value = index + 1;
-          return option(String(value), value === 1 ? '1 层' : `${value} 层`, String(object.floorSpan || 1));
+          return optionHtml(String(value), value === 1 ? '1 层' : `${value} 层`, String(object.floorSpan || 1));
         }).join('');
       }
 
@@ -1182,10 +1182,6 @@
       function doorOptions(value) {
         const doors = allObjects().filter((object) => object.type === 'keyDoor' || object.type === 'hiddenDoor');
         return optionsWithEmptyHtml(doors, value, (door) => door.doorId || door.id, (door) => door.label || door.doorId || door.id);
-      }
-
-      function option(value, label, selected) {
-        return optionHtml(value, label, selected);
       }
 
       function canvasPoint(event) {
