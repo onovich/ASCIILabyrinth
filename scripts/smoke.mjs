@@ -303,7 +303,17 @@ async function assertToolPageSharedUiContract() {
         'const touchSharedProject = SHARED_DATA.touchProject;',
         'const countBy = SHARED_DATA.countBy;',
         'const clamp = SHARED_DATA.clamp;',
-        'const createSharedId = SHARED_DATA.createId;'
+        'const allLevelObjects = SHARED_DATA.allLevelObjects;',
+        'const objectOnLevelFloor = SHARED_DATA.objectOnFloor;',
+        'const getFloorLabel = SHARED_DATA.getFloorLabel;',
+        'const hasFloor = SHARED_DATA.hasFloor;',
+        'const getFloorIds = SHARED_DATA.getFloorIds;',
+        'const getMaxFloorSpan = SHARED_DATA.getMaxFloorSpan;',
+        'const getAdjacentFloorId = SHARED_DATA.getAdjacentFloorId;',
+        'const createSharedId = SHARED_DATA.createId;',
+        'return SHARED_DATA.createEditorLevel(id, name, width, height, {',
+        'return SHARED_DATA.createEditorObject(type, x, y, floor, extra, {',
+        'const normalized = SHARED_DATA.normalizeEditorProject(data, { cellSize: CELL_SIZE });'
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
@@ -321,7 +331,18 @@ async function assertToolPageSharedUiContract() {
         'const touchSharedProject = SHARED_DATA.touchProject ||',
         'const countBy = SHARED_DATA.countBy ||',
         'const clamp = SHARED_DATA.clamp ||',
-        'const createSharedId = SHARED_DATA.createId ||'
+        'const allLevelObjects = SHARED_DATA.allLevelObjects ||',
+        'const objectFloorSpanOf = SHARED_DATA.objectFloorSpan ||',
+        'const objectOnLevelFloor = SHARED_DATA.objectOnFloor ||',
+        'const getFloorLabel = SHARED_DATA.getFloorLabel ||',
+        'const hasFloor = SHARED_DATA.hasFloor ||',
+        'const getFloorIds = SHARED_DATA.getFloorIds ||',
+        'const getMaxFloorSpan = SHARED_DATA.getMaxFloorSpan ||',
+        'const getAdjacentFloorId = SHARED_DATA.getAdjacentFloorId ||',
+        'const createSharedId = SHARED_DATA.createId ||',
+        'const sharedLevel = SHARED_DATA.createEditorLevel?.',
+        'const sharedObject = SHARED_DATA.createEditorObject?.',
+        'const normalized = SHARED_DATA.normalizeEditorProject?.'
       ]
     },
     {
@@ -342,7 +363,17 @@ async function assertToolPageSharedUiContract() {
         'const touchSharedProject = SHARED_DATA.touchProject;',
         'const countBy = SHARED_DATA.countBy;',
         'const clamp = SHARED_DATA.clamp;',
-        'const createSharedId = SHARED_DATA.createId;'
+        'const allLevelObjects = SHARED_DATA.allLevelObjects;',
+        'const objectOnLevelFloor = SHARED_DATA.objectOnFloor;',
+        'const getFloorLabel = SHARED_DATA.getFloorLabel;',
+        'const hasFloor = SHARED_DATA.hasFloor;',
+        'const getFloorIds = SHARED_DATA.getFloorIds;',
+        'const getMaxFloorSpan = SHARED_DATA.getMaxFloorSpan;',
+        'const getAdjacentFloorId = SHARED_DATA.getAdjacentFloorId;',
+        'const createSharedId = SHARED_DATA.createId;',
+        'return SHARED_DATA.createEditorLevel(id, name, width, height, {',
+        'return SHARED_DATA.createEditorObject(type, x, y, floor, extra, {',
+        'const normalized = SHARED_DATA.normalizeEditorProject(data, { cellSize: CELL_SIZE });'
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
@@ -360,7 +391,18 @@ async function assertToolPageSharedUiContract() {
         'const touchSharedProject = SHARED_DATA.touchProject ||',
         'const countBy = SHARED_DATA.countBy ||',
         'const clamp = SHARED_DATA.clamp ||',
-        'const createSharedId = SHARED_DATA.createId ||'
+        'const allLevelObjects = SHARED_DATA.allLevelObjects ||',
+        'const objectFloorSpanOf = SHARED_DATA.objectFloorSpan ||',
+        'const objectOnLevelFloor = SHARED_DATA.objectOnFloor ||',
+        'const getFloorLabel = SHARED_DATA.getFloorLabel ||',
+        'const hasFloor = SHARED_DATA.hasFloor ||',
+        'const getFloorIds = SHARED_DATA.getFloorIds ||',
+        'const getMaxFloorSpan = SHARED_DATA.getMaxFloorSpan ||',
+        'const getAdjacentFloorId = SHARED_DATA.getAdjacentFloorId ||',
+        'const createSharedId = SHARED_DATA.createId ||',
+        'const sharedLevel = SHARED_DATA.createEditorLevel?.',
+        'const sharedObject = SHARED_DATA.createEditorObject?.',
+        'const normalized = SHARED_DATA.normalizeEditorProject?.'
       ]
     },
     {

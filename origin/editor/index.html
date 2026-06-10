@@ -479,31 +479,13 @@
       const touchSharedProject = SHARED_DATA.touchProject;
       const countBy = SHARED_DATA.countBy;
       const clamp = SHARED_DATA.clamp;
-      const allLevelObjects = SHARED_DATA.allLevelObjects || ((level) => [...(level?.objects || []), ...(level?.triggers || [])]);
-      const objectFloorSpanOf = SHARED_DATA.objectFloorSpan || ((object) => Math.max(1, Number(object?.floorSpan) || 1));
-      const objectOnLevelFloor = SHARED_DATA.objectOnFloor || ((object, floorId) => {
-        if (!object) return false;
-        if (object.type === 'ramp') {
-          return object.floorFrom === floorId || object.floorTo === floorId || object.floor === floorId;
-        }
-        const baseFloor = Number(object.floor) || 0;
-        return floorId >= baseFloor && floorId < baseFloor + objectFloorSpanOf(object);
-      });
-      const getFloorLabel = SHARED_DATA.getFloorLabel || ((floorId, floors = FLOORS) => floors.find((floor) => floor.id === floorId)?.label || String(floorId));
-      const hasFloor = SHARED_DATA.hasFloor || ((floorId, floors = FLOORS) => floors.some((floor) => floor.id === floorId));
-      const getFloorIds = SHARED_DATA.getFloorIds || ((floors = FLOORS) => floors.map((floor) => floor.id));
-      const getMaxFloorSpan = SHARED_DATA.getMaxFloorSpan || ((floorId, floors = FLOORS) => {
-        const floorIds = getFloorIds(floors);
-        if (!floorIds.length) return 1;
-        const minFloor = Math.min(...floorIds);
-        const maxFloor = Math.max(...floorIds);
-        const baseFloor = Number.isFinite(Number(floorId)) ? Number(floorId) : minFloor;
-        return Math.max(1, maxFloor - baseFloor + 1);
-      });
-      const getAdjacentFloorId = SHARED_DATA.getAdjacentFloorId || ((floorId, direction, floors = FLOORS) => {
-        const index = floors.findIndex((floor) => floor.id === floorId);
-        return floors[index + direction]?.id ?? null;
-      });
+      const allLevelObjects = SHARED_DATA.allLevelObjects;
+      const objectOnLevelFloor = SHARED_DATA.objectOnFloor;
+      const getFloorLabel = SHARED_DATA.getFloorLabel;
+      const hasFloor = SHARED_DATA.hasFloor;
+      const getFloorIds = SHARED_DATA.getFloorIds;
+      const getMaxFloorSpan = SHARED_DATA.getMaxFloorSpan;
+      const getAdjacentFloorId = SHARED_DATA.getAdjacentFloorId;
       const createSharedId = SHARED_DATA.createId;
 
       const ENEMY_KIND_OPTIONS = SHARED_DATA.ENEMY_KIND_OPTIONS || [
@@ -632,60 +614,19 @@
       }
 
       function createLevel(id, name, width = 24, height = 16, upperStart = false) {
-        const sharedLevel = SHARED_DATA.createEditorLevel?.(id, name, width, height, {
+        return SHARED_DATA.createEditorLevel(id, name, width, height, {
           upperStart,
           typeMeta: TYPE_META,
           makeId,
           floors: getFloorIds(FLOORS)
         });
-        if (sharedLevel) return sharedLevel;
-
-        const level = {
-          id,
-          name,
-          width,
-          height,
-          floors: [0, 1],
-          objects: [],
-          triggers: [],
-          notes: ''
-        };
-        if (upperStart) {
-          level.objects.push(createObject('entrance', 2, 2, 1, { label: '上层入口', entranceId: 'entry-upper' }));
-          level.objects.push(createObject('exit', 20, 11, 1, { label: '返回设施 A', exitId: 'exit-back', targetLevelId: 'facility-a', targetEntranceId: 'entry-a', targetFloor: 0 }));
-          level.objects.push(createObject('terminal', 8, 5, 1, { label: '档案终端', message: 'ARCHIVE LINK ONLINE' }));
-          level.objects.push(createObject('weapon', 5, 8, 1, { weaponKind: 'sidearm' }));
-          for (let x = 0; x < width; x++) {
-            level.objects.push(createObject('wall', x, 0, 1));
-            level.objects.push(createObject('wall', x, height - 1, 1));
-          }
-          for (let y = 1; y < height - 1; y++) {
-            level.objects.push(createObject('wall', 0, y, 1));
-            level.objects.push(createObject('wall', width - 1, y, 1));
-          }
-        }
-        return level;
       }
 
       function createObject(type, x, y, floor = currentFloor, extra = {}) {
-        const sharedObject = SHARED_DATA.createEditorObject?.(type, x, y, floor, extra, {
+        return SHARED_DATA.createEditorObject(type, x, y, floor, extra, {
           typeMeta: TYPE_META,
           makeId
         });
-        if (sharedObject) return sharedObject;
-
-        const meta = TYPE_META[type];
-        const base = structuredClone(meta.default);
-        return {
-          id: makeId(type),
-          type,
-          label: meta.name,
-          x,
-          y,
-          floor,
-          ...base,
-          ...extra
-        };
       }
 
       function makeId(prefix) {
@@ -1539,23 +1480,9 @@
       }
 
       function validateProject(data) {
-        const normalized = SHARED_DATA.normalizeEditorProject?.(data, { cellSize: CELL_SIZE });
-        if (normalized) return normalized;
-
-        if (!data || typeof data !== 'object') throw new Error('invalid data');
-        if (!Array.isArray(data.levels) || !data.levels.length) throw new Error('missing levels');
-        for (const level of data.levels) {
-          if (!level.id || !level.name) throw new Error('invalid level');
-          level.objects ||= [];
-          level.triggers ||= [];
-          level.floors ||= [0, 1];
-          level.width = Number(level.width) || 24;
-          level.height = Number(level.height) || 16;
-        }
-        data.version ||= 1;
-        data.settings ||= { cellSize: CELL_SIZE };
-        data.settings.cellSize ||= CELL_SIZE;
-        return data;
+        const normalized = SHARED_DATA.normalizeEditorProject(data, { cellSize: CELL_SIZE });
+        if (!normalized) throw new Error('invalid editor project');
+        return normalized;
       }
 
       function exportProject() {
