@@ -20,6 +20,7 @@ This project is moving from prototype-heavy HTML pages toward shared runtime, ed
 - `scripts/smoke-css-contracts.mjs`: shared UI CSS selector contract used by smoke source assertions.
 - `scripts/smoke-environment.mjs`: project paths and file readers used by smoke guards.
 - `scripts/smoke-fixtures.mjs`: low-cost runtime/model conversion fixtures.
+- `scripts/smoke-runtime-contracts.mjs`: runtime page required/forbidden shared UI and schema source fragments.
 - `scripts/smoke-schema-assertions.mjs`: shared schema and conversion assertions.
 - `scripts/smoke-source-assertions.mjs`: source text guards for runtime/editor/model-editor shared-helper dependencies.
 - `scripts/smoke-ui-assertions.mjs`: shared UI CSS and page-level UI contract checks.
