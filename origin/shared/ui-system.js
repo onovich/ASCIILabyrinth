@@ -47,6 +47,23 @@
     }, {});
   }
 
+  function bindDelegatedChangeHandlers(elements, handlers = {}) {
+    return Object.entries(handlers || {}).reduce((bindings, [key, config]) => {
+      const element = elements?.[key] || resolveElement(key);
+      const selector = Array.isArray(config) ? config[0] : config?.selector;
+      const handler = Array.isArray(config) ? config[1] : config?.handler;
+      if (element?.addEventListener && selector && typeof handler === 'function') {
+        element.addEventListener('change', (event) => {
+          if (event.target?.matches?.(selector)) handler(event.target, event);
+        });
+        bindings[key] = true;
+      } else {
+        bindings[key] = false;
+      }
+      return bindings;
+    }, {});
+  }
+
   function normalizeLine(line) {
     if (line && typeof line === 'object') {
       return {
@@ -211,6 +228,7 @@
     editor: Object.freeze([
       'bindElements',
       'bindClickHandlers',
+      'bindDelegatedChangeHandlers',
       'importTextFile',
       'swatchHtml',
       'colorVarStyle',
@@ -220,6 +238,7 @@
     modelEditor: Object.freeze([
       'bindElements',
       'bindClickHandlers',
+      'bindDelegatedChangeHandlers',
       'importTextFile',
       'swatchHtml',
       'downloadTextFile',
@@ -240,6 +259,7 @@
   publicApi = Object.freeze({
     bindElements,
     bindClickHandlers,
+    bindDelegatedChangeHandlers,
     importTextFile,
     formatMeter,
     colorVarStyle,

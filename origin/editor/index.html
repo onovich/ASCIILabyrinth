@@ -394,6 +394,7 @@
       const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
       const bindElements = SHARED_UI.bindElements || ((ids) => Object.fromEntries(ids.map((id) => [id, document.getElementById(id)])));
       const bindClickHandlers = SHARED_UI.bindClickHandlers;
+      const bindDelegatedChangeHandlers = SHARED_UI.bindDelegatedChangeHandlers;
       const importTextFile = SHARED_UI.importTextFile;
       const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS?.editorProject || 'ascii-labyrinth-editor-v1';
       const CELL_SIZE = 32;
@@ -1833,12 +1834,9 @@
         render();
       });
 
-      dom.levelInspector.addEventListener('change', (event) => {
-        if (event.target.matches('[data-level-field]')) updateLevelField(event.target);
-      });
-
-      dom.objectInspector.addEventListener('change', (event) => {
-        if (event.target.matches('[data-path]')) updateObjectField(event.target);
+      bindDelegatedChangeHandlers(dom, {
+        levelInspector: ['[data-level-field]', updateLevelField],
+        objectInspector: ['[data-path]', updateObjectField]
       });
 
       bindClickHandlers(dom, {

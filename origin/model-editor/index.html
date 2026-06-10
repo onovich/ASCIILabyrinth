@@ -194,6 +194,7 @@
       const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
       const bindElements = SHARED_UI.bindElements || ((ids) => Object.fromEntries(ids.map((id) => [id, document.getElementById(id)])));
       const bindClickHandlers = SHARED_UI.bindClickHandlers;
+      const bindDelegatedChangeHandlers = SHARED_UI.bindDelegatedChangeHandlers;
       const importTextFile = SHARED_UI.importTextFile;
       const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS?.modelProject || 'ascii-labyrinth-model-editor-v1';
       const SHAPES = SHARED_DATA.MODEL_SHAPES || ['box', 'sphere', 'cylinder', 'cone', 'torus', 'octahedron', 'icosahedron', 'dodecahedron'];
@@ -1032,12 +1033,9 @@
         render();
       });
 
-      dom.modelInspector.addEventListener('change', (event) => {
-        if (event.target.matches('[data-model-field]')) updateModelField(event.target);
-      });
-
-      dom.partInspector.addEventListener('change', (event) => {
-        if (event.target.matches('[data-part-field]')) updatePartField(event.target);
+      bindDelegatedChangeHandlers(dom, {
+        modelInspector: ['[data-model-field]', updateModelField],
+        partInspector: ['[data-part-field]', updatePartField]
       });
 
       dom.partInspector.addEventListener('click', (event) => {
