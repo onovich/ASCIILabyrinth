@@ -394,6 +394,7 @@
       const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
       const bindElements = SHARED_UI.bindElements || ((ids) => Object.fromEntries(ids.map((id) => [id, document.getElementById(id)])));
       const bindClickHandlers = SHARED_UI.bindClickHandlers;
+      const bindChangeHandlers = SHARED_UI.bindChangeHandlers;
       const bindDelegatedClickHandlers = SHARED_UI.bindDelegatedClickHandlers;
       const bindDelegatedChangeHandlers = SHARED_UI.bindDelegatedChangeHandlers;
       const importTextFile = SHARED_UI.importTextFile;
@@ -1806,30 +1807,12 @@
         render();
       });
 
-      dom.levelSelect.addEventListener('change', (event) => {
-        currentLevelId = event.target.value;
-        clearSelection();
-        render();
-      });
-
       bindDelegatedClickHandlers(dom, {
         floorSwitch: ['[data-floor]', (button) => {
           currentFloor = Number(button.dataset.floor);
           clearSelection();
           render();
         }]
-      });
-
-      dom.showPrevFloor.addEventListener('change', (event) => {
-        floorPreview.previous = event.target.checked;
-        clearHover();
-        render();
-      });
-
-      dom.showNextFloor.addEventListener('change', (event) => {
-        floorPreview.next = event.target.checked;
-        clearHover();
-        render();
       });
 
       bindDelegatedChangeHandlers(dom, {
@@ -1854,8 +1837,26 @@
         exportBtn: exportProject,
         importBtn: () => dom.importFile.click()
       });
-      dom.importFile.addEventListener('change', async (event) => {
-        await importTextFile(event, loadFromJson);
+
+      bindChangeHandlers(dom, {
+        levelSelect: (event) => {
+          currentLevelId = event.target.value;
+          clearSelection();
+          render();
+        },
+        showPrevFloor: (event) => {
+          floorPreview.previous = event.target.checked;
+          clearHover();
+          render();
+        },
+        showNextFloor: (event) => {
+          floorPreview.next = event.target.checked;
+          clearHover();
+          render();
+        },
+        importFile: async (event) => {
+          await importTextFile(event, loadFromJson);
+        }
       });
 
       window.addEventListener('keydown', (event) => {

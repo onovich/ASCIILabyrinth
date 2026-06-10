@@ -47,6 +47,19 @@
     }, {});
   }
 
+  function bindChangeHandlers(elements, handlers = {}) {
+    return Object.entries(handlers || {}).reduce((bindings, [key, handler]) => {
+      const element = elements?.[key] || resolveElement(key);
+      if (element?.addEventListener && typeof handler === 'function') {
+        element.addEventListener('change', handler);
+        bindings[key] = true;
+      } else {
+        bindings[key] = false;
+      }
+      return bindings;
+    }, {});
+  }
+
   function normalizeDelegatedConfigs(config) {
     if (Array.isArray(config) && typeof config[0] === 'string') return [config];
     if (Array.isArray(config)) return config;
@@ -256,6 +269,7 @@
     editor: Object.freeze([
       'bindElements',
       'bindClickHandlers',
+      'bindChangeHandlers',
       'bindDelegatedClickHandlers',
       'bindDelegatedChangeHandlers',
       'importTextFile',
@@ -267,6 +281,7 @@
     modelEditor: Object.freeze([
       'bindElements',
       'bindClickHandlers',
+      'bindChangeHandlers',
       'bindDelegatedClickHandlers',
       'bindDelegatedChangeHandlers',
       'importTextFile',
@@ -289,6 +304,7 @@
   publicApi = Object.freeze({
     bindElements,
     bindClickHandlers,
+    bindChangeHandlers,
     bindDelegatedClickHandlers,
     bindDelegatedChangeHandlers,
     importTextFile,

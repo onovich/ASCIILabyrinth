@@ -194,6 +194,7 @@
       const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
       const bindElements = SHARED_UI.bindElements || ((ids) => Object.fromEntries(ids.map((id) => [id, document.getElementById(id)])));
       const bindClickHandlers = SHARED_UI.bindClickHandlers;
+      const bindChangeHandlers = SHARED_UI.bindChangeHandlers;
       const bindDelegatedClickHandlers = SHARED_UI.bindDelegatedClickHandlers;
       const bindDelegatedChangeHandlers = SHARED_UI.bindDelegatedChangeHandlers;
       const importTextFile = SHARED_UI.importTextFile;
@@ -1053,8 +1054,11 @@
         exportBtn: exportProject,
         importBtn: () => dom.importFile.click()
       });
-      dom.importFile.addEventListener('change', async (event) => {
-        await importTextFile(event, loadFromJson);
+
+      bindChangeHandlers(dom, {
+        importFile: async (event) => {
+          await importTextFile(event, loadFromJson);
+        }
       });
 
       dom.previewCanvas.addEventListener('pointerdown', (event) => {
