@@ -9,6 +9,7 @@ export const runtimeSharedUiContract = {
     '<script src="./runtime/level-source.js"></script>',
     '<script src="./runtime/debug-snapshot.js"></script>',
     '<script src="./runtime/enemy-profiles.js"></script>',
+    '<script src="./runtime/enemy-models.js"></script>',
     'const SHARED_UI = window.ASCIIUI || {};',
     'const weapons = SHARED_DATA.WEAPON_DEFS.map((weapon) => ({ ...weapon }));',
     'const runtimeHud = window.ASCII_LABYRINTH_RUNTIME_HUD.createRuntimeHudController({',
@@ -27,6 +28,10 @@ export const runtimeSharedUiContract = {
     'const gridKey = SHARED_DATA.getCellKey;',
     'const runtimeEnemyProfiles = window.ASCII_LABYRINTH_RUNTIME_ENEMY_PROFILES.createRuntimeEnemyProfileSource({',
     'activeEnemyProfiles',
+    'const runtimeEnemyModels = window.ASCII_LABYRINTH_RUNTIME_ENEMY_MODELS.createRuntimeEnemyModelFactory({ THREE });',
+    'const buildEnemyModel = runtimeEnemyModels.buildEnemyModel;',
+    'const setEnemyFlash = runtimeEnemyModels.setEnemyFlash;',
+    "enemyModels: typeof window.ASCII_LABYRINTH_RUNTIME_ENEMY_MODELS?.createRuntimeEnemyModelFactory === 'function'",
     "enemyProfiles: typeof window.ASCII_LABYRINTH_RUNTIME_ENEMY_PROFILES?.createRuntimeEnemyProfileSource === 'function'",
     "SHARED_UI.setElementVisible('password-panel', true)",
     "SHARED_UI.isElementVisible('password-panel')",
@@ -61,6 +66,10 @@ export const runtimeSharedUiContract = {
     'const modelProfileBundle = SHARED_DATA.loadRuntimeModelProfilesFromLocalStorage() || null;',
     'const modelEditorEnemyProfiles = modelProfileBundle?.enemyProfiles || [];',
     'const mergeEnemyProfiles = SHARED_DATA.mergeRuntimeEnemyProfiles;',
+    'function createEnemyGeometry(shape)',
+    'function createEnemyPart(part)',
+    'function setEnemyFlash(enemy, flashing)',
+    'function buildEnemyModel(profile)',
     'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel;',
     'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel ||',
     'const editorLevel = SHARED_DATA.loadRuntimeLevelFromLocalStorage({ floor: 0 });',
@@ -209,10 +218,31 @@ export const runtimeEnemyProfileContract = {
   ]
 };
 
+export const runtimeEnemyModelContract = {
+  files: [
+    'origin/runtime/enemy-models.js',
+    'public/runtime/runtime/enemy-models.js'
+  ],
+  required: [
+    'function createRuntimeEnemyModelFactory({ THREE }) {',
+    'function createEnemyGeometry(shape) {',
+    'function createEnemyPart(part) {',
+    'function setEnemyFlash(enemy, flashing) {',
+    'function buildEnemyModel(profile) {',
+    'function getEnemyModelState() {',
+    'window.ASCII_LABYRINTH_RUNTIME_ENEMY_MODELS = {'
+  ],
+  forbidden: [
+    'window.ASCIIUI?.',
+    'onclick='
+  ]
+};
+
 export const runtimeSharedUiContracts = [
   runtimeSharedUiContract,
   runtimeAudioContract,
   runtimeDebugSnapshotContract,
+  runtimeEnemyModelContract,
   runtimeEnemyProfileContract,
   runtimeHudContract,
   runtimeLevelSourceContract
