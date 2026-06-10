@@ -7,6 +7,7 @@ export const runtimeSharedUiContract = {
     '<script src="./runtime/audio.js"></script>',
     '<script src="./runtime/hud.js"></script>',
     '<script src="./runtime/level-source.js"></script>',
+    '<script src="./runtime/debug-snapshot.js"></script>',
     'const SHARED_UI = window.ASCIIUI || {};',
     'const weapons = SHARED_DATA.WEAPON_DEFS.map((weapon) => ({ ...weapon }));',
     'const runtimeHud = window.ASCII_LABYRINTH_RUNTIME_HUD.createRuntimeHudController({',
@@ -27,14 +28,12 @@ export const runtimeSharedUiContract = {
     'const mergeEnemyProfiles = SHARED_DATA.mergeRuntimeEnemyProfiles;',
     "SHARED_UI.setElementVisible('password-panel', true)",
     "SHARED_UI.isElementVisible('password-panel')",
-    "SHARED_UI.getElementState('ascii-canvas', ['al-fullscreen-canvas'])",
-    "sharedContract: SHARED_DATA.getContractState('runtime'),",
-    "sharedUiContract: SHARED_UI.getContractState('runtime'),",
     "audio: typeof window.ASCII_LABYRINTH_RUNTIME_AUDIO?.createRuntimeAudioController === 'function'",
     "hud: typeof window.ASCII_LABYRINTH_RUNTIME_HUD?.createRuntimeHudController === 'function'",
     "levelSource: typeof window.ASCII_LABYRINTH_RUNTIME_LEVEL_SOURCE?.createRuntimeLevelSource === 'function'",
-    'levelSource: runtimeLevelSource.getLevelSourceState(runtimeLevel),',
-    "status: SHARED_UI.getPanelState('ui-layer'),",
+    'const runtimeDebugSnapshot = window.ASCII_LABYRINTH_RUNTIME_DEBUG.createRuntimeDebugSnapshot({',
+    'const getDebugSnapshot = runtimeDebugSnapshot.getDebugSnapshot;',
+    'runtimeDebugSnapshot.writeDebugSnapshot();',
     'const runtimeButtonBindings = SHARED_UI.bindClickHandlers(null, {',
     "'password-submit': submitPassword,",
     "'password-cancel': hidePasswordPrompt,",
@@ -54,6 +53,8 @@ export const runtimeSharedUiContract = {
     'function generateFacilityMap()',
     'function createProceduralRuntimeLevel()',
     'function loadRuntimeLevel()',
+    'function getDebugSnapshot()',
+    "document.body.dataset.debugSnapshot = JSON.stringify(getDebugSnapshot());",
     'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel;',
     'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel ||',
     'const editorLevel = SHARED_DATA.loadRuntimeLevelFromLocalStorage({ floor: 0 });',
@@ -155,9 +156,35 @@ export const runtimeLevelSourceContract = {
   ]
 };
 
+export const runtimeDebugSnapshotContract = {
+  files: [
+    'origin/runtime/debug-snapshot.js',
+    'public/runtime/runtime/debug-snapshot.js'
+  ],
+  required: [
+    'function createRuntimeDebugSnapshot({',
+    "sharedContract: sharedData.getContractState('runtime'),",
+    "sharedUiContract: sharedUi.getContractState('runtime'),",
+    'debugSnapshot: true,',
+    'audio: runtimeAudio.getAudioState(),',
+    'levelSource: runtimeLevelSource.getLevelSourceState(runtimeLevel),',
+    "status: sharedUi.getPanelState('ui-layer'),",
+    "asciiCanvas: sharedUi.getElementState('ascii-canvas', ['al-fullscreen-canvas']),",
+    'runtimeButtonBindings,',
+    'shaderPipeline: getShaderPipeline()',
+    'function writeDebugSnapshot() {',
+    'window.ASCII_LABYRINTH_RUNTIME_DEBUG = {'
+  ],
+  forbidden: [
+    'window.ASCIIUI?.',
+    'onclick='
+  ]
+};
+
 export const runtimeSharedUiContracts = [
   runtimeSharedUiContract,
   runtimeAudioContract,
+  runtimeDebugSnapshotContract,
   runtimeHudContract,
   runtimeLevelSourceContract
 ];

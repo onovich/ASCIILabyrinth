@@ -6,6 +6,7 @@ This project is moving from prototype-heavy HTML pages toward shared runtime, ed
 
 - `origin/index.html`: authoritative playable runtime.
 - `origin/runtime/audio.js`: runtime BGM and SFX controller.
+- `origin/runtime/debug-snapshot.js`: runtime debug snapshot publisher used by visual smoke.
 - `origin/runtime/hud.js`: runtime HUD, mission, and radio log rendering controller.
 - `origin/runtime/level-source.js`: runtime editor-level loading and procedural fallback generation.
 - `origin/editor/index.html`: authoritative level editor.
