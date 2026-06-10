@@ -14,63 +14,9 @@ const devServerHost = process.env.VISUAL_SMOKE_DEV_HOST || baseUrlParts.hostname
 const devServerPort = Number(process.env.VISUAL_SMOKE_DEV_PORT || baseUrlParts.port || 5174);
 const domDumpBudgetMs = Number(process.env.VISUAL_SMOKE_DOM_BUDGET_MS || 6000);
 
-const runtimeSharedUiKeys = [
-  'formatMeter',
-  'colorVarStyle',
-  'swatchHtml',
-  'downloadTextFile',
-  'renderPanel',
-  'setPanelLines',
-  'setElementVisible',
-  'isElementVisible',
-  'getElementState',
-  'getPanelState',
-  'getContractState'
-];
-
-const editorSharedContractKeys = [
-  'typeMeta',
-  'defaultEffect',
-  'defaultInteraction',
-  'paletteOrder',
-  'objectFactory',
-  'levelFactory',
-  'pathTools',
-  'clamp',
-  'optionHtml',
-  'parseJson',
-  'jsonExport',
-  'storageTools',
-  'timestamps',
-  'floorTools',
-  'htmlEscapes',
-  'optionsHtml',
-  'optionsWithEmptyHtml',
-  'projectNormalizer',
-  'contractState'
-];
-
-const modelEditorSharedContractKeys = [
-  'defaultProjectFactory',
-  'partFactory',
-  'partNormalizer',
-  'pathTools',
-  'clamp',
-  'optionHtml',
-  'parseJson',
-  'jsonExport',
-  'storageTools',
-  'timestamps',
-  'htmlEscapes',
-  'optionsHtml',
-  'optionsWithEmptyHtml',
-  'projectNormalizer',
-  'contractState'
-];
-
 const runtimeSnapshotChecks = [
-  ['runtime shared contract', (snapshot) => allTrue(snapshot.sharedContract, ['clamp', 'contractState'])],
-  ['runtime shared UI contract', (snapshot) => allTrue(snapshot.sharedUiContract, runtimeSharedUiKeys)],
+  ['runtime shared contract', (snapshot) => contractHealthy(snapshot.sharedContract)],
+  ['runtime shared UI contract', (snapshot) => contractHealthy(snapshot.sharedUiContract)],
   ['runtime HUD panels', (snapshot) => ['status', 'mission', 'log'].every((key) => {
     const panel = snapshot.hudPanels?.[key];
     return panel?.exists === true && panel.isPanel === true && Number(panel.lineCount) > 0;
@@ -115,7 +61,7 @@ const pages = [
     path: '/editor/index.html?verify=visual-smoke',
     mustContain: ['ASCII Labyrinth Level Editor', 'data-editor-snapshot', 'mapCanvas'],
     snapshotAttr: 'data-editor-snapshot',
-    snapshotChecks: toolPageChecks('editor', editorSharedContractKeys, [
+    snapshotChecks: toolPageChecks('editor', [
       ['editor levels', (snapshot) => Number(snapshot.levelCount) > 0],
       ['editor canvas', (snapshot) => Number(snapshot.canvas?.width) > 0 && Number(snapshot.canvas?.height) > 0]
     ])
@@ -125,7 +71,7 @@ const pages = [
     path: '/model-editor/index.html?verify=visual-smoke',
     mustContain: ['ASCII Labyrinth Model Editor', 'data-model-editor-snapshot', 'previewCanvas'],
     snapshotAttr: 'data-model-editor-snapshot',
-    snapshotChecks: toolPageChecks('model editor', modelEditorSharedContractKeys, [
+    snapshotChecks: toolPageChecks('model editor', [
       ['model editor models', (snapshot) => Number(snapshot.modelCount) > 0],
       ['model editor selected model', (snapshot) => Boolean(snapshot.selectedModelId)],
       ['model editor selected part', (snapshot) => Boolean(snapshot.selectedPartId)]
@@ -137,14 +83,15 @@ function normalizeBase(value) {
   return String(value).replace(/\/+$/, '');
 }
 
-function allTrue(object, keys) {
-  return keys.every((key) => object?.[key] === true);
+function contractHealthy(contract) {
+  const values = Object.values(contract || {});
+  return values.length > 0 && values.every((value) => value === true);
 }
 
-function toolPageChecks(label, contractKeys, checks) {
+function toolPageChecks(label, checks) {
   return [
-    [`${label} shared contract`, (snapshot) => allTrue(snapshot.sharedContract, contractKeys)],
-    [`${label} shared UI contract`, (snapshot) => allTrue(snapshot.sharedUiContract, ['swatchHtml', 'downloadTextFile', 'getContractState'])],
+    [`${label} shared contract`, (snapshot) => contractHealthy(snapshot.sharedContract)],
+    [`${label} shared UI contract`, (snapshot) => contractHealthy(snapshot.sharedUiContract)],
     [`${label} shared tool UI class`, (snapshot) => snapshot.toolUi?.bodyClass === true],
     ...checks
   ];

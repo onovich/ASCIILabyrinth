@@ -81,6 +81,7 @@ Preferred local patterns:
 - Use `ASCIIUI.downloadTextFile()` for editor JSON exports so Blob/link cleanup remains shared.
 - Use named shared UI snapshots such as `ASCIIUI.getContractState('runtime')` instead of repeating `typeof ASCIIUI.*` checks.
 - Use named shared schema snapshots such as `ASCII_LABYRINTH_DATA.getContractState('editor')` instead of repeating `typeof SHARED_DATA.*` checks.
+- Visual smoke should assert named contract snapshots are non-empty and all true instead of keeping duplicate key lists.
 - Repeated command buttons should use familiar icon text or concise labels.
 - New major panel surfaces should be implemented with shared `--al-*` tokens first.
 

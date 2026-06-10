@@ -12,6 +12,11 @@ function assert(condition, message) {
   }
 }
 
+function assertNamedContract(contract, message) {
+  const values = Object.values(contract || {});
+  assert(values.length > 0 && values.every(Boolean), message);
+}
+
 async function loadSharedData() {
   const schemaPath = resolve(projectRoot, 'origin', 'shared', 'game-schema.js');
   const source = await readFile(schemaPath, 'utf8');
@@ -247,6 +252,9 @@ async function main() {
   const uiContract = ui.getContractState(['formatMeter', 'downloadTextFile', 'missingHelper']);
   assert(uiContract.formatMeter && uiContract.downloadTextFile && uiContract.missingHelper === false, 'shared UI contract helper should report available functions');
   assert(ui.getContractState('runtime').renderPanel && ui.getContractState('editor').colorVarStyle && ui.getContractState('modelEditor').swatchHtml, 'shared UI contract helper should support named page specs');
+  assertNamedContract(ui.getContractState('runtime'), 'runtime UI named contract should be complete');
+  assertNamedContract(ui.getContractState('editor'), 'editor UI named contract should be complete');
+  assertNamedContract(ui.getContractState('modelEditor'), 'model editor UI named contract should be complete');
   assert(ui.UI_CONTRACT_SPECS?.runtime?.includes('renderPanel'), 'shared UI should expose named contract specs');
   assert(ui.getElementState('smoke-panel', ['al-panel']).classes['al-panel'] === true, 'shared UI element state should report requested classes');
   assert(ui.getPanelState('smoke-panel').isPanel && ui.getPanelState('smoke-panel').lineCount === 2, 'shared UI panel state should report rendered design-system panels');
@@ -270,6 +278,9 @@ async function main() {
   });
   assert(schemaContract.clamp && schemaContract.pathTools && schemaContract.paletteOrder && schemaContract.missing === false, 'shared schema contract helper should report grouped capabilities');
   assert(schema.getContractState('editor').projectNormalizer && schema.getContractState('modelEditor').partFactory, 'shared schema contract helper should support named page specs');
+  assertNamedContract(schema.getContractState('runtime'), 'runtime schema named contract should be complete');
+  assertNamedContract(schema.getContractState('editor'), 'editor schema named contract should be complete');
+  assertNamedContract(schema.getContractState('modelEditor'), 'model editor schema named contract should be complete');
   assert(schema.CONTRACT_SPECS?.runtime?.clamp === 'clamp', 'shared schema should expose named contract specs');
   assert(schema.clamp(7, 0, 5) === 5 && schema.clamp(-2, 0, 5) === 0, 'shared clamp should bound values');
   assert(schema.clamp(3, 5, 0) === 3 && schema.clamp('bad', 2, 8) === 2, 'shared clamp should normalize reversed limits and invalid values');
