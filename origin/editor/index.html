@@ -556,7 +556,7 @@
         return SHARED_DATA.createEditorLevel(id, name, width, height, {
           upperStart,
           typeMeta: TYPE_META,
-          makeId,
+          makeId: createSharedId,
           floors: getFloorIds(FLOORS)
         });
       }
@@ -564,12 +564,8 @@
       function createObject(type, x, y, floor = currentFloor, extra = {}) {
         return SHARED_DATA.createEditorObject(type, x, y, floor, extra, {
           typeMeta: TYPE_META,
-          makeId
+          makeId: createSharedId
         });
-      }
-
-      function makeId(prefix) {
-        return createSharedId(prefix);
       }
 
       function getLevel() {
@@ -1366,7 +1362,7 @@
         if (!object) return;
         recordUndo('复制对象');
         const clone = structuredClone(object);
-        clone.id = makeId(object.type);
+        clone.id = createSharedId(object.type);
         clone.label = `${object.label || TYPE_META[object.type].name} copy`;
         clone.x = clamp(clone.x + 1, 0, level.width - Math.max(1, clone.w || 1));
         clone.y = clamp(clone.y + 1, 0, level.height - Math.max(1, clone.h || 1));
@@ -1442,10 +1438,10 @@
         recordUndo('复制关卡');
         const source = getLevel();
         const clone = structuredClone(source);
-        clone.id = makeId('level');
+        clone.id = createSharedId('level');
         clone.name = `${source.name} copy`;
-        clone.objects.forEach((object) => (object.id = makeId(object.type)));
-        clone.triggers.forEach((object) => (object.id = makeId(object.type)));
+        clone.objects.forEach((object) => (object.id = createSharedId(object.type)));
+        clone.triggers.forEach((object) => (object.id = createSharedId(object.type)));
         project.levels.push(clone);
         currentLevelId = clone.id;
         clearSelection();

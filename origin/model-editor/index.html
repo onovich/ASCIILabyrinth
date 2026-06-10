@@ -449,12 +449,8 @@
       function normalizePart(raw) {
         const normalized = SHARED_DATA.normalizeModelPart(raw);
         Object.assign(raw, normalized);
-        if (raw.id === 'part') raw.id = makeId('part');
+        if (raw.id === 'part') raw.id = createSharedId('part');
         return raw;
-      }
-
-      function makeId(prefix) {
-        return createSharedId(prefix);
       }
 
       function getModel() {
@@ -792,7 +788,7 @@
 
       function newModel() {
         const model = {
-          id: makeId('model'),
+          id: createSharedId('model'),
           name: '新模型',
           category: 'enemy',
           role: 'custom',
@@ -808,7 +804,7 @@
 
       function duplicateModel() {
         const clone = structuredClone(getModel());
-        clone.id = makeId(clone.id || 'model');
+        clone.id = createSharedId(clone.id || 'model');
         clone.name = `${clone.name} copy`;
         project.models.push(clone);
         selectModel(clone.id);
@@ -831,7 +827,7 @@
       function addPart() {
         const model = getModel();
         const shape = dom.shapeSelect.value;
-        const partItem = part(makeId(shape), `${shape} 部件`, shape, '#d8d0c0', '#222222', [0, 0.5, 0], [0, 0, 0], [0.4, 0.4, 0.4]);
+        const partItem = part(createSharedId(shape), `${shape} 部件`, shape, '#d8d0c0', '#222222', [0, 0.5, 0], [0, 0, 0], [0.4, 0.4, 0.4]);
         model.parts.push(partItem);
         selectPart(partItem.id);
         touchProject();
@@ -843,7 +839,7 @@
         const partItem = getPart();
         if (!partItem) return;
         const clone = structuredClone(partItem);
-        clone.id = makeId(partItem.id || 'part');
+        clone.id = createSharedId(partItem.id || 'part');
         clone.name = `${partItem.name} copy`;
         clone.position = [clone.position[0] + 0.16, clone.position[1], clone.position[2] + 0.16];
         model.parts.push(clone);
