@@ -24,6 +24,7 @@ This project is moving from prototype-heavy HTML pages toward shared runtime, ed
 - `scripts/smoke-ui-assertions.mjs`: shared UI CSS and page-level UI contract checks.
 - `scripts/visual-smoke.mjs`: visual smoke orchestrator for DOM dumps, screenshots, and per-page assertions.
 - `scripts/visual-smoke-browser.mjs`: Chrome/Edge discovery and browser process cleanup helpers.
+- `scripts/visual-smoke-capture.mjs`: Chrome DOM dump and screenshot capture helpers.
 - `scripts/visual-smoke-contracts.mjs`: visual smoke page list and snapshot checks.
 - `scripts/visual-smoke-dev-server.mjs`: dev-server readiness checks, startup, log capture, and cleanup.
 - `scripts/visual-smoke-page-assertions.mjs`: DOM marker, snapshot extraction, and snapshot comparison helpers.
