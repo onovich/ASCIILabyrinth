@@ -21,6 +21,7 @@ function toolPageChecks(label, checks) {
 const runtimeSnapshotChecks = [
   ['runtime shared contract', (snapshot) => contractHealthy(snapshot.sharedContract)],
   ['runtime shared UI contract', (snapshot) => contractHealthy(snapshot.sharedUiContract)],
+  ['runtime audio module', (snapshot) => snapshot.runtimeModules?.audio === true && snapshot.audio?.sfxCount >= 9],
   ['runtime HUD module', (snapshot) => snapshot.runtimeModules?.hud === true],
   ['runtime HUD panels', (snapshot) => ['status', 'mission', 'log'].every((key) => {
     const panel = snapshot.hudPanels?.[key];

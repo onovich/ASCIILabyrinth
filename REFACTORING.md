@@ -5,6 +5,7 @@ This project is moving from prototype-heavy HTML pages toward shared runtime, ed
 ## Source Map
 
 - `origin/index.html`: authoritative playable runtime.
+- `origin/runtime/audio.js`: runtime BGM and SFX controller.
 - `origin/runtime/hud.js`: runtime HUD, mission, and radio log rendering controller.
 - `origin/editor/index.html`: authoritative level editor.
 - `origin/model-editor/index.html`: authoritative model editor.

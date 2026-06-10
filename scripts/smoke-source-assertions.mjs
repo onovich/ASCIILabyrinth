@@ -11,6 +11,7 @@ const projectRoot = resolve(import.meta.dirname, '..');
 async function assertSyncedFiles(assert) {
   const files = [
     'public/runtime/index.html',
+    'public/runtime/runtime/audio.js',
     'public/runtime/runtime/hud.js',
     'public/editor/index.html',
     'public/model-editor/index.html',

@@ -4,6 +4,7 @@ export const runtimeSharedUiContract = {
     'public/runtime/index.html'
   ],
   required: [
+    '<script src="./runtime/audio.js"></script>',
     '<script src="./runtime/hud.js"></script>',
     'const SHARED_UI = window.ASCIIUI || {};',
     'const weapons = SHARED_DATA.WEAPON_DEFS.map((weapon) => ({ ...weapon }));',
@@ -11,6 +12,9 @@ export const runtimeSharedUiContract = {
     'const pushLog = runtimeHud.pushLog;',
     'const setObjective = runtimeHud.setObjective;',
     'const updateUI = runtimeHud.updateUI;',
+    'const runtimeAudio = window.ASCII_LABYRINTH_RUNTIME_AUDIO.createRuntimeAudioController({',
+    'const playSfx = runtimeAudio.playSfx;',
+    'const startBgm = runtimeAudio.startBgm;',
     'const TILE = SHARED_DATA.TILE;',
     'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel;',
     'const editorLevel = SHARED_DATA.loadRuntimeLevelFromLocalStorage({ floor: 0 });',
@@ -25,6 +29,7 @@ export const runtimeSharedUiContract = {
     "SHARED_UI.getElementState('ascii-canvas', ['al-fullscreen-canvas'])",
     "sharedContract: SHARED_DATA.getContractState('runtime'),",
     "sharedUiContract: SHARED_UI.getContractState('runtime'),",
+    "audio: typeof window.ASCII_LABYRINTH_RUNTIME_AUDIO?.createRuntimeAudioController === 'function'",
     "hud: typeof window.ASCII_LABYRINTH_RUNTIME_HUD?.createRuntimeHudController === 'function'",
     "status: SHARED_UI.getPanelState('ui-layer'),",
     'const runtimeButtonBindings = SHARED_UI.bindClickHandlers(null, {',
@@ -51,6 +56,12 @@ export const runtimeSharedUiContract = {
     'const gridKey = SHARED_DATA.getCellKey ||',
     'SHARED_DATA.loadRuntimeModelProfilesFromLocalStorage?.',
     'const mergeEnemyProfiles = SHARED_DATA.mergeRuntimeEnemyProfiles ||',
+    'let audioContext = null;',
+    "const bgm = new Audio('./bgm/ascii_fps_retro_modern_loop.ogg');",
+    'function ensureAudio()',
+    'function playTone(freq',
+    'function playSfx(name)',
+    'function startBgm()',
     "SHARED_DATA.getContractState?.('runtime') || {}",
     'panel.replaceChildren()',
     "element.style.display = visible ? display : 'none'",
@@ -92,7 +103,31 @@ export const runtimeHudContract = {
   ]
 };
 
+export const runtimeAudioContract = {
+  files: [
+    'origin/runtime/audio.js',
+    'public/runtime/runtime/audio.js'
+  ],
+  required: [
+    'const SFX_PATTERNS = {',
+    'function createRuntimeAudioController({',
+    'const bgm = new Audio(bgmUrl);',
+    'function ensureAudio() {',
+    'function playTone(freq, duration = 0.08, type =',
+    'function playSfx(name) {',
+    'function startBgm() {',
+    'document.removeEventListener(',
+    'function getAudioState() {',
+    'window.ASCII_LABYRINTH_RUNTIME_AUDIO = {'
+  ],
+  forbidden: [
+    'window.ASCIIUI?.',
+    'onclick='
+  ]
+};
+
 export const runtimeSharedUiContracts = [
   runtimeSharedUiContract,
+  runtimeAudioContract,
   runtimeHudContract
 ];
