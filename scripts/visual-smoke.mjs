@@ -2,6 +2,7 @@ import { constants } from 'node:fs';
 import { access, mkdir, rm, stat } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { spawn } from 'node:child_process';
+import { assertNoBoxDrawingGuard, visualSmokePages } from './visual-smoke-contracts.mjs';
 
 await import('./sync-runtime.mjs');
 
@@ -15,106 +16,9 @@ const devServerPort = Number(process.env.VISUAL_SMOKE_DEV_PORT || baseUrlParts.p
 const domDumpBudgetMs = Number(process.env.VISUAL_SMOKE_DOM_BUDGET_MS || 12000);
 const domDumpTimeoutMs = Number(process.env.VISUAL_SMOKE_DOM_TIMEOUT_MS || 90000);
 const domDumpAttempts = Math.max(1, Math.floor(Number(process.env.VISUAL_SMOKE_DOM_ATTEMPTS || 2)));
-const boxDrawingTextPattern = /[\u250c\u2510\u2514\u2518\u2502\u2500]/;
-
-const runtimeSnapshotChecks = [
-  ['runtime shared contract', (snapshot) => contractHealthy(snapshot.sharedContract)],
-  ['runtime shared UI contract', (snapshot) => contractHealthy(snapshot.sharedUiContract)],
-  ['runtime HUD panels', (snapshot) => ['status', 'mission', 'log'].every((key) => {
-    const panel = snapshot.hudPanels?.[key];
-    return panel?.exists === true && panel.isPanel === true && Number(panel.lineCount) > 0;
-  })],
-  ['runtime HUD tones', (snapshot) =>
-    snapshot.hudPanels?.status?.tone === ''
-    && snapshot.hudPanels?.mission?.tone === 'cyan'
-    && snapshot.hudPanels?.log?.tone === 'amber'],
-  ['runtime screen UI classes', (snapshot) => Object.values(snapshot.screenUi || {}).every((state) =>
-    state?.exists === true && Object.values(state.classes || {}).every(Boolean)
-  )],
-  ['runtime modal UI classes', (snapshot) => Object.values(snapshot.modalUi || {}).every((state) =>
-    state?.exists === true && Object.values(state.classes || {}).every(Boolean)
-  )],
-  ['runtime modal text has no drawn boxes', (snapshot) => noBoxDrawingText(snapshot.modalText)],
-  ['runtime modal button bindings', (snapshot) => {
-    const bindings = Object.values(snapshot.runtimeButtonBindings || {});
-    return bindings.length === 4 && bindings.every((value) => value === true);
-  }],
-  ['runtime level source', (snapshot) => Boolean(snapshot.runtimeLevel?.source)],
-  ['runtime level size', (snapshot) => Number(snapshot.levelSize?.rows) > 0 && Number(snapshot.levelSize?.cols) > 0],
-  ['runtime enemy profiles', (snapshot) => Number(snapshot.runtimeModels?.activeEnemyCount) > 0],
-  ['runtime shader pipeline', (snapshot) => snapshot.shaderPipeline === true]
-];
-
-const pages = [
-  {
-    name: 'runtime',
-    path: '/runtime/index.html?verify=visual-smoke',
-    mustContain: ['ASCII 3D FPS', 'data-debug-snapshot', 'ascii-canvas'],
-    snapshotAttr: 'data-debug-snapshot',
-    snapshotChecks: runtimeSnapshotChecks
-  },
-  {
-    name: 'runtime-password-modal',
-    path: '/runtime/index.html?verify=visual-smoke&debugModal=password',
-    mustContain: ['ASCII 3D FPS', 'data-debug-snapshot', 'password-panel'],
-    snapshotAttr: 'data-debug-snapshot',
-    snapshotChecks: [
-      ...runtimeSnapshotChecks,
-      ['runtime password modal visible', (snapshot) => snapshot.modalUi?.passwordPanel?.display === 'block']
-    ]
-  },
-  {
-    name: 'editor',
-    path: '/editor/index.html?verify=visual-smoke',
-    mustContain: ['ASCII Labyrinth Level Editor', 'data-editor-snapshot', 'mapCanvas'],
-    snapshotAttr: 'data-editor-snapshot',
-    snapshotChecks: toolPageChecks('editor', [
-      ['editor levels', (snapshot) => Number(snapshot.levelCount) > 0],
-      ['editor canvas', (snapshot) => Number(snapshot.canvas?.width) > 0 && Number(snapshot.canvas?.height) > 0]
-    ])
-  },
-  {
-    name: 'model-editor',
-    path: '/model-editor/index.html?verify=visual-smoke',
-    mustContain: ['ASCII Labyrinth Model Editor', 'data-model-editor-snapshot', 'previewCanvas'],
-    snapshotAttr: 'data-model-editor-snapshot',
-    snapshotChecks: toolPageChecks('model editor', [
-      ['model editor models', (snapshot) => Number(snapshot.modelCount) > 0],
-      ['model editor selected model', (snapshot) => Boolean(snapshot.selectedModelId)],
-      ['model editor selected part', (snapshot) => Boolean(snapshot.selectedPartId)]
-    ])
-  }
-];
 
 function normalizeBase(value) {
   return String(value).replace(/\/+$/, '');
-}
-
-function contractHealthy(contract) {
-  const values = Object.values(contract || {});
-  return values.length > 0 && values.every((value) => value === true);
-}
-
-function toolPageChecks(label, checks) {
-  return [
-    [`${label} shared contract`, (snapshot) => contractHealthy(snapshot.sharedContract)],
-    [`${label} shared UI contract`, (snapshot) => contractHealthy(snapshot.sharedUiContract)],
-    [`${label} shared tool UI class`, (snapshot) => snapshot.toolUi?.bodyClass === true],
-    ...checks
-  ];
-}
-
-function noBoxDrawingText(values) {
-  return Object.values(values || {}).every((value) => !boxDrawingTextPattern.test(String(value)));
-}
-
-function assertNoBoxDrawingGuard() {
-  if (
-    noBoxDrawingText({ border: '\u250cPASSWORD\u2510' })
-    || !noBoxDrawingText({ copy: 'Enter the access code.' })
-  ) {
-    throw new Error('visual smoke box-drawing text guard is not matching expected characters');
-  }
 }
 
 function decodeHtmlAttribute(value) {
@@ -369,7 +273,7 @@ async function main() {
   const results = [];
 
   try {
-    for (const page of pages) {
+    for (const page of visualSmokePages) {
       const profileDir = resolve(outDir, `chrome-profile-${page.name}`);
       await rm(profileDir, { recursive: true, force: true }).catch(() => {});
       await mkdir(profileDir, { recursive: true });
