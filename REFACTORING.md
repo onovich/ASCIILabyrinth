@@ -21,6 +21,7 @@ This project is moving from prototype-heavy HTML pages toward shared runtime, ed
 - `scripts/smoke-schema-editor-assertions.mjs`: editor object, level, floor visibility, and editor project schema assertions.
 - `scripts/smoke-environment.mjs`: project paths and file readers used by smoke guards.
 - `scripts/smoke-fixtures.mjs`: low-cost runtime/model conversion fixtures.
+- `scripts/smoke-schema-model-assertions.mjs`: model part and model project schema assertions.
 - `scripts/smoke-runtime-contracts.mjs`: runtime page required/forbidden shared UI and schema source fragments.
 - `scripts/smoke-runtime-conversion-assertions.mjs`: editor-level and model-project conversion assertions used by smoke.
 - `scripts/smoke-schema-persistence-assertions.mjs`: JSON, storage, timestamp, and project touch schema assertions.
