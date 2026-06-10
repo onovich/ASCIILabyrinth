@@ -392,6 +392,7 @@
     <script>
       const SHARED_UI = window.ASCIIUI || {};
       const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
+      const bindElements = SHARED_UI.bindElements || ((ids) => Object.fromEntries(ids.map((id) => [id, document.getElementById(id)])));
       const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS?.editorProject || 'ascii-labyrinth-editor-v1';
       const CELL_SIZE = 32;
       const HISTORY_LIMIT = 80;
@@ -537,35 +538,35 @@
         ['priest', '深井祭司']
       ];
 
-      const dom = {
-        levelSelect: document.getElementById('levelSelect'),
-        addLevelBtn: document.getElementById('addLevelBtn'),
-        duplicateLevelBtn: document.getElementById('duplicateLevelBtn'),
-        deleteLevelBtn: document.getElementById('deleteLevelBtn'),
-        floorSwitch: document.getElementById('floorSwitch'),
-        showPrevFloor: document.getElementById('showPrevFloor'),
-        showNextFloor: document.getElementById('showNextFloor'),
-        prevFloorLabel: document.getElementById('prevFloorLabel'),
-        nextFloorLabel: document.getElementById('nextFloorLabel'),
-        undoBtn: document.getElementById('undoBtn'),
-        saveBtn: document.getElementById('saveBtn'),
-        loadBtn: document.getElementById('loadBtn'),
-        exportBtn: document.getElementById('exportBtn'),
-        importBtn: document.getElementById('importBtn'),
-        importFile: document.getElementById('importFile'),
-        palettePanel: document.getElementById('palettePanel'),
-        mapCanvas: document.getElementById('mapCanvas'),
-        canvasWrap: document.getElementById('canvasWrap'),
-        objectTooltip: document.getElementById('objectTooltip'),
-        levelInspector: document.getElementById('levelInspector'),
-        objectInspector: document.getElementById('objectInspector'),
-        sceneName: document.getElementById('sceneName'),
-        sceneStats: document.getElementById('sceneStats'),
-        cursorReadout: document.getElementById('cursorReadout'),
-        statusText: document.getElementById('statusText'),
-        projectMeta: document.getElementById('projectMeta'),
-        schemaText: document.getElementById('schemaText')
-      };
+      const dom = bindElements([
+        'levelSelect',
+        'addLevelBtn',
+        'duplicateLevelBtn',
+        'deleteLevelBtn',
+        'floorSwitch',
+        'showPrevFloor',
+        'showNextFloor',
+        'prevFloorLabel',
+        'nextFloorLabel',
+        'undoBtn',
+        'saveBtn',
+        'loadBtn',
+        'exportBtn',
+        'importBtn',
+        'importFile',
+        'palettePanel',
+        'mapCanvas',
+        'canvasWrap',
+        'objectTooltip',
+        'levelInspector',
+        'objectInspector',
+        'sceneName',
+        'sceneStats',
+        'cursorReadout',
+        'statusText',
+        'projectMeta',
+        'schemaText'
+      ]);
 
       const ctx = dom.mapCanvas.getContext('2d');
       let project = createStarterProject();

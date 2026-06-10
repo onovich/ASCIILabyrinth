@@ -6,6 +6,16 @@
     return target;
   }
 
+  function bindElements(entries, root = document) {
+    const source = Array.isArray(entries)
+      ? Object.fromEntries(entries.map((id) => [id, id]))
+      : entries || {};
+    return Object.entries(source).reduce((bindings, [key, id]) => {
+      bindings[key] = root?.getElementById?.(id) || null;
+      return bindings;
+    }, {});
+  }
+
   function normalizeLine(line) {
     if (line && typeof line === 'object') {
       return {
@@ -154,6 +164,7 @@
 
   const UI_CONTRACT_SPECS = Object.freeze({
     runtime: Object.freeze([
+      'bindElements',
       'formatMeter',
       'colorVarStyle',
       'swatchHtml',
@@ -167,12 +178,14 @@
       'getContractState'
     ]),
     editor: Object.freeze([
+      'bindElements',
       'swatchHtml',
       'colorVarStyle',
       'downloadTextFile',
       'getContractState'
     ]),
     modelEditor: Object.freeze([
+      'bindElements',
       'swatchHtml',
       'downloadTextFile',
       'getContractState'
@@ -190,6 +203,7 @@
   }
 
   publicApi = Object.freeze({
+    bindElements,
     formatMeter,
     colorVarStyle,
     swatchHtml,

@@ -238,6 +238,11 @@ async function main() {
   const smokePanel = createDomElement('div');
   smokePanel.className = 'al-hud al-panel';
   elements.set('smoke-panel', smokePanel);
+  const smokeSecondary = createDomElement('div');
+  elements.set('smoke-secondary', smokeSecondary);
+  const boundElements = ui.bindElements(['smoke-panel', 'smoke-secondary']);
+  const namedBoundElements = ui.bindElements({ panel: 'smoke-panel' });
+  assert(boundElements['smoke-panel'] === smokePanel && boundElements['smoke-secondary'] === smokeSecondary && namedBoundElements.panel === smokePanel, 'shared UI element binder should resolve arrays and named id maps');
   ui.renderPanel('smoke-panel', {
     title: 'SMOKE',
     tone: 'cyan',

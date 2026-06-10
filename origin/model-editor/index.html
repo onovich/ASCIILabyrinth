@@ -192,6 +192,7 @@
     <script>
       const SHARED_UI = window.ASCIIUI || {};
       const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
+      const bindElements = SHARED_UI.bindElements || ((ids) => Object.fromEntries(ids.map((id) => [id, document.getElementById(id)])));
       const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS?.modelProject || 'ascii-labyrinth-model-editor-v1';
       const SHAPES = SHARED_DATA.MODEL_SHAPES || ['box', 'sphere', 'cylinder', 'cone', 'torus', 'octahedron', 'icosahedron', 'dodecahedron'];
       const TEMPLATE_IDS = SHARED_DATA.MODEL_TEMPLATE_IDS || [
@@ -254,31 +255,31 @@
       const createSharedId = SHARED_DATA.createId || SHARED_DATA.createEditorId || ((prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`);
       const degreesToRadians = SHARED_DATA.degreesToRadians || ((values) => (Array.isArray(values) ? values : [0, 0, 0]).map((value) => (Number(value) || 0) * Math.PI / 180));
 
-      const dom = {
-        templateSelect: document.getElementById('templateSelect'),
-        applyTemplateBtn: document.getElementById('applyTemplateBtn'),
-        newModelBtn: document.getElementById('newModelBtn'),
-        duplicateModelBtn: document.getElementById('duplicateModelBtn'),
-        deleteModelBtn: document.getElementById('deleteModelBtn'),
-        saveBtn: document.getElementById('saveBtn'),
-        loadBtn: document.getElementById('loadBtn'),
-        exportBtn: document.getElementById('exportBtn'),
-        importBtn: document.getElementById('importBtn'),
-        importFile: document.getElementById('importFile'),
-        modelList: document.getElementById('modelList'),
-        partList: document.getElementById('partList'),
-        shapeSelect: document.getElementById('shapeSelect'),
-        addPartBtn: document.getElementById('addPartBtn'),
-        modelInspector: document.getElementById('modelInspector'),
-        partInspector: document.getElementById('partInspector'),
-        jsonPreview: document.getElementById('jsonPreview'),
-        previewName: document.getElementById('previewName'),
-        previewStats: document.getElementById('previewStats'),
-        previewCanvas: document.getElementById('previewCanvas'),
-        modelMeta: document.getElementById('modelMeta'),
-        schemaText: document.getElementById('schemaText'),
-        statusText: document.getElementById('statusText')
-      };
+      const dom = bindElements([
+        'templateSelect',
+        'applyTemplateBtn',
+        'newModelBtn',
+        'duplicateModelBtn',
+        'deleteModelBtn',
+        'saveBtn',
+        'loadBtn',
+        'exportBtn',
+        'importBtn',
+        'importFile',
+        'modelList',
+        'partList',
+        'shapeSelect',
+        'addPartBtn',
+        'modelInspector',
+        'partInspector',
+        'jsonPreview',
+        'previewName',
+        'previewStats',
+        'previewCanvas',
+        'modelMeta',
+        'schemaText',
+        'statusText'
+      ]);
 
       let project;
       let selectedModelId;
