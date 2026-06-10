@@ -214,17 +214,7 @@
         'item-key',
         'item-scatter'
       ];
-      const setByPath = SHARED_DATA.setValueByPath || ((object, path, value) => {
-        const parts = String(path).split('.');
-        let cursor = object;
-        for (let i = 0; i < parts.length - 1; i++) {
-          const key = parts[i];
-          cursor[key] ||= Number.isInteger(Number(parts[i + 1])) ? [] : {};
-          cursor = cursor[key];
-        }
-        cursor[parts.at(-1)] = value;
-        return object;
-      });
+      const setByPath = SHARED_DATA.setValueByPath;
       const escapeHtml = SHARED_DATA.escapeHtml;
       const escapeAttr = SHARED_DATA.escapeAttr;
       const optionHtml = SHARED_DATA.optionHtml;

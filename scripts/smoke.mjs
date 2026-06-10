@@ -295,7 +295,9 @@ async function assertToolPageSharedUiContract() {
         'const escapeAttr = SHARED_DATA.escapeAttr;',
         'const optionHtml = SHARED_DATA.optionHtml;',
         'const optionsHtml = SHARED_DATA.optionsHtml;',
-        'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml;'
+        'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml;',
+        'const setByPath = SHARED_DATA.setValueByPath;',
+        'const getByPath = SHARED_DATA.getValueByPath;'
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
@@ -305,7 +307,9 @@ async function assertToolPageSharedUiContract() {
         'const escapeAttr = SHARED_DATA.escapeAttr ||',
         'const optionHtml = SHARED_DATA.optionHtml ||',
         'const optionsHtml = SHARED_DATA.optionsHtml ||',
-        'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml ||'
+        'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml ||',
+        'const setByPath = SHARED_DATA.setValueByPath ||',
+        'const getByPath = SHARED_DATA.getValueByPath ||'
       ]
     },
     {
@@ -318,7 +322,9 @@ async function assertToolPageSharedUiContract() {
         'const escapeAttr = SHARED_DATA.escapeAttr;',
         'const optionHtml = SHARED_DATA.optionHtml;',
         'const optionsHtml = SHARED_DATA.optionsHtml;',
-        'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml;'
+        'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml;',
+        'const setByPath = SHARED_DATA.setValueByPath;',
+        'const getByPath = SHARED_DATA.getValueByPath;'
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
@@ -328,7 +334,9 @@ async function assertToolPageSharedUiContract() {
         'const escapeAttr = SHARED_DATA.escapeAttr ||',
         'const optionHtml = SHARED_DATA.optionHtml ||',
         'const optionsHtml = SHARED_DATA.optionsHtml ||',
-        'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml ||'
+        'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml ||',
+        'const setByPath = SHARED_DATA.setValueByPath ||',
+        'const getByPath = SHARED_DATA.getValueByPath ||'
       ]
     },
     {
@@ -339,7 +347,8 @@ async function assertToolPageSharedUiContract() {
         'const escapeHtml = SHARED_DATA.escapeHtml;',
         'const escapeAttr = SHARED_DATA.escapeAttr;',
         'const optionHtml = SHARED_DATA.optionHtml;',
-        'const optionsHtml = SHARED_DATA.optionsHtml;'
+        'const optionsHtml = SHARED_DATA.optionsHtml;',
+        'const setByPath = SHARED_DATA.setValueByPath;'
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
@@ -347,7 +356,8 @@ async function assertToolPageSharedUiContract() {
         'const escapeHtml = SHARED_DATA.escapeHtml ||',
         'const escapeAttr = SHARED_DATA.escapeAttr ||',
         'const optionHtml = SHARED_DATA.optionHtml ||',
-        'const optionsHtml = SHARED_DATA.optionsHtml ||'
+        'const optionsHtml = SHARED_DATA.optionsHtml ||',
+        'const setByPath = SHARED_DATA.setValueByPath ||'
       ]
     },
     {
@@ -358,7 +368,8 @@ async function assertToolPageSharedUiContract() {
         'const escapeHtml = SHARED_DATA.escapeHtml;',
         'const escapeAttr = SHARED_DATA.escapeAttr;',
         'const optionHtml = SHARED_DATA.optionHtml;',
-        'const optionsHtml = SHARED_DATA.optionsHtml;'
+        'const optionsHtml = SHARED_DATA.optionsHtml;',
+        'const setByPath = SHARED_DATA.setValueByPath;'
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
@@ -366,7 +377,8 @@ async function assertToolPageSharedUiContract() {
         'const escapeHtml = SHARED_DATA.escapeHtml ||',
         'const escapeAttr = SHARED_DATA.escapeAttr ||',
         'const optionHtml = SHARED_DATA.optionHtml ||',
-        'const optionsHtml = SHARED_DATA.optionsHtml ||'
+        'const optionsHtml = SHARED_DATA.optionsHtml ||',
+        'const setByPath = SHARED_DATA.setValueByPath ||'
       ]
     }
   ];
