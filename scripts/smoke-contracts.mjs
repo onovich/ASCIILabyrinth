@@ -186,9 +186,9 @@ export const toolPageSharedUiContracts = [
       'const countBy = SHARED_DATA.countBy;',
       'const clamp = SHARED_DATA.clamp;',
       'const createSharedId = SHARED_DATA.createId;',
+      'const createModelPart = SHARED_DATA.createModelPart;',
       'const degreesToRadians = SHARED_DATA.degreesToRadians;',
       'return SHARED_DATA.createDefaultModelProject(TEMPLATE_IDS, createTemplateModel);',
-      'return SHARED_DATA.createModelPart(id, name, shape, color, edgeColor, position, rotation, scale);',
       'const normalized = SHARED_DATA.normalizeModelPart(raw);',
       'const normalized = SHARED_DATA.normalizeModelProject(data, {',
       'modelSchema: SHARED_DATA.MODEL_RUNTIME_SCHEMA,',
@@ -213,6 +213,7 @@ export const toolPageSharedUiContracts = [
       'const countBy = SHARED_DATA.countBy ||',
       'const clamp = SHARED_DATA.clamp ||',
       'const createSharedId = SHARED_DATA.createId ||',
+      'const createModelPart = SHARED_DATA.createModelPart ||',
       'const degreesToRadians = SHARED_DATA.degreesToRadians ||',
       'SHARED_DATA.createDefaultModelProject?.',
       'SHARED_DATA.createModelPart?.',
@@ -221,6 +222,8 @@ export const toolPageSharedUiContracts = [
       'SHARED_DATA.MODEL_RUNTIME_SCHEMA ||',
       'function option(value, label, selected)',
       'function makeId(prefix)',
+      'function part(id, name, shape',
+      'function createModelPart(id, name, shape',
       "SHARED_DATA.getContractState?.('modelEditor') || {}",
       "SHARED_UI.getContractState?.('modelEditor') || {}"
     ]
