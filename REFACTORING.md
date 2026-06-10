@@ -27,6 +27,7 @@ This project is moving from prototype-heavy HTML pages toward shared runtime, ed
 - `scripts/visual-smoke-capture.mjs`: Chrome DOM dump and screenshot capture helpers.
 - `scripts/visual-smoke-contracts.mjs`: visual smoke page list and snapshot checks.
 - `scripts/visual-smoke-dev-server.mjs`: dev-server readiness checks, startup, log capture, and cleanup.
+- `scripts/visual-smoke-environment.mjs`: visual smoke env var parsing, paths, and browser discovery.
 - `scripts/visual-smoke-page-assertions.mjs`: DOM marker, snapshot extraction, and snapshot comparison helpers.
 
 ## Slice Loop
