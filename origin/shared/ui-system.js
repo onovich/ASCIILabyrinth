@@ -152,9 +152,37 @@
     };
   }
 
+  const UI_CONTRACT_SPECS = Object.freeze({
+    runtime: Object.freeze([
+      'formatMeter',
+      'colorVarStyle',
+      'swatchHtml',
+      'downloadTextFile',
+      'renderPanel',
+      'setPanelLines',
+      'setElementVisible',
+      'isElementVisible',
+      'getElementState',
+      'getPanelState',
+      'getContractState'
+    ]),
+    editor: Object.freeze([
+      'swatchHtml',
+      'colorVarStyle',
+      'downloadTextFile',
+      'getContractState'
+    ]),
+    modelEditor: Object.freeze([
+      'swatchHtml',
+      'downloadTextFile',
+      'getContractState'
+    ])
+  });
+
   function getContractState(keys = []) {
     const api = publicApi || {};
-    const selectedKeys = Array.isArray(keys) && keys.length ? keys : Object.keys(api);
+    const resolvedKeys = typeof keys === 'string' ? UI_CONTRACT_SPECS[keys] || [] : keys;
+    const selectedKeys = Array.isArray(resolvedKeys) && resolvedKeys.length ? resolvedKeys : Object.keys(api);
     return selectedKeys.reduce((state, key) => {
       state[key] = typeof api[key] === 'function';
       return state;
@@ -172,6 +200,7 @@
     isElementVisible,
     getElementState,
     getPanelState,
+    UI_CONTRACT_SPECS,
     getContractState
   });
 

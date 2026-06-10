@@ -1008,12 +1008,7 @@
         return {
           version: project.version,
           sharedContract: SHARED_DATA.getContractState?.('editor') || {},
-          sharedUiContract: SHARED_UI.getContractState?.([
-            'swatchHtml',
-            'colorVarStyle',
-            'downloadTextFile',
-            'getContractState'
-          ]) || {},
+          sharedUiContract: SHARED_UI.getContractState?.('editor') || {},
           toolUi: {
             bodyClass: document.body.classList.contains('al-tool-page')
           },

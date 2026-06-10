@@ -1725,19 +1725,7 @@
         function getDebugSnapshot() {
             return {
                 sharedContract: SHARED_DATA.getContractState?.('runtime') || {},
-                sharedUiContract: window.ASCIIUI?.getContractState?.([
-                    'formatMeter',
-                    'colorVarStyle',
-                    'swatchHtml',
-                    'downloadTextFile',
-                    'renderPanel',
-                    'setPanelLines',
-                    'setElementVisible',
-                    'isElementVisible',
-                    'getElementState',
-                    'getPanelState',
-                    'getContractState'
-                ]) || {},
+                sharedUiContract: window.ASCIIUI?.getContractState?.('runtime') || {},
                 hudPanels: {
                     status: window.ASCIIUI?.getPanelState?.('ui-layer') || { exists: false },
                     mission: window.ASCIIUI?.getPanelState?.('mission-layer') || { exists: false },

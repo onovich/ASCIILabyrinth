@@ -976,11 +976,7 @@
           version: project.version,
           modelSchema: project.modelSchema || '',
           sharedContract: SHARED_DATA.getContractState?.('modelEditor') || {},
-          sharedUiContract: SHARED_UI.getContractState?.([
-            'swatchHtml',
-            'downloadTextFile',
-            'getContractState'
-          ]) || {},
+          sharedUiContract: SHARED_UI.getContractState?.('modelEditor') || {},
           toolUi: {
             bodyClass: document.body.classList.contains('al-tool-page')
           },
