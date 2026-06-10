@@ -15,6 +15,7 @@ This project is moving from prototype-heavy HTML pages toward shared runtime, ed
 - `origin/editor/index.html`: authoritative level editor.
 - `origin/editor/starter-project.js`: editor starter project, level, and object factory.
 - `origin/model-editor/index.html`: authoritative model editor.
+- `origin/model-editor/preview-factory.js`: model editor Three.js part object and geometry factory.
 - `origin/shared/game-schema.js`: shared data contracts, editor/runtime conversion, model/runtime conversion, storage helpers, and schema contract snapshots.
 - `origin/shared/ui-system.js`: shared DOM helpers, HUD panels, visibility helpers, event binding helpers, file import/export helpers, and UI contract snapshots.
 - `origin/shared/ui-system.css`: shared design tokens and reusable runtime/tool UI primitives.

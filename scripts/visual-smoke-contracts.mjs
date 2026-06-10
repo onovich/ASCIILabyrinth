@@ -88,6 +88,7 @@ export const visualSmokePages = [
     mustContain: ['ASCII Labyrinth Model Editor', 'data-model-editor-snapshot', 'previewCanvas'],
     snapshotAttr: 'data-model-editor-snapshot',
     snapshotChecks: toolPageChecks('model editor', [
+      ['model editor preview factory module', (snapshot) => snapshot.modelEditorModules?.previewFactory === true && Number(snapshot.previewFactory?.shapeCount) >= 8],
       ['model editor models', (snapshot) => Number(snapshot.modelCount) > 0],
       ['model editor selected model', (snapshot) => Boolean(snapshot.selectedModelId)],
       ['model editor selected part', (snapshot) => Boolean(snapshot.selectedPartId)]

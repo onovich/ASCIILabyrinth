@@ -114,6 +114,7 @@ export const toolPageSharedUiContracts = [
   {
     files: ['origin/model-editor/index.html', 'public/model-editor/index.html'],
     required: [
+      '<script src="./preview-factory.js"></script>',
       'const bindElements = SHARED_UI.bindElements;',
       'const swatchHtml = SHARED_UI.swatchHtml;',
       'const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS.modelProject;',
@@ -133,11 +134,16 @@ export const toolPageSharedUiContracts = [
       'const createSharedId = SHARED_DATA.createId;',
       'const createModelPart = SHARED_DATA.createModelPart;',
       'const degreesToRadians = SHARED_DATA.degreesToRadians;',
+      'const modelPreviewFactory = window.ASCII_LABYRINTH_MODEL_PREVIEW.createModelPreviewFactory({',
+      'const createPartObject = modelPreviewFactory.createPartObject;',
       'return SHARED_DATA.createDefaultModelProject(TEMPLATE_IDS, createTemplateModel);',
       'const normalized = SHARED_DATA.normalizeModelPart(raw);',
       'const normalized = SHARED_DATA.normalizeModelProject(data, {',
       'modelSchema: SHARED_DATA.MODEL_RUNTIME_SCHEMA,',
+      'createId: createSharedId,',
+      'createPartId: createSharedId,',
       "sharedContract: SHARED_DATA.getContractState('modelEditor'),",
+      "previewFactory: typeof window.ASCII_LABYRINTH_MODEL_PREVIEW?.createModelPreviewFactory === 'function'",
       "sharedUiContract: SHARED_UI.getContractState('modelEditor'),"
     ],
     forbidden: [
@@ -169,8 +175,29 @@ export const toolPageSharedUiContracts = [
       'function makeId(prefix)',
       'function part(id, name, shape',
       'function createModelPart(id, name, shape',
+      'function createPartObject(partItem)',
+      'function createGeometry(shape)',
+      'createId: makeId,',
+      'createPartId: makeId,',
       "SHARED_DATA.getContractState?.('modelEditor') || {}",
       "SHARED_UI.getContractState?.('modelEditor') || {}"
+    ]
+  },
+  {
+    files: ['origin/model-editor/preview-factory.js', 'public/model-editor/preview-factory.js'],
+    required: [
+      'function createModelPreviewFactory({ THREE, degreesToRadians }) {',
+      'function createGeometry(shape) {',
+      'function createPartObject(partItem) {',
+      'new THREE.MeshStandardMaterial({',
+      'new THREE.EdgesGeometry(geometry)',
+      'group.rotation.set(...degreesToRadians(partItem.rotation));',
+      'function getPreviewFactoryState() {',
+      'window.ASCII_LABYRINTH_MODEL_PREVIEW = {'
+    ],
+    forbidden: [
+      'window.ASCIIUI?.',
+      'onclick='
     ]
   }
 ];
