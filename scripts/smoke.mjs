@@ -237,6 +237,38 @@ async function assertSharedCssContract() {
   }
 }
 
+async function assertRuntimeSharedUiContract() {
+  const files = [
+    'origin/index.html',
+    'public/runtime/index.html'
+  ];
+  const requiredFragments = [
+    'const SHARED_UI = window.ASCIIUI || {};',
+    'SHARED_UI.renderPanel(id, { title, lines, tone });',
+    'return SHARED_UI.formatMeter(value, max, { width });',
+    'return SHARED_UI.setElementVisible(id, visible, display);',
+    'return SHARED_UI.isElementVisible(id);'
+  ];
+  const forbiddenFragments = [
+    'window.ASCIIUI?.renderPanel',
+    'window.ASCIIUI?.formatMeter',
+    'window.ASCIIUI?.setElementVisible',
+    'window.ASCIIUI?.isElementVisible',
+    'panel.replaceChildren()',
+    "element.style.display = visible ? display : 'none'"
+  ];
+
+  for (const file of files) {
+    const source = await readFile(resolve(projectRoot, file), 'utf8');
+    for (const fragment of requiredFragments) {
+      assert(source.includes(fragment), `${file} should call shared runtime UI helper: ${fragment}`);
+    }
+    for (const fragment of forbiddenFragments) {
+      assert(!source.includes(fragment), `${file} should not keep runtime UI fallback: ${fragment}`);
+    }
+  }
+}
+
 async function main() {
   const schema = await loadSharedData();
   const { ui, elements } = await loadSharedUi();
@@ -439,8 +471,9 @@ async function main() {
 
   await assertSyncedFiles();
   await assertSharedCssContract();
+  await assertRuntimeSharedUiContract();
 
-  console.log('smoke ok: shared schema, runtime conversion, model conversion, shared UI CSS, synced assets');
+  console.log('smoke ok: shared schema, runtime conversion, model conversion, shared UI CSS, runtime shared UI, synced assets');
 }
 
 await main();

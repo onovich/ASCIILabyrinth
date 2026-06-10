@@ -88,6 +88,7 @@
         // ==========================================
         // 1. 游戏状态与核心配置
         // ==========================================
+        const SHARED_UI = window.ASCIIUI || {};
         const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
         const gameState = {
             health: 100,
@@ -1422,53 +1423,19 @@
         }
 
         function renderPanel(id, title, lines, tone = '') {
-            if (window.ASCIIUI?.renderPanel) {
-                window.ASCIIUI.renderPanel(id, { title, lines, tone });
-                return;
-            }
-
-            const panel = document.getElementById(id);
-            panel.dataset.title = title;
-            if (tone) panel.dataset.tone = tone;
-            else panel.removeAttribute('data-tone');
-            panel.replaceChildren();
-
-            const container = document.createElement('div');
-            container.className = 'al-panel-lines';
-            lines.forEach((line) => {
-                const entry = document.createElement('div');
-                entry.className = 'al-panel-line';
-                entry.textContent = line && typeof line === 'object' ? String(line.text ?? '') : String(line ?? '');
-                container.appendChild(entry);
-            });
-            panel.appendChild(container);
+            SHARED_UI.renderPanel(id, { title, lines, tone });
         }
 
         function bar(value, max, width = 12) {
-            if (window.ASCIIUI?.formatMeter) {
-                return window.ASCIIUI.formatMeter(value, max, { width });
-            }
-            const filled = clamp(Math.round((value / max) * width), 0, width);
-            return `${'█'.repeat(filled)}${'░'.repeat(width - filled)}`;
+            return SHARED_UI.formatMeter(value, max, { width });
         }
 
         function setElementVisible(id, visible, display = 'block') {
-            if (window.ASCIIUI?.setElementVisible) {
-                return window.ASCIIUI.setElementVisible(id, visible, display);
-            }
-            const element = document.getElementById(id);
-            if (!element) return null;
-            element.style.display = visible ? display : 'none';
-            element.setAttribute('aria-hidden', visible ? 'false' : 'true');
-            return element;
+            return SHARED_UI.setElementVisible(id, visible, display);
         }
 
         function isElementVisible(id) {
-            if (window.ASCIIUI?.isElementVisible) {
-                return window.ASCIIUI.isElementVisible(id);
-            }
-            const element = document.getElementById(id);
-            return Boolean(element && element.style.display !== 'none');
+            return SHARED_UI.isElementVisible(id);
         }
 
         function pushLog(text) {

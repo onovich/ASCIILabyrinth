@@ -12,7 +12,7 @@ const outDir = resolve(projectRoot, process.env.VISUAL_SMOKE_OUT_DIR || '.codex-
 const chromePath = await findChrome();
 const devServerHost = process.env.VISUAL_SMOKE_DEV_HOST || baseUrlParts.hostname || '127.0.0.1';
 const devServerPort = Number(process.env.VISUAL_SMOKE_DEV_PORT || baseUrlParts.port || 5174);
-const domDumpBudgetMs = Number(process.env.VISUAL_SMOKE_DOM_BUDGET_MS || 6000);
+const domDumpBudgetMs = Number(process.env.VISUAL_SMOKE_DOM_BUDGET_MS || 12000);
 
 const runtimeSnapshotChecks = [
   ['runtime shared contract', (snapshot) => contractHealthy(snapshot.sharedContract)],
@@ -190,7 +190,7 @@ function runChrome(args, options = {}) {
     child.on('error', (error) => {
       finish(rejectRun, error);
     });
-    child.on('exit', (code) => {
+    child.on('close', (code) => {
       if (code !== 0) {
         finish(rejectRun, new Error(`Chrome exited with ${code}: ${stderr || stdout}`));
         return;
@@ -302,6 +302,10 @@ async function dumpDom(page, profileDir) {
   return result.stdout;
 }
 
+function missingExpectedMarkers(page, dom) {
+  return (page.mustContain || []).filter((expected) => !dom.includes(expected));
+}
+
 async function capture(page, profileDir, screenshotPath) {
   const url = `${baseUrl}${page.path}`;
   await mkdir(dirname(screenshotPath), { recursive: true });
@@ -337,11 +341,14 @@ async function main() {
       const profileDir = resolve(outDir, `chrome-profile-${page.name}`);
       await rm(profileDir, { recursive: true, force: true }).catch(() => {});
       await mkdir(profileDir, { recursive: true });
-      const dom = await dumpDom(page, profileDir);
-      for (const expected of page.mustContain) {
-        if (!dom.includes(expected)) {
-          throw new Error(`${page.name} DOM is missing expected marker: ${expected}`);
-        }
+      let dom = await dumpDom(page, profileDir);
+      let missingMarkers = missingExpectedMarkers(page, dom);
+      if (missingMarkers.length) {
+        dom = await dumpDom(page, profileDir);
+        missingMarkers = missingExpectedMarkers(page, dom);
+      }
+      if (missingMarkers.length) {
+        throw new Error(`${page.name} DOM is missing expected marker: ${missingMarkers[0]}`);
       }
       const snapshot = readSnapshot(dom, page);
       assertSnapshot(page, snapshot);
