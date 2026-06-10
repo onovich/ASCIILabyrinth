@@ -236,7 +236,7 @@
       const downloadTextFile = SHARED_UI.downloadTextFile;
       const parseJson = SHARED_DATA.parseJson || JSON.parse;
       const stringifyJson = SHARED_DATA.stringifyJson || ((value) => JSON.stringify(value, null, 2));
-      const createJsonExportName = SHARED_DATA.createJsonExportName || ((prefix) => `${prefix}-${new Date().toISOString().slice(0, 10)}.json`);
+      const createJsonDownloadPayload = SHARED_DATA.createJsonDownloadPayload;
       const toIsoTimestamp = SHARED_DATA.toIsoTimestamp || ((date = new Date()) => (date instanceof Date ? date : new Date(date)).toISOString());
       const touchSharedProject = SHARED_DATA.touchProject || ((target) => {
         if (target && typeof target === 'object') target.updatedAt = toIsoTimestamp();
@@ -954,11 +954,7 @@
 
       function exportProject() {
         touchProject();
-        downloadTextFile({
-          text: stringifyJson(project),
-          fileName: createJsonExportName('ascii-labyrinth-models'),
-          mimeType: 'application/json'
-        });
+        downloadTextFile(createJsonDownloadPayload(project, 'ascii-labyrinth-models'));
         setStatus('JSON exported');
       }
 

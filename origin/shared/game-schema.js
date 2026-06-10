@@ -228,6 +228,14 @@
     return `${prefix}-${stamp}.json`;
   }
 
+  function createJsonDownloadPayload(value, prefix, options = {}) {
+    return {
+      text: stringifyJson(value),
+      fileName: createJsonExportName(prefix, options.date),
+      mimeType: options.mimeType || 'application/json'
+    };
+  }
+
   function toIsoTimestamp(date = new Date()) {
     return (date instanceof Date ? date : new Date(date)).toISOString();
   }
@@ -741,7 +749,7 @@
       clamp: 'clamp',
       optionHtml: 'optionHtml',
       parseJson: 'parseJson',
-      jsonExport: Object.freeze(['stringifyJson', 'createJsonExportName']),
+      jsonExport: Object.freeze(['stringifyJson', 'createJsonExportName', 'createJsonDownloadPayload']),
       timestamps: Object.freeze(['toIsoTimestamp', 'touchProject']),
       floorTools: Object.freeze(['getFloorLabel', 'hasFloor', 'getFloorIds', 'getMaxFloorSpan', 'getAdjacentFloorId']),
       htmlEscapes: Object.freeze(['escapeHtml', 'escapeAttr']),
@@ -760,7 +768,7 @@
       optionsHtml: 'optionsHtml',
       optionsWithEmptyHtml: 'optionsWithEmptyHtml',
       parseJson: 'parseJson',
-      jsonExport: Object.freeze(['stringifyJson', 'createJsonExportName']),
+      jsonExport: Object.freeze(['stringifyJson', 'createJsonExportName', 'createJsonDownloadPayload']),
       timestamps: Object.freeze(['toIsoTimestamp', 'touchProject']),
       htmlEscapes: Object.freeze(['escapeHtml', 'escapeAttr']),
       projectNormalizer: 'normalizeModelProject',
@@ -811,6 +819,7 @@
     parseJson,
     stringifyJson,
     createJsonExportName,
+    createJsonDownloadPayload,
     toIsoTimestamp,
     touchProject,
     PALETTE_ORDER,
