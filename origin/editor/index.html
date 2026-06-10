@@ -394,6 +394,7 @@
       const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
       const bindElements = SHARED_UI.bindElements || ((ids) => Object.fromEntries(ids.map((id) => [id, document.getElementById(id)])));
       const bindClickHandlers = SHARED_UI.bindClickHandlers;
+      const bindDelegatedClickHandlers = SHARED_UI.bindDelegatedClickHandlers;
       const bindDelegatedChangeHandlers = SHARED_UI.bindDelegatedChangeHandlers;
       const importTextFile = SHARED_UI.importTextFile;
       const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS?.editorProject || 'ascii-labyrinth-editor-v1';
@@ -1139,9 +1140,6 @@
           </div>
         `;
         dom.objectInspector.innerHTML = common + renderTypeFields(object);
-
-        document.getElementById('deleteObjectBtn')?.addEventListener('click', deleteSelected);
-        document.getElementById('cloneObjectBtn')?.addEventListener('click', cloneSelected);
       }
 
       function renderTypeFields(object) {
@@ -1684,13 +1682,13 @@
         render();
       }
 
-      dom.palettePanel.addEventListener('click', (event) => {
-        const item = event.target.closest('[data-tool]');
-        if (!item) return;
-        activeTool = item.dataset.tool;
-        clearHover();
-        render();
-        setStatus(`${TYPE_META[activeTool].name} selected`);
+      bindDelegatedClickHandlers(dom, {
+        palettePanel: ['[data-tool]', (item) => {
+          activeTool = item.dataset.tool;
+          clearHover();
+          render();
+          setStatus(`${TYPE_META[activeTool].name} selected`);
+        }]
       });
 
       dom.palettePanel.addEventListener('dragstart', (event) => {
@@ -1814,12 +1812,12 @@
         render();
       });
 
-      dom.floorSwitch.addEventListener('click', (event) => {
-        const button = event.target.closest('[data-floor]');
-        if (!button) return;
-        currentFloor = Number(button.dataset.floor);
-        clearSelection();
-        render();
+      bindDelegatedClickHandlers(dom, {
+        floorSwitch: ['[data-floor]', (button) => {
+          currentFloor = Number(button.dataset.floor);
+          clearSelection();
+          render();
+        }]
       });
 
       dom.showPrevFloor.addEventListener('change', (event) => {
@@ -1837,6 +1835,13 @@
       bindDelegatedChangeHandlers(dom, {
         levelInspector: ['[data-level-field]', updateLevelField],
         objectInspector: ['[data-path]', updateObjectField]
+      });
+
+      bindDelegatedClickHandlers(dom, {
+        objectInspector: [
+          ['#deleteObjectBtn', () => deleteSelected()],
+          ['#cloneObjectBtn', () => cloneSelected()]
+        ]
       });
 
       bindClickHandlers(dom, {

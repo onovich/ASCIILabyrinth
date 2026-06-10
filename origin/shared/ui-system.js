@@ -47,6 +47,34 @@
     }, {});
   }
 
+  function normalizeDelegatedConfigs(config) {
+    if (Array.isArray(config) && typeof config[0] === 'string') return [config];
+    if (Array.isArray(config)) return config;
+    return [config];
+  }
+
+  function bindDelegatedClickHandlers(elements, handlers = {}) {
+    return Object.entries(handlers || {}).reduce((bindings, [key, config]) => {
+      const element = elements?.[key] || resolveElement(key);
+      const configs = normalizeDelegatedConfigs(config);
+      let bound = false;
+      configs.forEach((entry) => {
+        const selector = Array.isArray(entry) ? entry[0] : entry?.selector;
+        const handler = Array.isArray(entry) ? entry[1] : entry?.handler;
+        if (element?.addEventListener && selector && typeof handler === 'function') {
+          element.addEventListener('click', (event) => {
+            const target = event.target || null;
+            const match = target?.closest?.(selector) || (target?.matches?.(selector) ? target : null);
+            if (match) handler(match, event);
+          });
+          bound = true;
+        }
+      });
+      bindings[key] = bound;
+      return bindings;
+    }, {});
+  }
+
   function bindDelegatedChangeHandlers(elements, handlers = {}) {
     return Object.entries(handlers || {}).reduce((bindings, [key, config]) => {
       const element = elements?.[key] || resolveElement(key);
@@ -228,6 +256,7 @@
     editor: Object.freeze([
       'bindElements',
       'bindClickHandlers',
+      'bindDelegatedClickHandlers',
       'bindDelegatedChangeHandlers',
       'importTextFile',
       'swatchHtml',
@@ -238,6 +267,7 @@
     modelEditor: Object.freeze([
       'bindElements',
       'bindClickHandlers',
+      'bindDelegatedClickHandlers',
       'bindDelegatedChangeHandlers',
       'importTextFile',
       'swatchHtml',
@@ -259,6 +289,7 @@
   publicApi = Object.freeze({
     bindElements,
     bindClickHandlers,
+    bindDelegatedClickHandlers,
     bindDelegatedChangeHandlers,
     importTextFile,
     formatMeter,

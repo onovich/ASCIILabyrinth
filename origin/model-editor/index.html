@@ -194,6 +194,7 @@
       const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
       const bindElements = SHARED_UI.bindElements || ((ids) => Object.fromEntries(ids.map((id) => [id, document.getElementById(id)])));
       const bindClickHandlers = SHARED_UI.bindClickHandlers;
+      const bindDelegatedClickHandlers = SHARED_UI.bindDelegatedClickHandlers;
       const bindDelegatedChangeHandlers = SHARED_UI.bindDelegatedChangeHandlers;
       const importTextFile = SHARED_UI.importTextFile;
       const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS?.modelProject || 'ascii-labyrinth-model-editor-v1';
@@ -1019,28 +1020,26 @@
         };
       }
 
-      dom.modelList.addEventListener('click', (event) => {
-        const row = event.target.closest('[data-model-id]');
-        if (!row) return;
-        selectModel(row.dataset.modelId);
-        render();
-      });
+      bindDelegatedClickHandlers(dom, {
+        modelList: ['[data-model-id]', (row) => {
+          selectModel(row.dataset.modelId);
+          render();
+        }],
 
-      dom.partList.addEventListener('click', (event) => {
-        const row = event.target.closest('[data-part-id]');
-        if (!row) return;
-        selectPart(row.dataset.partId);
-        render();
+        partList: ['[data-part-id]', (row) => {
+          selectPart(row.dataset.partId);
+          render();
+        }],
+
+        partInspector: [
+          ['#duplicatePartBtn', () => duplicatePart()],
+          ['#deletePartBtn', () => deletePart()]
+        ]
       });
 
       bindDelegatedChangeHandlers(dom, {
         modelInspector: ['[data-model-field]', updateModelField],
         partInspector: ['[data-part-field]', updatePartField]
-      });
-
-      dom.partInspector.addEventListener('click', (event) => {
-        if (event.target.id === 'duplicatePartBtn') duplicatePart();
-        if (event.target.id === 'deletePartBtn') deletePart();
       });
 
       bindClickHandlers(dom, {

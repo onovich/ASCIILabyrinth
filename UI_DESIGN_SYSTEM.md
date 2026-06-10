@@ -77,6 +77,7 @@ Preferred local patterns:
 - Shared list-item primitives include `.palette-item`, `.model-row`, `.part-row`, and their compact title overflow rules; keep page-specific columns, padding, and active colors local.
 - Use `ASCIIUI.bindElements([...])` for top-level page DOM bindings when keys match element IDs.
 - Use `ASCIIUI.bindClickHandlers(dom, {...})` for simple button click groups on tool pages.
+- Use `ASCIIUI.bindDelegatedClickHandlers(dom, {...})` for list rows, toolbar items, and dynamic inspector buttons.
 - Use `ASCIIUI.bindDelegatedChangeHandlers(dom, {...})` for simple inspector change delegation.
 - Use `ASCIIUI.importTextFile(event, onText)` for hidden file-input text imports before page-specific JSON parsing.
 - Use `ASCIIUI.swatchHtml(color)` and `--al-swatch-color` for palette/model color chips instead of hand-writing `style="background:..."`.
