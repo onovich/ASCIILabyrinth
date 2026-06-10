@@ -35,6 +35,7 @@ Use shared tokens instead of ad hoc colors:
 
 Use CSS borders and `ASCIIUI.renderPanel`; do not draw boxes with text characters.
 Runtime code should define `const SHARED_UI = window.ASCIIUI || {};` once and call shared helpers through it. Do not duplicate local fallback implementations of HUD panels, meters, or modal visibility.
+Runtime code should call shared schema helpers directly through `SHARED_DATA` for weapon definitions, tile constants, runtime level loading/validation, map counting, cell keys, clamp, and model profile merging.
 Runtime buttons should use `ASCIIUI.bindClickHandlers`; do not add inline `onclick` attributes for modal or restart actions.
 Runtime debug snapshots should also use the same `SHARED_UI` reference for UI contract, panel, and element state checks.
 

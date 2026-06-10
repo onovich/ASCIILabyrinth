@@ -747,6 +747,11 @@
 
   const CONTRACT_SPECS = Object.freeze({
     runtime: Object.freeze({
+      tileContract: (api) => api.TILE?.WEAPON === TILE.WEAPON,
+      weaponDefs: (api) => Array.isArray(api.WEAPON_DEFS) && api.WEAPON_DEFS.length > 0,
+      runtimeLevel: Object.freeze(['isValidRuntimeLevel', 'loadRuntimeLevelFromLocalStorage']),
+      mapTools: Object.freeze(['countTiles', 'countBy', 'getCellKey']),
+      modelProfiles: Object.freeze(['loadRuntimeModelProfilesFromLocalStorage', 'mergeRuntimeEnemyProfiles']),
       clamp: 'clamp',
       contractState: 'getContractState'
     }),

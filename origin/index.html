@@ -105,30 +105,7 @@
         };
         const EXIT_CODE = '3142';
         const messageLog = [];
-        const weapons = (SHARED_DATA.WEAPON_DEFS || [
-            {
-                id: 'sidearm',
-                name: 'SIDEARM',
-                cost: 1,
-                pellets: 1,
-                spread: 0,
-                cooldown: 220,
-                damage: 1,
-                speed: 21,
-                lightColor: 0xffdd55
-            },
-            {
-                id: 'scatter',
-                name: 'SCATTER',
-                cost: 3,
-                pellets: 6,
-                spread: 0.16,
-                cooldown: 720,
-                damage: 1,
-                speed: 18,
-                lightColor: 0xff9955
-            }
-        ]).map((weapon) => ({ ...weapon }));
+        const weapons = SHARED_DATA.WEAPON_DEFS.map((weapon) => ({ ...weapon }));
         let lastShotAt = 0;
         let audioContext = null;
 
@@ -411,18 +388,7 @@
         // ==========================================
         // 3. 地图与场景生成 (调整了材质颜色，形成分层)
         // ==========================================
-        const TILE = SHARED_DATA.TILE || {
-            WALL: '1',
-            EMPTY: '0',
-            AMMO: '2',
-            HEALTH: '3',
-            ENEMY: '4',
-            KEY: '5',
-            DOOR: '6',
-            CLUE: '7',
-            EXIT: '8',
-            WEAPON: '9'
-        };
+        const TILE = SHARED_DATA.TILE;
 
         function generateFacilityMap() {
             const width = 21;
@@ -519,32 +485,20 @@
             };
         }
 
-        const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel || ((candidate) => Boolean(
-            candidate
-            && Array.isArray(candidate.map)
-            && candidate.map.length > 0
-            && candidate.map.every((row) => typeof row === 'string' && row.length === candidate.map[0].length)
-        ));
+        const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel;
 
         function loadRuntimeLevel() {
-            const editorLevel = SHARED_DATA.loadRuntimeLevelFromLocalStorage?.({ floor: 0 });
+            const editorLevel = SHARED_DATA.loadRuntimeLevelFromLocalStorage({ floor: 0 });
             if (isValidRuntimeLevel(editorLevel)) return editorLevel;
             return createProceduralRuntimeLevel();
         }
 
         const runtimeLevel = loadRuntimeLevel();
         const levelMap = runtimeLevel.map;
-        const countTiles = SHARED_DATA.countTiles || ((map) => map.join('').split('').reduce((acc, ch) => {
-            acc[ch] = (acc[ch] || 0) + 1;
-            return acc;
-        }, {}));
-        const countBy = SHARED_DATA.countBy || ((items, getKey) => items.reduce((acc, item, index) => {
-            const key = typeof getKey === 'function' ? getKey(item, index) : item?.[getKey];
-            if (key) acc[key] = (acc[key] || 0) + 1;
-            return acc;
-        }, {}));
-        const clamp = SHARED_DATA.clamp || ((value, min, max) => Math.max(min, Math.min(max, value)));
-        const gridKey = SHARED_DATA.getCellKey || ((x, z) => `${x},${z}`);
+        const countTiles = SHARED_DATA.countTiles;
+        const countBy = SHARED_DATA.countBy;
+        const clamp = SHARED_DATA.clamp;
+        const gridKey = SHARED_DATA.getCellKey;
 
         const mapSize = 2; 
         const startCell = runtimeLevel.startCell || { x: 1, y: 1 };
@@ -896,15 +850,9 @@
             }
         ];
 
-        const modelProfileBundle = SHARED_DATA.loadRuntimeModelProfilesFromLocalStorage?.() || null;
+        const modelProfileBundle = SHARED_DATA.loadRuntimeModelProfilesFromLocalStorage() || null;
         const modelEditorEnemyProfiles = modelProfileBundle?.enemyProfiles || [];
-        const mergeEnemyProfiles = SHARED_DATA.mergeRuntimeEnemyProfiles || ((baseProfiles = [], overrideProfiles = []) => {
-            const merged = new Map(baseProfiles.map((profile) => [profile.id, profile]));
-            overrideProfiles.forEach((profile) => {
-                if (profile?.id && Array.isArray(profile.parts) && profile.parts.length) merged.set(profile.id, profile);
-            });
-            return [...merged.values()];
-        });
+        const mergeEnemyProfiles = SHARED_DATA.mergeRuntimeEnemyProfiles;
         const activeEnemyProfiles = mergeEnemyProfiles(enemyProfiles, modelEditorEnemyProfiles);
 
         function createEnemyGeometry(shape) {
@@ -1699,7 +1647,7 @@
 
         function getDebugSnapshot() {
             return {
-                sharedContract: SHARED_DATA.getContractState?.('runtime') || {},
+                sharedContract: SHARED_DATA.getContractState('runtime'),
                 sharedUiContract: SHARED_UI.getContractState('runtime'),
                 hudPanels: {
                     status: SHARED_UI.getPanelState('ui-layer'),
