@@ -2,27 +2,58 @@ import { copyFile, mkdir, readdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
 const projectRoot = resolve(import.meta.dirname, '..');
-const sourcePath = resolve(projectRoot, 'origin', 'index.html');
-const targetPath = resolve(projectRoot, 'public', 'runtime', 'index.html');
-const bgmSourceDir = resolve(projectRoot, 'bgm');
-const bgmTargetDir = resolve(projectRoot, 'public', 'runtime', 'bgm');
-const sharedSourceDir = resolve(projectRoot, 'origin', 'shared');
-const sharedTargetDir = resolve(projectRoot, 'public', 'shared');
-const runtimeSharedTargetDir = resolve(projectRoot, 'public', 'runtime', 'shared');
-const editorSourceDir = resolve(projectRoot, 'origin', 'editor');
-const editorTargetDir = resolve(projectRoot, 'public', 'editor');
-const modelEditorSourceDir = resolve(projectRoot, 'origin', 'model-editor');
-const modelEditorTargetDir = resolve(projectRoot, 'public', 'model-editor');
+const projectPath = (...segments) => resolve(projectRoot, ...segments);
 
-async function copyDirectory(sourceDir, targetDir) {
-  const entries = await readdir(sourceDir, { withFileTypes: true }).catch((error) => {
+const fileCopyJobs = [
+  {
+    source: projectPath('origin', 'index.html'),
+    target: projectPath('public', 'runtime', 'index.html')
+  }
+];
+
+const fileOnlyDirectoryCopyJobs = [
+  {
+    source: projectPath('bgm'),
+    target: projectPath('public', 'runtime', 'bgm')
+  }
+];
+
+const directoryCopyJobs = [
+  {
+    source: projectPath('origin', 'editor'),
+    target: projectPath('public', 'editor')
+  },
+  {
+    source: projectPath('origin', 'model-editor'),
+    target: projectPath('public', 'model-editor')
+  },
+  {
+    source: projectPath('origin', 'shared'),
+    target: projectPath('public', 'shared')
+  },
+  {
+    source: projectPath('origin', 'shared'),
+    target: projectPath('public', 'runtime', 'shared')
+  }
+];
+
+async function readDirectoryEntries(sourceDir) {
+  return readdir(sourceDir, { withFileTypes: true }).catch((error) => {
     if (error.code === 'ENOENT') {
       return [];
     }
 
     throw error;
   });
+}
 
+async function copyProjectFile(source, target) {
+  await mkdir(dirname(target), { recursive: true });
+  await copyFile(source, target);
+}
+
+async function copyDirectory(sourceDir, targetDir) {
+  const entries = await readDirectoryEntries(sourceDir);
   await mkdir(targetDir, { recursive: true });
   await Promise.all(
     entries.map((entry) => {
@@ -32,32 +63,21 @@ async function copyDirectory(sourceDir, targetDir) {
         return copyDirectory(source, target);
       }
 
-      return copyFile(source, target);
+      return copyProjectFile(source, target);
     }),
   );
 }
 
-await mkdir(dirname(targetPath), { recursive: true });
-await copyFile(sourcePath, targetPath);
+async function copyFilesInDirectory(sourceDir, targetDir) {
+  const entries = await readDirectoryEntries(sourceDir);
+  await mkdir(targetDir, { recursive: true });
+  await Promise.all(
+    entries
+      .filter((entry) => entry.isFile())
+      .map((entry) => copyProjectFile(resolve(sourceDir, entry.name), resolve(targetDir, entry.name))),
+  );
+}
 
-const bgmEntries = await readdir(bgmSourceDir, { withFileTypes: true }).catch((error) => {
-  if (error.code === 'ENOENT') {
-    return [];
-  }
-
-  throw error;
-});
-
-await mkdir(bgmTargetDir, { recursive: true });
-await Promise.all(
-  bgmEntries
-    .filter((entry) => entry.isFile())
-    .map((entry) =>
-      copyFile(resolve(bgmSourceDir, entry.name), resolve(bgmTargetDir, entry.name)),
-    ),
-);
-
-await copyDirectory(editorSourceDir, editorTargetDir);
-await copyDirectory(modelEditorSourceDir, modelEditorTargetDir);
-await copyDirectory(sharedSourceDir, sharedTargetDir);
-await copyDirectory(sharedSourceDir, runtimeSharedTargetDir);
+await Promise.all(fileCopyJobs.map(({ source, target }) => copyProjectFile(source, target)));
+await Promise.all(fileOnlyDirectoryCopyJobs.map(({ source, target }) => copyFilesInDirectory(source, target)));
+await Promise.all(directoryCopyJobs.map(({ source, target }) => copyDirectory(source, target)));
