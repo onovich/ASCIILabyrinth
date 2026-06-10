@@ -20,6 +20,10 @@ const fileOnlyDirectoryCopyJobs = [
 
 const directoryCopyJobs = [
   {
+    source: projectPath('origin', 'runtime'),
+    target: projectPath('public', 'runtime', 'runtime')
+  },
+  {
     source: projectPath('origin', 'editor'),
     target: projectPath('public', 'editor')
   },

@@ -83,6 +83,7 @@
     <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.19.2/dist/lil-gui.umd.js"></script>
     <script src="./shared/ui-system.js"></script>
     <script src="./shared/game-schema.js"></script>
+    <script src="./runtime/hud.js"></script>
 
     <script>
         // ==========================================
@@ -106,6 +107,18 @@
         const EXIT_CODE = '3142';
         const messageLog = [];
         const weapons = SHARED_DATA.WEAPON_DEFS.map((weapon) => ({ ...weapon }));
+        const runtimeHud = window.ASCII_LABYRINTH_RUNTIME_HUD.createRuntimeHudController({
+            sharedUi: SHARED_UI,
+            gameState,
+            weapons,
+            messageLog,
+            exitCode: EXIT_CODE,
+            defaultLogLines: ['> 活下来，找到钥匙并逃离设施。'],
+            pausedLine: 'PAUSED / 调试面板已打开'
+        });
+        const pushLog = runtimeHud.pushLog;
+        const setObjective = runtimeHud.setObjective;
+        const updateUI = runtimeHud.updateUI;
         let lastShotAt = 0;
         let audioContext = null;
 
@@ -1378,53 +1391,6 @@
             return false;
         }
 
-        function pushLog(text) {
-            messageLog.unshift(`> ${text}`);
-            messageLog.splice(5);
-            updateUI();
-        }
-
-        function setObjective(text) {
-            gameState.objective = text;
-            updateUI();
-        }
-
-        function updateUI() {
-            document.getElementById('health-val').innerText = gameState.health;
-            document.getElementById('ammo-val').innerText = gameState.ammo;
-            document.getElementById('score-val').innerText = gameState.score;
-
-            const weapon = weapons[gameState.weaponIndex];
-            SHARED_UI.renderPanel('ui-layer', {
-                title: 'OPS / STATUS',
-                lines: [
-                    `HP   ${SHARED_UI.formatMeter(gameState.health, 100, { width: 12 })} ${String(gameState.health).padStart(3, '0')}`,
-                    `AMMO ${String(gameState.ammo).padStart(3, '0')}    SCORE ${String(gameState.score).padStart(5, '0')}`,
-                    `WEAP ${weapon.name.padEnd(8, ' ')} COST ${weapon.cost}`,
-                    `KEY  ${gameState.hasKey ? 'YES' : 'NO '}    CODE ${gameState.foundCode ? EXIT_CODE : '----'}`,
-                    ...(gameState.isPaused ? ['PAUSED / 调试面板已打开'] : [])
-                ]
-            });
-
-            SHARED_UI.renderPanel('mission-layer', {
-                title: 'MISSION / LINK',
-                tone: 'cyan',
-                lines: [
-                    gameState.objective,
-                    gameState.nearbyAction || 'WASD move | mouse look | LMB fire',
-                    `${weapons.map((item, index) => `${index + 1} ${item.name.toLowerCase()}`).join(' | ')} | E interact`
-                ]
-            });
-
-            SHARED_UI.renderPanel('log-layer', {
-                title: 'RADIO / LOG',
-                tone: 'amber',
-                lines: messageLog.length ? messageLog : [
-                    '> 活下来，找到钥匙并逃离设施。'
-                ]
-            });
-        }
-
         const clock = new THREE.Clock();
 
         function updateLogic() {
@@ -1641,6 +1607,9 @@
             return {
                 sharedContract: SHARED_DATA.getContractState('runtime'),
                 sharedUiContract: SHARED_UI.getContractState('runtime'),
+                runtimeModules: {
+                    hud: typeof window.ASCII_LABYRINTH_RUNTIME_HUD?.createRuntimeHudController === 'function'
+                },
                 hudPanels: {
                     status: SHARED_UI.getPanelState('ui-layer'),
                     mission: SHARED_UI.getPanelState('mission-layer'),

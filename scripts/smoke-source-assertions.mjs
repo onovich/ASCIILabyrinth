@@ -1,7 +1,7 @@
 import { readFile, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import {
-  runtimeSharedUiContract,
+  runtimeSharedUiContracts,
   sharedCssContract,
   toolPageSharedUiContracts
 } from './smoke-contracts.mjs';
@@ -11,6 +11,7 @@ const projectRoot = resolve(import.meta.dirname, '..');
 async function assertSyncedFiles(assert) {
   const files = [
     'public/runtime/index.html',
+    'public/runtime/runtime/hud.js',
     'public/editor/index.html',
     'public/model-editor/index.html',
     'public/shared/game-schema.js',
@@ -45,12 +46,14 @@ async function assertSharedCssContract(assert) {
 }
 
 async function assertRuntimeSharedUiContract(assert) {
-  await assertTextContract(runtimeSharedUiContract.files, {
-    required: runtimeSharedUiContract.required,
-    forbidden: runtimeSharedUiContract.forbidden,
-    requiredLabel: 'should call shared runtime UI helper',
-    forbiddenLabel: 'should not keep runtime UI fallback'
-  }, assert);
+  for (const contract of runtimeSharedUiContracts) {
+    await assertTextContract(contract.files, {
+      required: contract.required,
+      forbidden: contract.forbidden,
+      requiredLabel: 'should call shared runtime UI helper',
+      forbiddenLabel: 'should not keep runtime UI fallback'
+    }, assert);
+  }
 }
 
 async function assertToolPageSharedUiContract(assert) {

@@ -4,8 +4,13 @@ export const runtimeSharedUiContract = {
     'public/runtime/index.html'
   ],
   required: [
+    '<script src="./runtime/hud.js"></script>',
     'const SHARED_UI = window.ASCIIUI || {};',
     'const weapons = SHARED_DATA.WEAPON_DEFS.map((weapon) => ({ ...weapon }));',
+    'const runtimeHud = window.ASCII_LABYRINTH_RUNTIME_HUD.createRuntimeHudController({',
+    'const pushLog = runtimeHud.pushLog;',
+    'const setObjective = runtimeHud.setObjective;',
+    'const updateUI = runtimeHud.updateUI;',
     'const TILE = SHARED_DATA.TILE;',
     'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel;',
     'const editorLevel = SHARED_DATA.loadRuntimeLevelFromLocalStorage({ floor: 0 });',
@@ -15,13 +20,12 @@ export const runtimeSharedUiContract = {
     'const gridKey = SHARED_DATA.getCellKey;',
     'const modelProfileBundle = SHARED_DATA.loadRuntimeModelProfilesFromLocalStorage() || null;',
     'const mergeEnemyProfiles = SHARED_DATA.mergeRuntimeEnemyProfiles;',
-    "SHARED_UI.renderPanel('ui-layer', {",
-    'SHARED_UI.formatMeter(gameState.health, 100, { width: 12 })',
     "SHARED_UI.setElementVisible('password-panel', true)",
     "SHARED_UI.isElementVisible('password-panel')",
     "SHARED_UI.getElementState('ascii-canvas', ['al-fullscreen-canvas'])",
     "sharedContract: SHARED_DATA.getContractState('runtime'),",
     "sharedUiContract: SHARED_UI.getContractState('runtime'),",
+    "hud: typeof window.ASCII_LABYRINTH_RUNTIME_HUD?.createRuntimeHudController === 'function'",
     "status: SHARED_UI.getPanelState('ui-layer'),",
     'const runtimeButtonBindings = SHARED_UI.bindClickHandlers(null, {',
     "'password-submit': submitPassword,",
@@ -60,3 +64,35 @@ export const runtimeSharedUiContract = {
     "document.getElementById('password-cancel').addEventListener('click'"
   ]
 };
+
+export const runtimeHudContract = {
+  files: [
+    'origin/runtime/hud.js',
+    'public/runtime/runtime/hud.js'
+  ],
+  required: [
+    'function createRuntimeHudController({',
+    "sharedUi.renderPanel('ui-layer', {",
+    'sharedUi.formatMeter(gameState.health, 100, { width: 12 })',
+    "sharedUi.renderPanel('mission-layer', {",
+    "sharedUi.renderPanel('log-layer', {",
+    'function pushLog(text) {',
+    'function setObjective(text) {',
+    'function updateUI() {',
+    'window.ASCII_LABYRINTH_RUNTIME_HUD = {'
+  ],
+  forbidden: [
+    'window.ASCIIUI?.renderPanel',
+    'window.ASCIIUI?.formatMeter',
+    'panel.replaceChildren()',
+    "element.style.display = visible ? display : 'none'",
+    'function renderPanel(id, title, lines',
+    'function bar(value, max',
+    'onclick='
+  ]
+};
+
+export const runtimeSharedUiContracts = [
+  runtimeSharedUiContract,
+  runtimeHudContract
+];
