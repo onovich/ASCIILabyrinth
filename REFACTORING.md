@@ -17,8 +17,16 @@ This project is moving from prototype-heavy HTML pages toward shared runtime, ed
 - `scripts/sync-runtime.mjs`: task-driven sync from `origin/` and `bgm/` into `public/`.
 - `scripts/smoke.mjs`: low-cost behavioral and contract guard.
 - `scripts/smoke-contracts.mjs`: required/forbidden source fragments and shared CSS selectors used by `smoke.mjs`.
-- `scripts/visual-smoke.mjs`: dev-server, DOM dump, snapshot assertion, and screenshot runner.
+- `scripts/smoke-environment.mjs`: project paths and file readers used by smoke guards.
+- `scripts/smoke-fixtures.mjs`: low-cost runtime/model conversion fixtures.
+- `scripts/smoke-schema-assertions.mjs`: shared schema and conversion assertions.
+- `scripts/smoke-source-assertions.mjs`: source text guards for runtime/editor/model-editor shared-helper dependencies.
+- `scripts/smoke-ui-assertions.mjs`: shared UI CSS and page-level UI contract checks.
+- `scripts/visual-smoke.mjs`: visual smoke orchestrator for DOM dumps, screenshots, and per-page assertions.
+- `scripts/visual-smoke-browser.mjs`: Chrome/Edge discovery and browser process cleanup helpers.
 - `scripts/visual-smoke-contracts.mjs`: visual smoke page list and snapshot checks.
+- `scripts/visual-smoke-dev-server.mjs`: dev-server readiness checks, startup, log capture, and cleanup.
+- `scripts/visual-smoke-page-assertions.mjs`: DOM marker, snapshot extraction, and snapshot comparison helpers.
 
 ## Slice Loop
 

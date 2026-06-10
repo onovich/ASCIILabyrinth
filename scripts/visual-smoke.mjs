@@ -3,6 +3,7 @@ import { dirname, resolve } from 'node:path';
 import { spawn } from 'node:child_process';
 import { assertNoBoxDrawingGuard, visualSmokePages } from './visual-smoke-contracts.mjs';
 import { findChrome, killProcessTree } from './visual-smoke-browser.mjs';
+import { ensureDevServer } from './visual-smoke-dev-server.mjs';
 import {
   assertSnapshot,
   missingExpectedMarkers,
@@ -67,66 +68,6 @@ function runChrome(args, options = {}) {
   });
 }
 
-async function fetchReady() {
-  try {
-    const response = await fetch(`${baseUrl}/runtime/index.html?verify=visual-smoke-ready`, { cache: 'no-store' });
-    if (!response.ok) return false;
-    const html = await response.text();
-    return html.includes('ASCII 3D FPS') && html.includes('ascii-canvas');
-  } catch (error) {
-    return false;
-  }
-}
-
-async function waitForDevServer(timeoutMs = 25000) {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    if (await fetchReady()) return true;
-    await new Promise((resolveWait) => setTimeout(resolveWait, 500));
-  }
-  return false;
-}
-
-async function ensureDevServer() {
-  if (await fetchReady()) {
-    return async () => {};
-  }
-  if (process.env.VISUAL_SMOKE_START_SERVER === '0') {
-    throw new Error(`Dev server is not reachable at ${baseUrl}. Start it with: npm run dev -- --host ${devServerHost} --port ${devServerPort}`);
-  }
-
-  const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  const args = ['run', 'dev', '--', '--host', devServerHost, '--port', String(devServerPort), '--strictPort'];
-  const child = process.platform === 'win32'
-    ? spawn('cmd.exe', ['/d', '/s', '/c', [npmCommand, ...args].join(' ')], {
-      cwd: projectRoot,
-      windowsHide: true,
-      stdio: ['ignore', 'pipe', 'pipe']
-    })
-    : spawn(npmCommand, args, {
-      cwd: projectRoot,
-      windowsHide: true,
-      stdio: ['ignore', 'pipe', 'pipe']
-    });
-  const logs = [];
-  const keepLog = (chunk) => {
-    logs.push(chunk.toString());
-    if (logs.length > 20) logs.shift();
-  };
-  child.stdout.on('data', keepLog);
-  child.stderr.on('data', keepLog);
-  child.on('error', keepLog);
-
-  if (!(await waitForDevServer())) {
-    await killProcessTree(child);
-    throw new Error(`Dev server did not become ready at ${baseUrl}.\n${logs.join('').trim()}`);
-  }
-
-  return async () => {
-    await killProcessTree(child);
-  };
-}
-
 async function dumpDom(page, profileDir) {
   const url = `${baseUrl}${page.path}`;
   const args = [
@@ -189,7 +130,12 @@ async function capture(page, profileDir, screenshotPath) {
 
 async function main() {
   assertNoBoxDrawingGuard();
-  const cleanupDevServer = await ensureDevServer();
+  const cleanupDevServer = await ensureDevServer({
+    baseUrl,
+    projectRoot,
+    devServerHost,
+    devServerPort
+  });
   await mkdir(outDir, { recursive: true });
   const results = [];
 
