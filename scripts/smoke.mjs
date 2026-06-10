@@ -313,6 +313,10 @@ async function assertToolPageSharedUiContract() {
         'const bindElements = SHARED_UI.bindElements;',
         'const colorVarStyle = SHARED_UI.colorVarStyle;',
         'const swatchHtml = SHARED_UI.swatchHtml;',
+        'const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS.editorProject;',
+        'const FLOORS = SHARED_DATA.FLOORS;',
+        'const PALETTE_ORDER = SHARED_DATA.PALETTE_ORDER;',
+        'const ENEMY_KIND_OPTIONS = SHARED_DATA.ENEMY_KIND_OPTIONS;',
         'const escapeHtml = SHARED_DATA.escapeHtml;',
         'const escapeAttr = SHARED_DATA.escapeAttr;',
         'const optionHtml = SHARED_DATA.optionHtml;',
@@ -335,12 +339,18 @@ async function assertToolPageSharedUiContract() {
         'const createSharedId = SHARED_DATA.createId;',
         'return SHARED_DATA.createEditorLevel(id, name, width, height, {',
         'return SHARED_DATA.createEditorObject(type, x, y, floor, extra, {',
-        'const normalized = SHARED_DATA.normalizeEditorProject(data, { cellSize: CELL_SIZE });'
+        'const normalized = SHARED_DATA.normalizeEditorProject(data, { cellSize: CELL_SIZE });',
+        "sharedContract: SHARED_DATA.getContractState('editor'),",
+        "sharedUiContract: SHARED_UI.getContractState('editor'),"
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
         'const colorVarStyle = SHARED_UI.colorVarStyle ||',
         'const swatchHtml = SHARED_UI.swatchHtml ||',
+        'SHARED_DATA.STORAGE_KEYS?.editorProject ||',
+        'const FLOORS = SHARED_DATA.FLOORS ||',
+        'const PALETTE_ORDER = SHARED_DATA.PALETTE_ORDER ||',
+        'const ENEMY_KIND_OPTIONS = SHARED_DATA.ENEMY_KIND_OPTIONS ||',
         'const escapeHtml = SHARED_DATA.escapeHtml ||',
         'const escapeAttr = SHARED_DATA.escapeAttr ||',
         'const optionHtml = SHARED_DATA.optionHtml ||',
@@ -364,7 +374,9 @@ async function assertToolPageSharedUiContract() {
         'const createSharedId = SHARED_DATA.createId ||',
         'const sharedLevel = SHARED_DATA.createEditorLevel?.',
         'const sharedObject = SHARED_DATA.createEditorObject?.',
-        'const normalized = SHARED_DATA.normalizeEditorProject?.'
+        'const normalized = SHARED_DATA.normalizeEditorProject?.',
+        "SHARED_DATA.getContractState?.('editor') || {}",
+        "SHARED_UI.getContractState?.('editor') || {}"
       ]
     },
     {
@@ -373,6 +385,10 @@ async function assertToolPageSharedUiContract() {
         'const bindElements = SHARED_UI.bindElements;',
         'const colorVarStyle = SHARED_UI.colorVarStyle;',
         'const swatchHtml = SHARED_UI.swatchHtml;',
+        'const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS.editorProject;',
+        'const FLOORS = SHARED_DATA.FLOORS;',
+        'const PALETTE_ORDER = SHARED_DATA.PALETTE_ORDER;',
+        'const ENEMY_KIND_OPTIONS = SHARED_DATA.ENEMY_KIND_OPTIONS;',
         'const escapeHtml = SHARED_DATA.escapeHtml;',
         'const escapeAttr = SHARED_DATA.escapeAttr;',
         'const optionHtml = SHARED_DATA.optionHtml;',
@@ -395,12 +411,18 @@ async function assertToolPageSharedUiContract() {
         'const createSharedId = SHARED_DATA.createId;',
         'return SHARED_DATA.createEditorLevel(id, name, width, height, {',
         'return SHARED_DATA.createEditorObject(type, x, y, floor, extra, {',
-        'const normalized = SHARED_DATA.normalizeEditorProject(data, { cellSize: CELL_SIZE });'
+        'const normalized = SHARED_DATA.normalizeEditorProject(data, { cellSize: CELL_SIZE });',
+        "sharedContract: SHARED_DATA.getContractState('editor'),",
+        "sharedUiContract: SHARED_UI.getContractState('editor'),"
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
         'const colorVarStyle = SHARED_UI.colorVarStyle ||',
         'const swatchHtml = SHARED_UI.swatchHtml ||',
+        'SHARED_DATA.STORAGE_KEYS?.editorProject ||',
+        'const FLOORS = SHARED_DATA.FLOORS ||',
+        'const PALETTE_ORDER = SHARED_DATA.PALETTE_ORDER ||',
+        'const ENEMY_KIND_OPTIONS = SHARED_DATA.ENEMY_KIND_OPTIONS ||',
         'const escapeHtml = SHARED_DATA.escapeHtml ||',
         'const escapeAttr = SHARED_DATA.escapeAttr ||',
         'const optionHtml = SHARED_DATA.optionHtml ||',
@@ -424,7 +446,9 @@ async function assertToolPageSharedUiContract() {
         'const createSharedId = SHARED_DATA.createId ||',
         'const sharedLevel = SHARED_DATA.createEditorLevel?.',
         'const sharedObject = SHARED_DATA.createEditorObject?.',
-        'const normalized = SHARED_DATA.normalizeEditorProject?.'
+        'const normalized = SHARED_DATA.normalizeEditorProject?.',
+        "SHARED_DATA.getContractState?.('editor') || {}",
+        "SHARED_UI.getContractState?.('editor') || {}"
       ]
     },
     {
@@ -432,6 +456,9 @@ async function assertToolPageSharedUiContract() {
       required: [
         'const bindElements = SHARED_UI.bindElements;',
         'const swatchHtml = SHARED_UI.swatchHtml;',
+        'const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS.modelProject;',
+        'const SHAPES = SHARED_DATA.MODEL_SHAPES;',
+        'const TEMPLATE_IDS = SHARED_DATA.MODEL_TEMPLATE_IDS;',
         'const escapeHtml = SHARED_DATA.escapeHtml;',
         'const escapeAttr = SHARED_DATA.escapeAttr;',
         'const optionHtml = SHARED_DATA.optionHtml;',
@@ -456,6 +483,9 @@ async function assertToolPageSharedUiContract() {
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
         'const swatchHtml = SHARED_UI.swatchHtml ||',
+        'SHARED_DATA.STORAGE_KEYS?.modelProject ||',
+        'const SHAPES = SHARED_DATA.MODEL_SHAPES ||',
+        'const TEMPLATE_IDS = SHARED_DATA.MODEL_TEMPLATE_IDS ||',
         'const escapeHtml = SHARED_DATA.escapeHtml ||',
         'const escapeAttr = SHARED_DATA.escapeAttr ||',
         'const optionHtml = SHARED_DATA.optionHtml ||',
@@ -483,6 +513,9 @@ async function assertToolPageSharedUiContract() {
       required: [
         'const bindElements = SHARED_UI.bindElements;',
         'const swatchHtml = SHARED_UI.swatchHtml;',
+        'const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS.modelProject;',
+        'const SHAPES = SHARED_DATA.MODEL_SHAPES;',
+        'const TEMPLATE_IDS = SHARED_DATA.MODEL_TEMPLATE_IDS;',
         'const escapeHtml = SHARED_DATA.escapeHtml;',
         'const escapeAttr = SHARED_DATA.escapeAttr;',
         'const optionHtml = SHARED_DATA.optionHtml;',
@@ -507,6 +540,9 @@ async function assertToolPageSharedUiContract() {
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
         'const swatchHtml = SHARED_UI.swatchHtml ||',
+        'SHARED_DATA.STORAGE_KEYS?.modelProject ||',
+        'const SHAPES = SHARED_DATA.MODEL_SHAPES ||',
+        'const TEMPLATE_IDS = SHARED_DATA.MODEL_TEMPLATE_IDS ||',
         'const escapeHtml = SHARED_DATA.escapeHtml ||',
         'const escapeAttr = SHARED_DATA.escapeAttr ||',
         'const optionHtml = SHARED_DATA.optionHtml ||',

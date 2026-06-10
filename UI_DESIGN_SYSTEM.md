@@ -81,7 +81,7 @@ Preferred local patterns:
 - Shared list-item primitives include `.palette-item`, `.model-row`, `.part-row`, and their compact title overflow rules; keep page-specific columns, padding, and active colors local.
 - Use `ASCIIUI.bindElements([...])` for top-level page DOM bindings when keys match element IDs.
 - Tool pages should call shared UI helpers directly through `SHARED_UI`; do not keep local fallback implementations for `bindElements`, `swatchHtml`, or `colorVarStyle`.
-- Tool pages should call shared schema helpers directly through `SHARED_DATA` for `escapeHtml`, `escapeAttr`, `optionHtml`, `optionsHtml`, `optionsWithEmptyHtml`, `setValueByPath`, `getValueByPath`, `parseJson`, `stringifyJson`, `toIsoTimestamp`, `touchProject`, `countBy`, `clamp`, `createId`, `degreesToRadians`, floor helpers, editor/model factories, part/project normalizers, and debug contract snapshots.
+- Tool pages should call shared schema helpers and constants directly through `SHARED_DATA` for storage keys, palette/model constants, `escapeHtml`, `escapeAttr`, `optionHtml`, `optionsHtml`, `optionsWithEmptyHtml`, `setValueByPath`, `getValueByPath`, `parseJson`, `stringifyJson`, `toIsoTimestamp`, `touchProject`, `countBy`, `clamp`, `createId`, `degreesToRadians`, floor helpers, editor/model factories, part/project normalizers, and debug contract snapshots.
 - Use `ASCIIUI.bindClickHandlers(dom, {...})` for simple button click groups on tool pages.
 - Use `ASCIIUI.bindChangeHandlers(dom, {...})` for simple select, checkbox, and file-input change groups.
 - Use `ASCIIUI.bindDelegatedClickHandlers(dom, {...})` for list rows, toolbar items, and dynamic inspector buttons.

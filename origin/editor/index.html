@@ -398,13 +398,10 @@
       const bindDelegatedClickHandlers = SHARED_UI.bindDelegatedClickHandlers;
       const bindDelegatedChangeHandlers = SHARED_UI.bindDelegatedChangeHandlers;
       const importTextFile = SHARED_UI.importTextFile;
-      const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS?.editorProject || 'ascii-labyrinth-editor-v1';
+      const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS.editorProject;
       const CELL_SIZE = 32;
       const HISTORY_LIMIT = 80;
-      const FLOORS = SHARED_DATA.FLOORS || [
-        { id: 0, label: 'B1' },
-        { id: 1, label: '1F' }
-      ];
+      const FLOORS = SHARED_DATA.FLOORS;
 
       const defaultEffect = SHARED_DATA.createDefaultEffect || ((type) => ({
         type,
@@ -442,24 +439,7 @@
         eraser: { group: '工具', name: '橡皮', icon: '⌫', color: '#b8b8b8', default: {} }
       };
 
-      const PALETTE_ORDER = SHARED_DATA.PALETTE_ORDER || [
-        'select',
-        'wall',
-        'keyDoor',
-        'hiddenDoor',
-        'ramp',
-        'entrance',
-        'exit',
-        'key',
-        'terminal',
-        'enemy',
-        'npc',
-        'ammo',
-        'medkit',
-        'weapon',
-        'trigger',
-        'eraser'
-      ];
+      const PALETTE_ORDER = SHARED_DATA.PALETTE_ORDER;
       const setByPath = SHARED_DATA.setValueByPath;
       const getByPath = SHARED_DATA.getValueByPath;
       const escapeHtml = SHARED_DATA.escapeHtml;
@@ -488,16 +468,7 @@
       const getAdjacentFloorId = SHARED_DATA.getAdjacentFloorId;
       const createSharedId = SHARED_DATA.createId;
 
-      const ENEMY_KIND_OPTIONS = SHARED_DATA.ENEMY_KIND_OPTIONS || [
-        ['longlimb', '走廊瘦长人'],
-        ['orderly', '无脸护理员'],
-        ['inverted', '倒行爬行者'],
-        ['splitjaw', '裂颌病患'],
-        ['cultist', '触须信徒'],
-        ['watcher', '门缝窥视者'],
-        ['stitched', '缝合巨人'],
-        ['priest', '深井祭司']
-      ];
+      const ENEMY_KIND_OPTIONS = SHARED_DATA.ENEMY_KIND_OPTIONS;
 
       const dom = bindElements([
         'levelSelect',
@@ -928,8 +899,8 @@
         const objects = allObjects(level);
         return {
           version: project.version,
-          sharedContract: SHARED_DATA.getContractState?.('editor') || {},
-          sharedUiContract: SHARED_UI.getContractState?.('editor') || {},
+          sharedContract: SHARED_DATA.getContractState('editor'),
+          sharedUiContract: SHARED_UI.getContractState('editor'),
           toolUi: {
             bodyClass: document.body.classList.contains('al-tool-page')
           },

@@ -198,22 +198,9 @@
       const bindDelegatedClickHandlers = SHARED_UI.bindDelegatedClickHandlers;
       const bindDelegatedChangeHandlers = SHARED_UI.bindDelegatedChangeHandlers;
       const importTextFile = SHARED_UI.importTextFile;
-      const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS?.modelProject || 'ascii-labyrinth-model-editor-v1';
-      const SHAPES = SHARED_DATA.MODEL_SHAPES || ['box', 'sphere', 'cylinder', 'cone', 'torus', 'octahedron', 'icosahedron', 'dodecahedron'];
-      const TEMPLATE_IDS = SHARED_DATA.MODEL_TEMPLATE_IDS || [
-        'enemy-longlimb',
-        'enemy-orderly',
-        'enemy-inverted',
-        'enemy-splitjaw',
-        'enemy-cultist',
-        'enemy-watcher',
-        'enemy-stitched',
-        'enemy-priest',
-        'item-ammo',
-        'item-medkit',
-        'item-key',
-        'item-scatter'
-      ];
+      const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS.modelProject;
+      const SHAPES = SHARED_DATA.MODEL_SHAPES;
+      const TEMPLATE_IDS = SHARED_DATA.MODEL_TEMPLATE_IDS;
       const setByPath = SHARED_DATA.setValueByPath;
       const escapeHtml = SHARED_DATA.escapeHtml;
       const escapeAttr = SHARED_DATA.escapeAttr;
