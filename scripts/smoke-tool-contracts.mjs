@@ -2,6 +2,7 @@ export const toolPageSharedUiContracts = [
   {
     files: ['origin/editor/index.html', 'public/editor/index.html'],
     required: [
+      '<script src="./starter-project.js"></script>',
       'const bindElements = SHARED_UI.bindElements;',
       'const colorVarStyle = SHARED_UI.colorVarStyle;',
       'const swatchHtml = SHARED_UI.swatchHtml;',
@@ -32,8 +33,11 @@ export const toolPageSharedUiContracts = [
       'const getMaxFloorSpan = SHARED_DATA.getMaxFloorSpan;',
       'const getAdjacentFloorId = SHARED_DATA.getAdjacentFloorId;',
       'const createSharedId = SHARED_DATA.createId;',
-      'return SHARED_DATA.createEditorLevel(id, name, width, height, {',
-      'return SHARED_DATA.createEditorObject(type, x, y, floor, extra, {',
+      'const editorStarterProject = window.ASCII_LABYRINTH_EDITOR_STARTER.createEditorStarterProjectFactory({',
+      'const createLevel = editorStarterProject.createLevel;',
+      'const createObject = (type, x, y, floor = currentFloor, extra = {}) => editorStarterProject.createObject(type, x, y, floor, extra);',
+      'let project = editorStarterProject.createStarterProject();',
+      "starterProject: typeof window.ASCII_LABYRINTH_EDITOR_STARTER?.createEditorStarterProjectFactory === 'function'",
       'const normalized = SHARED_DATA.normalizeEditorProject(data, { cellSize: CELL_SIZE });',
       "sharedContract: SHARED_DATA.getContractState('editor'),",
       "sharedUiContract: SHARED_UI.getContractState('editor'),"
@@ -72,6 +76,12 @@ export const toolPageSharedUiContracts = [
       'const createSharedId = SHARED_DATA.createId ||',
       'const sharedLevel = SHARED_DATA.createEditorLevel?.',
       'const sharedObject = SHARED_DATA.createEditorObject?.',
+      'function createStarterProject()',
+      'function createStarterLevel()',
+      'function createLevel(id, name',
+      'function createObject(type, x, y',
+      'return SHARED_DATA.createEditorLevel(id, name, width, height, {',
+      'return SHARED_DATA.createEditorObject(type, x, y, floor, extra, {',
       'const normalized = SHARED_DATA.normalizeEditorProject?.',
       'function option(value, label, selected)',
       'function makeId(prefix)',
@@ -81,6 +91,24 @@ export const toolPageSharedUiContracts = [
       'function objectOnFloor(object',
       "SHARED_DATA.getContractState?.('editor') || {}",
       "SHARED_UI.getContractState?.('editor') || {}"
+    ]
+  },
+  {
+    files: ['origin/editor/starter-project.js', 'public/editor/starter-project.js'],
+    required: [
+      'function createEditorStarterProjectFactory({',
+      'function createStarterProject() {',
+      'function createStarterLevel() {',
+      'function createLevel(id, name, width = 24, height = 16, upperStart = false) {',
+      'function createObject(type, x, y, floor, extra = {}) {',
+      'return sharedData.createEditorLevel(id, name, width, height, {',
+      'return sharedData.createEditorObject(type, x, y, floor, extra, {',
+      'function getStarterProjectState(project) {',
+      'window.ASCII_LABYRINTH_EDITOR_STARTER = {'
+    ],
+    forbidden: [
+      'window.ASCIIUI?.',
+      'onclick='
     ]
   },
   {

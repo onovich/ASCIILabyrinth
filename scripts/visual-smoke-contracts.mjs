@@ -77,6 +77,7 @@ export const visualSmokePages = [
     mustContain: ['ASCII Labyrinth Level Editor', 'data-editor-snapshot', 'mapCanvas'],
     snapshotAttr: 'data-editor-snapshot',
     snapshotChecks: toolPageChecks('editor', [
+      ['editor starter project module', (snapshot) => snapshot.editorModules?.starterProject === true && Number(snapshot.starterProject?.levelCount) > 0],
       ['editor levels', (snapshot) => Number(snapshot.levelCount) > 0],
       ['editor canvas', (snapshot) => Number(snapshot.canvas?.width) > 0 && Number(snapshot.canvas?.height) > 0]
     ])
