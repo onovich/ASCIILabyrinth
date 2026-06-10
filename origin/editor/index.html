@@ -393,6 +393,7 @@
       const SHARED_UI = window.ASCIIUI || {};
       const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
       const bindElements = SHARED_UI.bindElements || ((ids) => Object.fromEntries(ids.map((id) => [id, document.getElementById(id)])));
+      const bindClickHandlers = SHARED_UI.bindClickHandlers;
       const importTextFile = SHARED_UI.importTextFile;
       const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS?.editorProject || 'ascii-labyrinth-editor-v1';
       const CELL_SIZE = 32;
@@ -1840,14 +1841,16 @@
         if (event.target.matches('[data-path]')) updateObjectField(event.target);
       });
 
-      dom.addLevelBtn.addEventListener('click', addLevel);
-      dom.duplicateLevelBtn.addEventListener('click', duplicateLevel);
-      dom.deleteLevelBtn.addEventListener('click', deleteLevel);
-      dom.undoBtn.addEventListener('click', undoLastEdit);
-      dom.saveBtn.addEventListener('click', saveProject);
-      dom.loadBtn.addEventListener('click', loadProject);
-      dom.exportBtn.addEventListener('click', exportProject);
-      dom.importBtn.addEventListener('click', () => dom.importFile.click());
+      bindClickHandlers(dom, {
+        addLevelBtn: addLevel,
+        duplicateLevelBtn: duplicateLevel,
+        deleteLevelBtn: deleteLevel,
+        undoBtn: undoLastEdit,
+        saveBtn: saveProject,
+        loadBtn: loadProject,
+        exportBtn: exportProject,
+        importBtn: () => dom.importFile.click()
+      });
       dom.importFile.addEventListener('change', async (event) => {
         await importTextFile(event, loadFromJson);
       });

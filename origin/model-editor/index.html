@@ -193,6 +193,7 @@
       const SHARED_UI = window.ASCIIUI || {};
       const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
       const bindElements = SHARED_UI.bindElements || ((ids) => Object.fromEntries(ids.map((id) => [id, document.getElementById(id)])));
+      const bindClickHandlers = SHARED_UI.bindClickHandlers;
       const importTextFile = SHARED_UI.importTextFile;
       const STORAGE_KEY = SHARED_DATA.STORAGE_KEYS?.modelProject || 'ascii-labyrinth-model-editor-v1';
       const SHAPES = SHARED_DATA.MODEL_SHAPES || ['box', 'sphere', 'cylinder', 'cone', 'torus', 'octahedron', 'icosahedron', 'dodecahedron'];
@@ -1044,15 +1045,17 @@
         if (event.target.id === 'deletePartBtn') deletePart();
       });
 
-      dom.applyTemplateBtn.addEventListener('click', applyTemplate);
-      dom.newModelBtn.addEventListener('click', newModel);
-      dom.duplicateModelBtn.addEventListener('click', duplicateModel);
-      dom.deleteModelBtn.addEventListener('click', deleteModel);
-      dom.addPartBtn.addEventListener('click', addPart);
-      dom.saveBtn.addEventListener('click', saveProject);
-      dom.loadBtn.addEventListener('click', loadProject);
-      dom.exportBtn.addEventListener('click', exportProject);
-      dom.importBtn.addEventListener('click', () => dom.importFile.click());
+      bindClickHandlers(dom, {
+        applyTemplateBtn: applyTemplate,
+        newModelBtn: newModel,
+        duplicateModelBtn: duplicateModel,
+        deleteModelBtn: deleteModel,
+        addPartBtn: addPart,
+        saveBtn: saveProject,
+        loadBtn: loadProject,
+        exportBtn: exportProject,
+        importBtn: () => dom.importFile.click()
+      });
       dom.importFile.addEventListener('change', async (event) => {
         await importTextFile(event, loadFromJson);
       });

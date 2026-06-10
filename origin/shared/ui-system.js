@@ -34,6 +34,19 @@
     }
   }
 
+  function bindClickHandlers(elements, handlers = {}) {
+    return Object.entries(handlers || {}).reduce((bindings, [key, handler]) => {
+      const element = elements?.[key] || resolveElement(key);
+      if (element?.addEventListener && typeof handler === 'function') {
+        element.addEventListener('click', handler);
+        bindings[key] = true;
+      } else {
+        bindings[key] = false;
+      }
+      return bindings;
+    }, {});
+  }
+
   function normalizeLine(line) {
     if (line && typeof line === 'object') {
       return {
@@ -197,6 +210,7 @@
     ]),
     editor: Object.freeze([
       'bindElements',
+      'bindClickHandlers',
       'importTextFile',
       'swatchHtml',
       'colorVarStyle',
@@ -205,6 +219,7 @@
     ]),
     modelEditor: Object.freeze([
       'bindElements',
+      'bindClickHandlers',
       'importTextFile',
       'swatchHtml',
       'downloadTextFile',
@@ -224,6 +239,7 @@
 
   publicApi = Object.freeze({
     bindElements,
+    bindClickHandlers,
     importTextFile,
     formatMeter,
     colorVarStyle,

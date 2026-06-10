@@ -51,10 +51,15 @@ function createDomElement(tagName) {
     dataset: {},
     style: {},
     attributes: {},
+    listeners: {},
     textContent: '',
     children: [],
     setAttribute(name, value) {
       this.attributes[name] = String(value);
+    },
+    addEventListener(type, handler) {
+      this.listeners[type] ||= [];
+      this.listeners[type].push(handler);
     },
     appendChild(child) {
       this.children.push(child);
@@ -243,6 +248,8 @@ async function main() {
   const boundElements = ui.bindElements(['smoke-panel', 'smoke-secondary']);
   const namedBoundElements = ui.bindElements({ panel: 'smoke-panel' });
   assert(boundElements['smoke-panel'] === smokePanel && boundElements['smoke-secondary'] === smokeSecondary && namedBoundElements.panel === smokePanel, 'shared UI element binder should resolve arrays and named id maps');
+  const clickBindings = ui.bindClickHandlers({ smokePanel }, { smokePanel: () => {} });
+  assert(clickBindings.smokePanel === true && smokePanel.listeners.click.length === 1, 'shared UI click binder should attach named click handlers');
   const importInput = { files: [{ name: 'fixture.json', text: async () => '{"ok":true}' }], value: 'fixture.json' };
   let importedMessage = '';
   const importedFile = await ui.importTextFile({ target: importInput }, (text, message) => {
