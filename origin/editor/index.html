@@ -787,11 +787,9 @@
           next: Boolean(snapshot.floorPreview?.next)
         };
         activeTool = TYPE_META[snapshot.activeTool] ? snapshot.activeTool : 'select';
-        selectedId = null;
-        hoveredId = null;
+        clearSelection();
         dragState = null;
         if (snapshot.selectedId && findObject(snapshot.selectedId)) selectedId = snapshot.selectedId;
-        hideObjectTooltip();
         render();
       }
 
@@ -1427,6 +1425,16 @@
         if (dom.objectTooltip) dom.objectTooltip.hidden = true;
       }
 
+      function clearHover() {
+        hoveredId = null;
+        hideObjectTooltip();
+      }
+
+      function clearSelection() {
+        selectedId = null;
+        clearHover();
+      }
+
       function updateHover(point, event) {
         const hit = hitTest(point);
         const nextHoveredId = hit?.id || null;
@@ -1493,9 +1501,7 @@
         const collection = getCollectionForObject(level, object);
         const index = collection.findIndex((entry) => entry.id === selectedId);
         if (index >= 0) collection.splice(index, 1);
-        selectedId = null;
-        hoveredId = null;
-        hideObjectTooltip();
+        clearSelection();
         touchProject();
         setStatus('Object deleted');
         render();
@@ -1547,9 +1553,7 @@
           project = next;
           currentLevelId = project.levels[0].id;
           currentFloor = project.levels[0].floors?.[0] ?? 0;
-          selectedId = null;
-          hoveredId = null;
-          hideObjectTooltip();
+          clearSelection();
           setStatus(message);
           render();
         } catch (error) {
@@ -1590,9 +1594,7 @@
         level.objects.push(createObject('entrance', 2, 2, 0, { entranceId: `entry-${project.levels.length + 1}` }));
         project.levels.push(level);
         currentLevelId = level.id;
-        selectedId = null;
-        hoveredId = null;
-        hideObjectTooltip();
+        clearSelection();
         touchProject();
         render();
       }
@@ -1607,9 +1609,7 @@
         clone.triggers.forEach((object) => (object.id = makeId(object.type)));
         project.levels.push(clone);
         currentLevelId = clone.id;
-        selectedId = null;
-        hoveredId = null;
-        hideObjectTooltip();
+        clearSelection();
         touchProject();
         render();
       }
@@ -1623,9 +1623,7 @@
         const index = project.levels.findIndex((level) => level.id === currentLevelId);
         if (index >= 0) project.levels.splice(index, 1);
         currentLevelId = project.levels[0].id;
-        selectedId = null;
-        hoveredId = null;
-        hideObjectTooltip();
+        clearSelection();
         touchProject();
         render();
       }
@@ -1686,8 +1684,7 @@
         const item = event.target.closest('[data-tool]');
         if (!item) return;
         activeTool = item.dataset.tool;
-        hoveredId = null;
-        hideObjectTooltip();
+        clearHover();
         render();
         setStatus(`${TYPE_META[activeTool].name} selected`);
       });
@@ -1722,8 +1719,7 @@
 
         if (activeTool === 'select') {
           if (!hit) {
-            selectedId = null;
-            hoveredId = null;
+            clearSelection();
             render();
             return;
           }
@@ -1804,16 +1800,13 @@
 
       dom.mapCanvas.addEventListener('pointerleave', () => {
         if (dragState) return;
-        hoveredId = null;
-        hideObjectTooltip();
+        clearHover();
         render();
       });
 
       dom.levelSelect.addEventListener('change', (event) => {
         currentLevelId = event.target.value;
-        selectedId = null;
-        hoveredId = null;
-        hideObjectTooltip();
+        clearSelection();
         render();
       });
 
@@ -1821,23 +1814,19 @@
         const button = event.target.closest('[data-floor]');
         if (!button) return;
         currentFloor = Number(button.dataset.floor);
-        selectedId = null;
-        hoveredId = null;
-        hideObjectTooltip();
+        clearSelection();
         render();
       });
 
       dom.showPrevFloor.addEventListener('change', (event) => {
         floorPreview.previous = event.target.checked;
-        hoveredId = null;
-        hideObjectTooltip();
+        clearHover();
         render();
       });
 
       dom.showNextFloor.addEventListener('change', (event) => {
         floorPreview.next = event.target.checked;
-        hoveredId = null;
-        hideObjectTooltip();
+        clearHover();
         render();
       });
 
@@ -1876,9 +1865,7 @@
           deleteSelected();
         }
         if (event.key === 'Escape') {
-          selectedId = null;
-          hoveredId = null;
-          hideObjectTooltip();
+          clearSelection();
           render();
         }
       });
