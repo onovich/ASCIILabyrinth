@@ -23,6 +23,7 @@ This project is moving from prototype-heavy HTML pages toward shared runtime, ed
 - `scripts/smoke-runtime-contracts.mjs`: runtime page required/forbidden shared UI and schema source fragments.
 - `scripts/smoke-schema-assertions.mjs`: shared schema and conversion assertions.
 - `scripts/smoke-source-assertions.mjs`: source text guards for runtime/editor/model-editor shared-helper dependencies.
+- `scripts/smoke-tool-contracts.mjs`: editor and model-editor required/forbidden shared UI and schema source fragments.
 - `scripts/smoke-ui-assertions.mjs`: shared UI CSS and page-level UI contract checks.
 - `scripts/visual-smoke.mjs`: visual smoke orchestrator for DOM dumps, screenshots, and per-page assertions.
 - `scripts/visual-smoke-browser.mjs`: Chrome/Edge discovery and browser process cleanup helpers.
