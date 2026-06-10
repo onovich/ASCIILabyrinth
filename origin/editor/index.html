@@ -392,7 +392,7 @@
     <script>
       const SHARED_UI = window.ASCIIUI || {};
       const SHARED_DATA = window.ASCII_LABYRINTH_DATA || {};
-      const bindElements = SHARED_UI.bindElements || ((ids) => Object.fromEntries(ids.map((id) => [id, document.getElementById(id)])));
+      const bindElements = SHARED_UI.bindElements;
       const bindClickHandlers = SHARED_UI.bindClickHandlers;
       const bindChangeHandlers = SHARED_UI.bindChangeHandlers;
       const bindDelegatedClickHandlers = SHARED_UI.bindDelegatedClickHandlers;
@@ -486,8 +486,8 @@
         return optionHtml(value, label, selected);
       }).join(''));
       const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml || ((items, selected, getValue, getLabel) => `<option value=""></option>${optionsHtml(items, selected, getValue, getLabel)}`);
-      const colorVarStyle = SHARED_UI.colorVarStyle || ((color) => `--al-swatch-color:${/^#[0-9a-f]{3,8}$/i.test(String(color || '').trim()) ? String(color).trim() : '#777777'}`);
-      const swatchHtml = SHARED_UI.swatchHtml || ((color) => `<span class="swatch" style="${colorVarStyle(color)}"></span>`);
+      const colorVarStyle = SHARED_UI.colorVarStyle;
+      const swatchHtml = SHARED_UI.swatchHtml;
       const downloadTextFile = SHARED_UI.downloadTextFile;
       const parseJson = SHARED_DATA.parseJson || JSON.parse;
       const createJsonDownloadPayload = SHARED_DATA.createJsonDownloadPayload;

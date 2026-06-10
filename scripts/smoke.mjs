@@ -283,6 +283,69 @@ async function assertRuntimeSharedUiContract() {
   }
 }
 
+async function assertToolPageSharedUiContract() {
+  const pageContracts = [
+    {
+      file: 'origin/editor/index.html',
+      required: [
+        'const bindElements = SHARED_UI.bindElements;',
+        'const colorVarStyle = SHARED_UI.colorVarStyle;',
+        'const swatchHtml = SHARED_UI.swatchHtml;'
+      ],
+      forbidden: [
+        'const bindElements = SHARED_UI.bindElements ||',
+        'const colorVarStyle = SHARED_UI.colorVarStyle ||',
+        'const swatchHtml = SHARED_UI.swatchHtml ||'
+      ]
+    },
+    {
+      file: 'public/editor/index.html',
+      required: [
+        'const bindElements = SHARED_UI.bindElements;',
+        'const colorVarStyle = SHARED_UI.colorVarStyle;',
+        'const swatchHtml = SHARED_UI.swatchHtml;'
+      ],
+      forbidden: [
+        'const bindElements = SHARED_UI.bindElements ||',
+        'const colorVarStyle = SHARED_UI.colorVarStyle ||',
+        'const swatchHtml = SHARED_UI.swatchHtml ||'
+      ]
+    },
+    {
+      file: 'origin/model-editor/index.html',
+      required: [
+        'const bindElements = SHARED_UI.bindElements;',
+        'const swatchHtml = SHARED_UI.swatchHtml;'
+      ],
+      forbidden: [
+        'const bindElements = SHARED_UI.bindElements ||',
+        'const swatchHtml = SHARED_UI.swatchHtml ||'
+      ]
+    },
+    {
+      file: 'public/model-editor/index.html',
+      required: [
+        'const bindElements = SHARED_UI.bindElements;',
+        'const swatchHtml = SHARED_UI.swatchHtml;'
+      ],
+      forbidden: [
+        'const bindElements = SHARED_UI.bindElements ||',
+        'const swatchHtml = SHARED_UI.swatchHtml ||'
+      ]
+    }
+  ];
+
+  for (const contract of pageContracts) {
+    const source = await readFile(resolve(projectRoot, contract.file), 'utf8');
+    for (const fragment of contract.required) {
+      assert(source.includes(fragment), `${contract.file} should call shared tool UI helper: ${fragment}`);
+    }
+    for (const fragment of contract.forbidden) {
+      assert(!source.includes(fragment), `${contract.file} should not keep tool UI fallback: ${fragment}`);
+    }
+  }
+}
+
 async function main() {
   const schema = await loadSharedData();
   const { ui, elements } = await loadSharedUi();
@@ -486,8 +549,9 @@ async function main() {
   await assertSyncedFiles();
   await assertSharedCssContract();
   await assertRuntimeSharedUiContract();
+  await assertToolPageSharedUiContract();
 
-  console.log('smoke ok: shared schema, runtime conversion, model conversion, shared UI CSS, runtime shared UI, synced assets');
+  console.log('smoke ok: shared schema, runtime conversion, model conversion, shared UI CSS, runtime/tool shared UI, synced assets');
 }
 
 await main();
