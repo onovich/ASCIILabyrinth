@@ -244,6 +244,17 @@
     return readStorageText(key, storage) !== '';
   }
 
+  function readStorageJson(key, storage = window.localStorage, normalize) {
+    try {
+      const raw = readStorageText(key, storage);
+      if (!raw) return null;
+      const value = parseJson(raw);
+      return typeof normalize === 'function' ? normalize(value) : value;
+    } catch {
+      return null;
+    }
+  }
+
   function saveStorageJson(key, value, storage = window.localStorage) {
     storage?.setItem(key, JSON.stringify(value));
     return value;
@@ -533,13 +544,7 @@
   }
 
   function loadEditorProject(storage = window.localStorage) {
-    try {
-      const raw = storage?.getItem(STORAGE_KEYS.editorProject);
-      if (!raw) return null;
-      return normalizeEditorProject(parseJson(raw));
-    } catch {
-      return null;
-    }
+    return readStorageJson(STORAGE_KEYS.editorProject, storage, normalizeEditorProject);
   }
 
   function loadRuntimeLevelFromLocalStorage(options = {}) {
@@ -731,13 +736,7 @@
   }
 
   function loadModelProject(storage = window.localStorage) {
-    try {
-      const raw = storage?.getItem(STORAGE_KEYS.modelProject);
-      if (!raw) return null;
-      return normalizeModelProject(parseJson(raw));
-    } catch {
-      return null;
-    }
+    return readStorageJson(STORAGE_KEYS.modelProject, storage, normalizeModelProject);
   }
 
   function loadRuntimeModelProfilesFromLocalStorage(options = {}) {
@@ -763,7 +762,7 @@
       optionHtml: 'optionHtml',
       parseJson: 'parseJson',
       jsonExport: Object.freeze(['stringifyJson', 'createJsonExportName', 'createJsonDownloadPayload']),
-      storageTools: Object.freeze(['readStorageText', 'hasStorageText', 'saveStorageJson']),
+      storageTools: Object.freeze(['readStorageText', 'hasStorageText', 'readStorageJson', 'saveStorageJson']),
       timestamps: Object.freeze(['toIsoTimestamp', 'touchProject']),
       floorTools: Object.freeze(['getFloorLabel', 'hasFloor', 'getFloorIds', 'getMaxFloorSpan', 'getAdjacentFloorId']),
       htmlEscapes: Object.freeze(['escapeHtml', 'escapeAttr']),
@@ -783,7 +782,7 @@
       optionsWithEmptyHtml: 'optionsWithEmptyHtml',
       parseJson: 'parseJson',
       jsonExport: Object.freeze(['stringifyJson', 'createJsonExportName', 'createJsonDownloadPayload']),
-      storageTools: Object.freeze(['readStorageText', 'hasStorageText', 'saveStorageJson']),
+      storageTools: Object.freeze(['readStorageText', 'hasStorageText', 'readStorageJson', 'saveStorageJson']),
       timestamps: Object.freeze(['toIsoTimestamp', 'touchProject']),
       htmlEscapes: Object.freeze(['escapeHtml', 'escapeAttr']),
       projectNormalizer: 'normalizeModelProject',
@@ -837,6 +836,7 @@
     createJsonDownloadPayload,
     readStorageText,
     hasStorageText,
+    readStorageJson,
     saveStorageJson,
     toIsoTimestamp,
     touchProject,

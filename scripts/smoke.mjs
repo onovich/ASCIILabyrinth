@@ -309,6 +309,10 @@ async function main() {
   };
   schema.saveStorageJson('smoke-storage', { ok: true }, storageApi);
   assert(schema.hasStorageText('smoke-storage', storageApi) && schema.readStorageText('smoke-storage', storageApi) === '{"ok":true}', 'shared storage helpers should write and read compact JSON saves');
+  assert(schema.readStorageJson('smoke-storage', storageApi).ok === true, 'shared storage helper should parse saved JSON');
+  assert(schema.readStorageJson('smoke-storage', storageApi, (value) => ({ normalized: value.ok }))?.normalized === true, 'shared storage helper should apply JSON normalizers');
+  storageFixture.set('smoke-bad-json', '{');
+  assert(schema.readStorageJson('smoke-bad-json', storageApi) === null, 'shared storage helper should return null for invalid JSON');
   assert(schema.toIsoTimestamp(new Date('2026-06-10T01:02:03Z')) === '2026-06-10T01:02:03.000Z', 'shared timestamp helper should produce ISO strings');
   const touchedProject = {};
   assert(schema.touchProject(touchedProject, new Date('2026-06-10T01:02:03Z')) === touchedProject && touchedProject.updatedAt === '2026-06-10T01:02:03.000Z', 'shared project touch helper should stamp and return projects');
