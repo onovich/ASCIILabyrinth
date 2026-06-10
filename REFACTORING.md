@@ -18,6 +18,7 @@ This project is moving from prototype-heavy HTML pages toward shared runtime, ed
 - `scripts/smoke.mjs`: low-cost behavioral and contract guard.
 - `scripts/smoke-contracts.mjs`: required/forbidden source fragments and shared CSS selectors used by `smoke.mjs`.
 - `scripts/smoke-css-contracts.mjs`: shared UI CSS selector contract used by smoke source assertions.
+- `scripts/smoke-schema-editor-assertions.mjs`: editor object, level, floor visibility, and editor project schema assertions.
 - `scripts/smoke-environment.mjs`: project paths and file readers used by smoke guards.
 - `scripts/smoke-fixtures.mjs`: low-cost runtime/model conversion fixtures.
 - `scripts/smoke-runtime-contracts.mjs`: runtime page required/forbidden shared UI and schema source fragments.
