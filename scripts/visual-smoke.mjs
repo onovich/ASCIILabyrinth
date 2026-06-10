@@ -127,7 +127,8 @@ const pages = [
     snapshotAttr: 'data-model-editor-snapshot',
     snapshotChecks: toolPageChecks('model editor', modelEditorSharedContractKeys, [
       ['model editor models', (snapshot) => Number(snapshot.modelCount) > 0],
-      ['model editor selected model', (snapshot) => Boolean(snapshot.selectedModelId)]
+      ['model editor selected model', (snapshot) => Boolean(snapshot.selectedModelId)],
+      ['model editor selected part', (snapshot) => Boolean(snapshot.selectedPartId)]
     ])
   }
 ];

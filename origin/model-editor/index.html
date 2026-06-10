@@ -520,6 +520,32 @@
         return getModel().parts.find((partItem) => partItem.id === selectedPartId) || null;
       }
 
+      function selectModel(modelId, options = {}) {
+        const model = project.models.find((candidate) => candidate.id === modelId) || project.models[0] || null;
+        selectedModelId = model?.id || null;
+        if (!model) {
+          selectedPartId = null;
+          return null;
+        }
+
+        const hasCurrentPart = model.parts.some((partItem) => partItem.id === selectedPartId);
+        selectedPartId = options.keepPart && hasCurrentPart ? selectedPartId : model.parts[0]?.id || null;
+        return model;
+      }
+
+      function selectPart(partId) {
+        const model = getModel();
+        const partItem = model.parts.find((candidate) => candidate.id === partId) || model.parts[0] || null;
+        selectedPartId = partItem?.id || null;
+        return partItem;
+      }
+
+      function ensureSelection() {
+        const model = selectModel(selectedModelId, { keepPart: true });
+        if (model && !getPart()) selectPart(model.parts[0]?.id);
+        return model;
+      }
+
       function initThree() {
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0x0b0d0f);
@@ -663,7 +689,7 @@
           model.parts.forEach(normalizePart);
           model.stats ||= { hp: 0, damage: 0, speed: 0, reward: 0 };
         });
-        if (!getPart()) selectedPartId = getModel().parts[0]?.id || null;
+        ensureSelection();
         renderTemplates();
         renderLists();
         renderInspectors();
@@ -790,7 +816,7 @@
         let value = target.type === 'number' ? Number(target.value) : target.value;
         if (field === 'id') value = String(value).trim() || oldId;
         setByPath(model, field, value);
-        if (field === 'id') selectedModelId = value;
+        if (field === 'id') selectModel(value, { keepPart: true });
         touchProject();
         render();
       }
@@ -806,7 +832,7 @@
         if (value === 'false') value = false;
         setByPath(partItem, field, value);
         normalizePart(partItem);
-        if (field === 'id') selectedPartId = partItem.id || oldId;
+        if (field === 'id') selectPart(partItem.id || oldId);
         touchProject();
         render();
       }
@@ -817,8 +843,7 @@
         const next = structuredClone(template);
         if (index >= 0) project.models.splice(index, 1, next);
         else project.models.push(next);
-        selectedModelId = next.id;
-        selectedPartId = next.parts[0]?.id || null;
+        selectModel(next.id);
         touchProject();
         setStatus(`Template loaded: ${next.name}`);
         render();
@@ -835,8 +860,7 @@
           parts: [part('core', '核心', 'box', '#d8d0c0', '#222222', [0, 0.5, 0], [0, 0, 0], [0.5, 0.5, 0.5])]
         };
         project.models.push(model);
-        selectedModelId = model.id;
-        selectedPartId = model.parts[0].id;
+        selectModel(model.id);
         touchProject();
         render();
       }
@@ -846,8 +870,7 @@
         clone.id = makeId(clone.id || 'model');
         clone.name = `${clone.name} copy`;
         project.models.push(clone);
-        selectedModelId = clone.id;
-        selectedPartId = clone.parts[0]?.id || null;
+        selectModel(clone.id);
         touchProject();
         render();
       }
@@ -859,8 +882,7 @@
         }
         const index = project.models.findIndex((model) => model.id === selectedModelId);
         if (index >= 0) project.models.splice(index, 1);
-        selectedModelId = project.models[0].id;
-        selectedPartId = project.models[0].parts[0]?.id || null;
+        selectModel(project.models[0]?.id);
         touchProject();
         render();
       }
@@ -870,7 +892,7 @@
         const shape = dom.shapeSelect.value;
         const partItem = part(makeId(shape), `${shape} 部件`, shape, '#d8d0c0', '#222222', [0, 0.5, 0], [0, 0, 0], [0.4, 0.4, 0.4]);
         model.parts.push(partItem);
-        selectedPartId = partItem.id;
+        selectPart(partItem.id);
         touchProject();
         render();
       }
@@ -884,7 +906,7 @@
         clone.name = `${partItem.name} copy`;
         clone.position = [clone.position[0] + 0.16, clone.position[1], clone.position[2] + 0.16];
         model.parts.push(clone);
-        selectedPartId = clone.id;
+        selectPart(clone.id);
         touchProject();
         render();
       }
@@ -897,7 +919,7 @@
         }
         const index = model.parts.findIndex((partItem) => partItem.id === selectedPartId);
         if (index >= 0) model.parts.splice(index, 1);
-        selectedPartId = model.parts[0]?.id || null;
+        selectPart(model.parts[0]?.id);
         touchProject();
         render();
       }
@@ -922,8 +944,7 @@
         try {
           const next = validateProject(parseJson(raw));
           project = next;
-          selectedModelId = project.models[0].id;
-          selectedPartId = project.models[0].parts[0]?.id || null;
+          selectModel(project.models[0]?.id);
           setStatus(message);
           render();
         } catch (error) {
@@ -997,15 +1018,14 @@
       dom.modelList.addEventListener('click', (event) => {
         const row = event.target.closest('[data-model-id]');
         if (!row) return;
-        selectedModelId = row.dataset.modelId;
-        selectedPartId = getModel().parts[0]?.id || null;
+        selectModel(row.dataset.modelId);
         render();
       });
 
       dom.partList.addEventListener('click', (event) => {
         const row = event.target.closest('[data-part-id]');
         if (!row) return;
-        selectedPartId = row.dataset.partId;
+        selectPart(row.dataset.partId);
         render();
       });
 
@@ -1070,8 +1090,7 @@
       window.__ASCII_MODEL_EDITOR_DEBUG__ = getDebugSnapshot;
 
       project = createDefaultProject();
-      selectedModelId = project.models[0].id;
-      selectedPartId = project.models[0].parts[0].id;
+      selectModel(project.models[0]?.id);
 
       initThree();
       render();
