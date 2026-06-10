@@ -297,7 +297,13 @@ async function assertToolPageSharedUiContract() {
         'const optionsHtml = SHARED_DATA.optionsHtml;',
         'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml;',
         'const setByPath = SHARED_DATA.setValueByPath;',
-        'const getByPath = SHARED_DATA.getValueByPath;'
+        'const getByPath = SHARED_DATA.getValueByPath;',
+        'const parseJson = SHARED_DATA.parseJson;',
+        'const toIsoTimestamp = SHARED_DATA.toIsoTimestamp;',
+        'const touchSharedProject = SHARED_DATA.touchProject;',
+        'const countBy = SHARED_DATA.countBy;',
+        'const clamp = SHARED_DATA.clamp;',
+        'const createSharedId = SHARED_DATA.createId;'
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
@@ -309,7 +315,13 @@ async function assertToolPageSharedUiContract() {
         'const optionsHtml = SHARED_DATA.optionsHtml ||',
         'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml ||',
         'const setByPath = SHARED_DATA.setValueByPath ||',
-        'const getByPath = SHARED_DATA.getValueByPath ||'
+        'const getByPath = SHARED_DATA.getValueByPath ||',
+        'const parseJson = SHARED_DATA.parseJson ||',
+        'const toIsoTimestamp = SHARED_DATA.toIsoTimestamp ||',
+        'const touchSharedProject = SHARED_DATA.touchProject ||',
+        'const countBy = SHARED_DATA.countBy ||',
+        'const clamp = SHARED_DATA.clamp ||',
+        'const createSharedId = SHARED_DATA.createId ||'
       ]
     },
     {
@@ -324,7 +336,13 @@ async function assertToolPageSharedUiContract() {
         'const optionsHtml = SHARED_DATA.optionsHtml;',
         'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml;',
         'const setByPath = SHARED_DATA.setValueByPath;',
-        'const getByPath = SHARED_DATA.getValueByPath;'
+        'const getByPath = SHARED_DATA.getValueByPath;',
+        'const parseJson = SHARED_DATA.parseJson;',
+        'const toIsoTimestamp = SHARED_DATA.toIsoTimestamp;',
+        'const touchSharedProject = SHARED_DATA.touchProject;',
+        'const countBy = SHARED_DATA.countBy;',
+        'const clamp = SHARED_DATA.clamp;',
+        'const createSharedId = SHARED_DATA.createId;'
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
@@ -336,7 +354,13 @@ async function assertToolPageSharedUiContract() {
         'const optionsHtml = SHARED_DATA.optionsHtml ||',
         'const optionsWithEmptyHtml = SHARED_DATA.optionsWithEmptyHtml ||',
         'const setByPath = SHARED_DATA.setValueByPath ||',
-        'const getByPath = SHARED_DATA.getValueByPath ||'
+        'const getByPath = SHARED_DATA.getValueByPath ||',
+        'const parseJson = SHARED_DATA.parseJson ||',
+        'const toIsoTimestamp = SHARED_DATA.toIsoTimestamp ||',
+        'const touchSharedProject = SHARED_DATA.touchProject ||',
+        'const countBy = SHARED_DATA.countBy ||',
+        'const clamp = SHARED_DATA.clamp ||',
+        'const createSharedId = SHARED_DATA.createId ||'
       ]
     },
     {
@@ -348,7 +372,15 @@ async function assertToolPageSharedUiContract() {
         'const escapeAttr = SHARED_DATA.escapeAttr;',
         'const optionHtml = SHARED_DATA.optionHtml;',
         'const optionsHtml = SHARED_DATA.optionsHtml;',
-        'const setByPath = SHARED_DATA.setValueByPath;'
+        'const setByPath = SHARED_DATA.setValueByPath;',
+        'const parseJson = SHARED_DATA.parseJson;',
+        'const stringifyJson = SHARED_DATA.stringifyJson;',
+        'const toIsoTimestamp = SHARED_DATA.toIsoTimestamp;',
+        'const touchSharedProject = SHARED_DATA.touchProject;',
+        'const countBy = SHARED_DATA.countBy;',
+        'const clamp = SHARED_DATA.clamp;',
+        'const createSharedId = SHARED_DATA.createId;',
+        'const degreesToRadians = SHARED_DATA.degreesToRadians;'
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
@@ -357,7 +389,15 @@ async function assertToolPageSharedUiContract() {
         'const escapeAttr = SHARED_DATA.escapeAttr ||',
         'const optionHtml = SHARED_DATA.optionHtml ||',
         'const optionsHtml = SHARED_DATA.optionsHtml ||',
-        'const setByPath = SHARED_DATA.setValueByPath ||'
+        'const setByPath = SHARED_DATA.setValueByPath ||',
+        'const parseJson = SHARED_DATA.parseJson ||',
+        'const stringifyJson = SHARED_DATA.stringifyJson ||',
+        'const toIsoTimestamp = SHARED_DATA.toIsoTimestamp ||',
+        'const touchSharedProject = SHARED_DATA.touchProject ||',
+        'const countBy = SHARED_DATA.countBy ||',
+        'const clamp = SHARED_DATA.clamp ||',
+        'const createSharedId = SHARED_DATA.createId ||',
+        'const degreesToRadians = SHARED_DATA.degreesToRadians ||'
       ]
     },
     {
@@ -369,7 +409,15 @@ async function assertToolPageSharedUiContract() {
         'const escapeAttr = SHARED_DATA.escapeAttr;',
         'const optionHtml = SHARED_DATA.optionHtml;',
         'const optionsHtml = SHARED_DATA.optionsHtml;',
-        'const setByPath = SHARED_DATA.setValueByPath;'
+        'const setByPath = SHARED_DATA.setValueByPath;',
+        'const parseJson = SHARED_DATA.parseJson;',
+        'const stringifyJson = SHARED_DATA.stringifyJson;',
+        'const toIsoTimestamp = SHARED_DATA.toIsoTimestamp;',
+        'const touchSharedProject = SHARED_DATA.touchProject;',
+        'const countBy = SHARED_DATA.countBy;',
+        'const clamp = SHARED_DATA.clamp;',
+        'const createSharedId = SHARED_DATA.createId;',
+        'const degreesToRadians = SHARED_DATA.degreesToRadians;'
       ],
       forbidden: [
         'const bindElements = SHARED_UI.bindElements ||',
@@ -378,7 +426,15 @@ async function assertToolPageSharedUiContract() {
         'const escapeAttr = SHARED_DATA.escapeAttr ||',
         'const optionHtml = SHARED_DATA.optionHtml ||',
         'const optionsHtml = SHARED_DATA.optionsHtml ||',
-        'const setByPath = SHARED_DATA.setValueByPath ||'
+        'const setByPath = SHARED_DATA.setValueByPath ||',
+        'const parseJson = SHARED_DATA.parseJson ||',
+        'const stringifyJson = SHARED_DATA.stringifyJson ||',
+        'const toIsoTimestamp = SHARED_DATA.toIsoTimestamp ||',
+        'const touchSharedProject = SHARED_DATA.touchProject ||',
+        'const countBy = SHARED_DATA.countBy ||',
+        'const clamp = SHARED_DATA.clamp ||',
+        'const createSharedId = SHARED_DATA.createId ||',
+        'const degreesToRadians = SHARED_DATA.degreesToRadians ||'
       ]
     }
   ];

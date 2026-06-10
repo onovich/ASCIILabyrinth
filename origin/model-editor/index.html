@@ -221,25 +221,18 @@
       const optionsHtml = SHARED_DATA.optionsHtml;
       const swatchHtml = SHARED_UI.swatchHtml;
       const downloadTextFile = SHARED_UI.downloadTextFile;
-      const parseJson = SHARED_DATA.parseJson || JSON.parse;
-      const stringifyJson = SHARED_DATA.stringifyJson || ((value) => JSON.stringify(value, null, 2));
+      const parseJson = SHARED_DATA.parseJson;
+      const stringifyJson = SHARED_DATA.stringifyJson;
       const createJsonDownloadPayload = SHARED_DATA.createJsonDownloadPayload;
       const readStorageText = SHARED_DATA.readStorageText;
       const hasStorageText = SHARED_DATA.hasStorageText;
       const saveStorageJson = SHARED_DATA.saveStorageJson;
-      const toIsoTimestamp = SHARED_DATA.toIsoTimestamp || ((date = new Date()) => (date instanceof Date ? date : new Date(date)).toISOString());
-      const touchSharedProject = SHARED_DATA.touchProject || ((target) => {
-        if (target && typeof target === 'object') target.updatedAt = toIsoTimestamp();
-        return target;
-      });
-      const countBy = SHARED_DATA.countBy || ((items, getKey) => (Array.isArray(items) ? items : []).reduce((acc, item, index) => {
-        const key = typeof getKey === 'function' ? getKey(item, index) : item?.[getKey];
-        if (key) acc[key] = (acc[key] || 0) + 1;
-        return acc;
-      }, {}));
-      const clamp = SHARED_DATA.clamp || ((value, min, max) => Math.max(min, Math.min(max, value)));
-      const createSharedId = SHARED_DATA.createId || SHARED_DATA.createEditorId || ((prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`);
-      const degreesToRadians = SHARED_DATA.degreesToRadians || ((values) => (Array.isArray(values) ? values : [0, 0, 0]).map((value) => (Number(value) || 0) * Math.PI / 180));
+      const toIsoTimestamp = SHARED_DATA.toIsoTimestamp;
+      const touchSharedProject = SHARED_DATA.touchProject;
+      const countBy = SHARED_DATA.countBy;
+      const clamp = SHARED_DATA.clamp;
+      const createSharedId = SHARED_DATA.createId;
+      const degreesToRadians = SHARED_DATA.degreesToRadians;
 
       const dom = bindElements([
         'templateSelect',
