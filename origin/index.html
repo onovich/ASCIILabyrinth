@@ -86,6 +86,7 @@
     <script src="./runtime/audio.js"></script>
     <script src="./runtime/hud.js"></script>
     <script src="./runtime/level-source.js"></script>
+    <script src="./runtime/mouse-look.js"></script>
     <script src="./runtime/debug-snapshot.js"></script>
     <script src="./runtime/enemy-profiles.js"></script>
     <script src="./runtime/enemy-models.js"></script>
@@ -824,51 +825,15 @@
         // ==========================================
         let touchLeft = null; let touchRight = null;
         let moveForward = 0; let moveRight = 0;
-        let yaw = 0; let pitch = 0;
-        let mouseLookFallback = null;
-
-        function applyLookDelta(dx, dy, sensitivity = 0.002) {
-            yaw -= dx * sensitivity;
-            pitch -= dy * sensitivity;
-            pitch = clamp(pitch, -Math.PI / 2.2, Math.PI / 2.2);
-            player.rotation.y = yaw;
-            pitchObject.rotation.x = pitch;
-            document.body.dataset.lookState = JSON.stringify({ yaw, pitch });
-        }
-
-        function startMouseLookFallback(e) {
-            mouseLookFallback = {
-                lastX: e.clientX,
-                lastY: e.clientY,
-                active: true
-            };
-            document.body.dataset.mouseLookMode = 'fallback';
-        }
-
-        function stopMouseLookFallback() {
-            mouseLookFallback = null;
-            document.body.dataset.mouseLookMode = '';
-        }
-
-        function isPointerLocked() {
-            return document.pointerLockElement === document.body;
-        }
-
-        function requestMouseLook(e) {
-            if (typeof document.body.requestPointerLock !== 'function') {
-                startMouseLookFallback(e);
-                return;
-            }
-
-            try {
-                const lockRequest = document.body.requestPointerLock();
-                if (lockRequest && typeof lockRequest.catch === 'function') {
-                    lockRequest.catch(() => startMouseLookFallback(e));
-                }
-            } catch {
-                startMouseLookFallback(e);
-            }
-        }
+        const runtimeMouseLook = window.ASCII_LABYRINTH_RUNTIME_MOUSE_LOOK.createRuntimeMouseLookController({
+            documentRef: document,
+            player,
+            pitchObject,
+            clamp
+        });
+        const applyLookDelta = runtimeMouseLook.applyLookDelta;
+        const isPointerLocked = runtimeMouseLook.isPointerLocked;
+        const requestMouseLook = runtimeMouseLook.requestMouseLook;
 
         window.addEventListener('touchstart', (e) => {
             if (gameState.isGameOver) return;
@@ -899,11 +864,7 @@
                     moveForward = clamp(moveForward, -1, 1);
                 }
                 if (touchRight && t.identifier === touchRight.id) {
-                    yaw += (t.clientX - touchRight.curX) * -0.005;
-                    pitch += (t.clientY - touchRight.curY) * -0.005;
-                    pitch = clamp(pitch, -Math.PI / 2.2, Math.PI / 2.2);
-                    player.rotation.y = yaw;
-                    pitchObject.rotation.x = pitch;
+                    applyLookDelta(t.clientX - touchRight.curX, t.clientY - touchRight.curY, 0.005);
 
                     if (Math.abs(t.clientX - touchRight.startX) > 10 || Math.abs(t.clientY - touchRight.startY) > 10) {
                         touchRight.isTap = false;
@@ -937,7 +898,7 @@
                 return;
             }
 
-            if (mouseLookFallback?.active) {
+            if (runtimeMouseLook.isFallbackActive()) {
                 if (e.button === 0) shoot();
                 return;
             }
@@ -950,26 +911,13 @@
         // 2. 鼠标自由移动控制视角
         window.addEventListener('mousemove', e => {
             if (gameState.isPaused) return; // 新增：暂停期间停止视角转动
-            if (isPointerLocked()) {
-                // 读取鼠标的物理相对位移 (movementX/Y)，实现真正的 FPS 视角
-                applyLookDelta(e.movementX, e.movementY);
-            } else if (mouseLookFallback?.active) {
-                const dx = e.clientX - mouseLookFallback.lastX;
-                const dy = e.clientY - mouseLookFallback.lastY;
-                mouseLookFallback.lastX = e.clientX;
-                mouseLookFallback.lastY = e.clientY;
-                applyLookDelta(dx, dy, 0.005);
-            }
+            runtimeMouseLook.handleMouseMove(e);
         });
 
-        document.addEventListener('pointerlockchange', () => {
-            document.body.dataset.mouseLookMode = isPointerLocked()
-                ? 'pointer-lock'
-                : (mouseLookFallback?.active ? 'fallback' : '');
-        });
+        document.addEventListener('pointerlockchange', runtimeMouseLook.handlePointerLockChange);
 
         window.addEventListener('blur', () => {
-            stopMouseLookFallback();
+            runtimeMouseLook.stopFallback();
         });
 
         function restartGame() {
@@ -1097,7 +1045,7 @@
             if (curMoveF !== 0 || curMoveR !== 0) {
                 const speed = 4.0 * delta; 
                 const dir = new THREE.Vector3(curMoveR, 0, -curMoveF).normalize();
-                dir.applyEuler(new THREE.Euler(0, yaw, 0)); 
+                dir.applyEuler(new THREE.Euler(0, player.rotation.y, 0)); 
                 const nextPos = player.position.clone().add(dir.multiplyScalar(speed));
                 
                 if (!checkWallCollision(new THREE.Vector3(nextPos.x, player.position.y, player.position.z))) player.position.x = nextPos.x;
@@ -1267,7 +1215,8 @@
                 enemyModels: typeof window.ASCII_LABYRINTH_RUNTIME_ENEMY_MODELS?.createRuntimeEnemyModelFactory === 'function',
                 enemyProfiles: typeof window.ASCII_LABYRINTH_RUNTIME_ENEMY_PROFILES?.createRuntimeEnemyProfileSource === 'function',
                 hud: typeof window.ASCII_LABYRINTH_RUNTIME_HUD?.createRuntimeHudController === 'function',
-                levelSource: typeof window.ASCII_LABYRINTH_RUNTIME_LEVEL_SOURCE?.createRuntimeLevelSource === 'function'
+                levelSource: typeof window.ASCII_LABYRINTH_RUNTIME_LEVEL_SOURCE?.createRuntimeLevelSource === 'function',
+                mouseLook: typeof window.ASCII_LABYRINTH_RUNTIME_MOUSE_LOOK?.createRuntimeMouseLookController === 'function'
             },
             runtimeAudio,
             runtimeLevelSource,
@@ -1288,6 +1237,7 @@
             weapons,
             messageLog,
             runtimeButtonBindings,
+            runtimeMouseLook,
             getShaderPipeline: () => !!postMaterial && !!renderTarget
         });
         const getDebugSnapshot = runtimeDebugSnapshot.getDebugSnapshot;

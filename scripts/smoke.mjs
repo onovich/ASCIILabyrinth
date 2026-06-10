@@ -6,6 +6,7 @@ import {
   assertRuntimeConversions,
   assertSharedSchemaBehavior
 } from './smoke-schema-assertions.mjs';
+import { assertRuntimeMouseLookBehavior } from './smoke-runtime-mouse-look-assertions.mjs';
 import { assertSmokeSourceContracts } from './smoke-source-assertions.mjs';
 import { assertSharedUiBehavior } from './smoke-ui-assertions.mjs';
 
@@ -28,6 +29,7 @@ async function main() {
   await assertSharedUiBehavior(ui, elements, assert, assertNamedContract);
   assertSharedSchemaBehavior(schema, assert, assertNamedContract);
   assertRuntimeConversions(schema, assert);
+  await assertRuntimeMouseLookBehavior(assert);
 
   await assertSmokeSourceContracts(assert);
 

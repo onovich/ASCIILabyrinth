@@ -18,6 +18,7 @@ async function assertSyncedFiles(assert) {
     'public/runtime/runtime/enemy-profiles.js',
     'public/runtime/runtime/hud.js',
     'public/runtime/runtime/level-source.js',
+    'public/runtime/runtime/mouse-look.js',
     'public/editor/index.html',
     'public/model-editor/index.html',
     'public/shared/game-schema.js',

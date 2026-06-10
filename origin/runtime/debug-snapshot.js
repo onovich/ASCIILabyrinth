@@ -22,6 +22,7 @@
     weapons,
     messageLog,
     runtimeButtonBindings,
+    runtimeMouseLook,
     getShaderPipeline
   }) {
     function getDebugSnapshot() {
@@ -67,6 +68,7 @@
           gameOverTitle: document.getElementById('game-over-title')?.textContent || ''
         },
         runtimeButtonBindings,
+        mouseLook: runtimeMouseLook.getMouseLookState(),
         runtimeLevel: {
           source: runtimeLevel.source,
           levelId: runtimeLevel.levelId,

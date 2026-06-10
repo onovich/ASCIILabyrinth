@@ -12,6 +12,7 @@ This project is moving from prototype-heavy HTML pages toward shared runtime, ed
 - `origin/runtime/enemy-profiles.js`: built-in runtime enemy profile catalog and model-editor profile merge.
 - `origin/runtime/hud.js`: runtime HUD, mission, and radio log rendering controller.
 - `origin/runtime/level-source.js`: runtime editor-level loading and procedural fallback generation.
+- `origin/runtime/mouse-look.js`: runtime pointer-lock and fallback mouse-look controller.
 - `origin/editor/index.html`: authoritative level editor.
 - `origin/editor/starter-project.js`: editor starter project, level, and object factory.
 - `origin/model-editor/index.html`: authoritative model editor.
@@ -34,6 +35,7 @@ This project is moving from prototype-heavy HTML pages toward shared runtime, ed
 - `scripts/smoke-schema-model-assertions.mjs`: model part and model project schema assertions.
 - `scripts/smoke-runtime-contracts.mjs`: runtime page required/forbidden shared UI and schema source fragments.
 - `scripts/smoke-runtime-conversion-assertions.mjs`: editor-level and model-project conversion assertions used by smoke.
+- `scripts/smoke-runtime-mouse-look-assertions.mjs`: runtime mouse-look fallback behavior assertions used by smoke.
 - `scripts/smoke-schema-persistence-assertions.mjs`: JSON, storage, timestamp, and project touch schema assertions.
 - `scripts/smoke-schema-assertions.mjs`: shared schema and conversion assertions.
 - `scripts/smoke-source-assertions.mjs`: source text guards for runtime/editor/model-editor shared-helper dependencies.

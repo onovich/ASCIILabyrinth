@@ -7,6 +7,7 @@ export const runtimeSharedUiContract = {
     '<script src="./runtime/audio.js"></script>',
     '<script src="./runtime/hud.js"></script>',
     '<script src="./runtime/level-source.js"></script>',
+    '<script src="./runtime/mouse-look.js"></script>',
     '<script src="./runtime/debug-snapshot.js"></script>',
     '<script src="./runtime/enemy-profiles.js"></script>',
     '<script src="./runtime/enemy-models.js"></script>',
@@ -23,6 +24,9 @@ export const runtimeSharedUiContract = {
     'const TILE = SHARED_DATA.TILE;',
     'const runtimeLevelSource = window.ASCII_LABYRINTH_RUNTIME_LEVEL_SOURCE.createRuntimeLevelSource({',
     'const runtimeLevel = runtimeLevelSource.loadRuntimeLevel();',
+    'const runtimeMouseLook = window.ASCII_LABYRINTH_RUNTIME_MOUSE_LOOK.createRuntimeMouseLookController({',
+    'const applyLookDelta = runtimeMouseLook.applyLookDelta;',
+    'runtimeMouseLook.handleMouseMove(e);',
     'const countTiles = SHARED_DATA.countTiles;',
     'const countBy = SHARED_DATA.countBy;',
     'const clamp = SHARED_DATA.clamp;',
@@ -43,6 +47,7 @@ export const runtimeSharedUiContract = {
     "audio: typeof window.ASCII_LABYRINTH_RUNTIME_AUDIO?.createRuntimeAudioController === 'function'",
     "hud: typeof window.ASCII_LABYRINTH_RUNTIME_HUD?.createRuntimeHudController === 'function'",
     "levelSource: typeof window.ASCII_LABYRINTH_RUNTIME_LEVEL_SOURCE?.createRuntimeLevelSource === 'function'",
+    "mouseLook: typeof window.ASCII_LABYRINTH_RUNTIME_MOUSE_LOOK?.createRuntimeMouseLookController === 'function'",
     'const runtimeDebugSnapshot = window.ASCII_LABYRINTH_RUNTIME_DEBUG.createRuntimeDebugSnapshot({',
     'const getDebugSnapshot = runtimeDebugSnapshot.getDebugSnapshot;',
     'runtimeDebugSnapshot.writeDebugSnapshot();',
@@ -77,6 +82,13 @@ export const runtimeSharedUiContract = {
     'function buildEnemyModel(profile)',
     'function spawnExplosion(pos)',
     'function spawnBullet(direction, weapon)',
+    'let yaw = 0;',
+    'let pitch = 0;',
+    'let yaw = 0; let pitch = 0;',
+    'let mouseLookFallback = null;',
+    'function startMouseLookFallback',
+    'function stopMouseLookFallback',
+    'function requestMouseLook(e)',
     'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel;',
     'const isValidRuntimeLevel = SHARED_DATA.isValidRuntimeLevel ||',
     'const editorLevel = SHARED_DATA.loadRuntimeLevelFromLocalStorage({ floor: 0 });',
@@ -178,6 +190,29 @@ export const runtimeLevelSourceContract = {
   ]
 };
 
+export const runtimeMouseLookContract = {
+  files: [
+    'origin/runtime/mouse-look.js',
+    'public/runtime/runtime/mouse-look.js'
+  ],
+  required: [
+    'function createRuntimeMouseLookController({',
+    'function applyLookDelta(dx, dy, sensitivity = 0.002) {',
+    'function startFallback(event) {',
+    'function requestMouseLook(event) {',
+    'lockRequest.catch(() => startFallback(event));',
+    'function handleMouseMove(event) {',
+    'applyLookDelta(event.movementX, event.movementY);',
+    'applyLookDelta(dx, dy, 0.005);',
+    'function getMouseLookState() {',
+    'window.ASCII_LABYRINTH_RUNTIME_MOUSE_LOOK = {'
+  ],
+  forbidden: [
+    'window.ASCIIUI?.',
+    'onclick='
+  ]
+};
+
 export const runtimeDebugSnapshotContract = {
   files: [
     'origin/runtime/debug-snapshot.js',
@@ -193,6 +228,7 @@ export const runtimeDebugSnapshotContract = {
     "status: sharedUi.getPanelState('ui-layer'),",
     "asciiCanvas: sharedUi.getElementState('ascii-canvas', ['al-fullscreen-canvas']),",
     'runtimeButtonBindings,',
+    'mouseLook: runtimeMouseLook.getMouseLookState(),',
     'shaderPipeline: getShaderPipeline()',
     'function writeDebugSnapshot() {',
     'window.ASCII_LABYRINTH_RUNTIME_DEBUG = {'
@@ -274,5 +310,6 @@ export const runtimeSharedUiContracts = [
   runtimeEnemyModelContract,
   runtimeEnemyProfileContract,
   runtimeHudContract,
-  runtimeLevelSourceContract
+  runtimeLevelSourceContract,
+  runtimeMouseLookContract
 ];

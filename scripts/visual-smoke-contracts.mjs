@@ -28,6 +28,7 @@ const runtimeSnapshotChecks = [
   ['runtime enemy profile module', (snapshot) => snapshot.runtimeModules?.enemyProfiles === true],
   ['runtime HUD module', (snapshot) => snapshot.runtimeModules?.hud === true],
   ['runtime level source module', (snapshot) => snapshot.runtimeModules?.levelSource === true && Boolean(snapshot.levelSource?.source)],
+  ['runtime mouse look module', (snapshot) => snapshot.runtimeModules?.mouseLook === true && typeof snapshot.mouseLook?.fallbackActive === 'boolean'],
   ['runtime HUD panels', (snapshot) => ['status', 'mission', 'log'].every((key) => {
     const panel = snapshot.hudPanels?.[key];
     return panel?.exists === true && panel.isPanel === true && Number(panel.lineCount) > 0;
