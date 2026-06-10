@@ -32,6 +32,10 @@ const runtimeSnapshotChecks = [
     state?.exists === true && Object.values(state.classes || {}).every(Boolean)
   )],
   ['runtime modal text has no drawn boxes', (snapshot) => noBoxDrawingText(snapshot.modalText)],
+  ['runtime modal button bindings', (snapshot) => {
+    const bindings = Object.values(snapshot.runtimeButtonBindings || {});
+    return bindings.length === 4 && bindings.every((value) => value === true);
+  }],
   ['runtime level source', (snapshot) => Boolean(snapshot.runtimeLevel?.source)],
   ['runtime level size', (snapshot) => Number(snapshot.levelSize?.rows) > 0 && Number(snapshot.levelSize?.cols) > 0],
   ['runtime enemy profiles', (snapshot) => Number(snapshot.runtimeModels?.activeEnemyCount) > 0],

@@ -247,7 +247,12 @@ async function assertRuntimeSharedUiContract() {
     'SHARED_UI.renderPanel(id, { title, lines, tone });',
     'return SHARED_UI.formatMeter(value, max, { width });',
     'return SHARED_UI.setElementVisible(id, visible, display);',
-    'return SHARED_UI.isElementVisible(id);'
+    'return SHARED_UI.isElementVisible(id);',
+    'const runtimeButtonBindings = SHARED_UI.bindClickHandlers(null, {',
+    "'password-submit': submitPassword,",
+    "'password-cancel': hidePasswordPrompt,",
+    "'ending-restart': restartGame,",
+    "'game-over-restart': restartGame"
   ];
   const forbiddenFragments = [
     'window.ASCIIUI?.renderPanel',
@@ -255,7 +260,10 @@ async function assertRuntimeSharedUiContract() {
     'window.ASCIIUI?.setElementVisible',
     'window.ASCIIUI?.isElementVisible',
     'panel.replaceChildren()',
-    "element.style.display = visible ? display : 'none'"
+    "element.style.display = visible ? display : 'none'",
+    'onclick=',
+    "document.getElementById('password-submit').addEventListener('click'",
+    "document.getElementById('password-cancel').addEventListener('click'"
   ];
 
   for (const file of files) {

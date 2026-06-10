@@ -67,13 +67,13 @@
     <div id="ending-panel" class="terminal-modal al-modal al-modal-centered">
         <h1 id="ending-title" class="al-modal-title">EXTRACTION COMPLETE</h1>
         <pre id="ending-text" class="al-modal-copy"></pre>
-        <button id="ending-restart" class="al-button al-button-terminal" onclick="location.reload()">再次部署 (RESTART)</button>
+        <button id="ending-restart" class="al-button al-button-terminal">再次部署 (RESTART)</button>
     </div>
 
     <div id="game-over" class="terminal-modal al-modal al-modal-centered">
         <h1 id="game-over-title" class="al-modal-title">任务失败 (YOU DIED)</h1>
         <p>最终得分: <span id="final-score">0</span></p>
-        <button id="game-over-restart" class="al-button al-button-terminal" onclick="location.reload()">重新部署 (RESTART)</button>
+        <button id="game-over-restart" class="al-button al-button-terminal">重新部署 (RESTART)</button>
     </div>
 
     <!-- 引入 Three.js -->
@@ -1356,8 +1356,16 @@
             stopMouseLookFallback();
         });
 
-        document.getElementById('password-submit').addEventListener('click', submitPassword);
-        document.getElementById('password-cancel').addEventListener('click', hidePasswordPrompt);
+        function restartGame() {
+            location.reload();
+        }
+
+        const runtimeButtonBindings = SHARED_UI.bindClickHandlers(null, {
+            'password-submit': submitPassword,
+            'password-cancel': hidePasswordPrompt,
+            'ending-restart': restartGame,
+            'game-over-restart': restartGame
+        });
 
         // 3. 更丝滑的 WASD 键盘记录（支持斜向移动）
         const keys = { w: false, a: false, s: false, d: false };
@@ -1725,6 +1733,7 @@
                     endingText: document.getElementById('ending-text')?.textContent || '',
                     gameOverTitle: document.getElementById('game-over-title')?.textContent || ''
                 },
+                runtimeButtonBindings,
                 runtimeLevel: {
                     source: runtimeLevel.source,
                     levelId: runtimeLevel.levelId,

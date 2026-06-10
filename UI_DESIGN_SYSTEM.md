@@ -35,6 +35,7 @@ Use shared tokens instead of ad hoc colors:
 
 Use CSS borders and `ASCIIUI.renderPanel`; do not draw boxes with text characters.
 Runtime code should define `const SHARED_UI = window.ASCIIUI || {};` once and call shared helpers through it. Do not duplicate local fallback implementations of HUD panels, meters, or modal visibility.
+Runtime buttons should use `ASCIIUI.bindClickHandlers`; do not add inline `onclick` attributes for modal or restart actions.
 
 ```js
 ASCIIUI.renderPanel('mission-layer', {
