@@ -403,41 +403,9 @@
       const HISTORY_LIMIT = 80;
       const FLOORS = SHARED_DATA.FLOORS;
 
-      const defaultEffect = SHARED_DATA.createDefaultEffect || ((type) => ({
-        type,
-        healAmount: 20,
-        dialog: '无线电短句',
-        targetLevelId: '',
-        targetEntranceId: '',
-        targetFloor: 0,
-        doorId: '',
-        weaponKind: 'scatter'
-      }));
-
-      const defaultInteraction = SHARED_DATA.createDefaultInteraction || ((type) => ({
-        mode: 'interact',
-        once: true,
-        effect: defaultEffect(type)
-      }));
-
-      const TYPE_META = SHARED_DATA.createEditorTypeMeta?.() || {
-        select: { group: '工具', name: '选择', icon: 'SEL', color: '#61d394', default: {} },
-        wall: { group: '结构', name: '墙壁', icon: 'W', color: '#718078', default: { w: 1, h: 1, blocking: true } },
-        keyDoor: { group: '结构', name: '钥匙门', icon: 'D', color: '#6ba6f6', default: { w: 1, h: 1, doorId: 'door-a', requiredKeyId: 'key-a', locked: true } },
-        hiddenDoor: { group: '结构', name: '隐藏门', icon: 'H', color: '#a889dc', default: { w: 1, h: 1, doorId: 'hidden-a', requiredKeyId: 'key-a', locked: true, hidden: true } },
-        ramp: { group: '结构', name: '斜坡', icon: 'R', color: '#d2a24f', default: { w: 2, h: 1, floorFrom: 0, floorTo: 1, direction: 'east' } },
-        entrance: { group: '场景', name: '入口', icon: 'IN', color: '#67d68c', default: { w: 1, h: 1, entranceId: 'entry-a' } },
-        exit: { group: '场景', name: '出口', icon: 'EX', color: '#50d6cf', default: { w: 1, h: 1, exitId: 'exit-a', targetLevelId: '', targetEntranceId: '' } },
-        key: { group: '物品', name: '钥匙', icon: 'K', color: '#f1d36d', default: { w: 1, h: 1, keyId: 'key-a', boundDoorId: 'door-a' } },
-        terminal: { group: '物品', name: '终端', icon: 'T', color: '#66d99c', default: { w: 1, h: 1, message: 'EXIT CODE :: 3142', interaction: defaultInteraction('dialog') } },
-        enemy: { group: '单位', name: '敌人', icon: 'E', color: '#e06f6b', default: { w: 1, h: 1, enemyKind: 'longlimb', patrol: 'idle' } },
-        npc: { group: '单位', name: 'NPC', icon: 'N', color: '#c6c0a5', default: { w: 1, h: 1, npcId: 'npc-a', interaction: defaultInteraction('dialog') } },
-        ammo: { group: '补给', name: '弹药', icon: 'A', color: '#71c7ff', default: { w: 1, h: 1, amount: 15 } },
-        medkit: { group: '补给', name: '医疗包', icon: '+', color: '#72d47e', default: { w: 1, h: 1, amount: 30 } },
-        weapon: { group: '补给', name: '武器', icon: 'G', color: '#f08f59', default: { w: 1, h: 1, weaponKind: 'scatter', ammo: 6 } },
-        trigger: { group: '逻辑', name: '触发器', icon: 'TR', color: '#e4b15b', default: { w: 3, h: 2, triggerId: 'trigger-a', once: true, effect: defaultEffect('dialog') } },
-        eraser: { group: '工具', name: '橡皮', icon: '⌫', color: '#b8b8b8', default: {} }
-      };
+      const defaultEffect = SHARED_DATA.createDefaultEffect;
+      const defaultInteraction = SHARED_DATA.createDefaultInteraction;
+      const TYPE_META = SHARED_DATA.createEditorTypeMeta();
 
       const PALETTE_ORDER = SHARED_DATA.PALETTE_ORDER;
       const setByPath = SHARED_DATA.setValueByPath;
