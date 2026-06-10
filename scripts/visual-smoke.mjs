@@ -13,6 +13,8 @@ const chromePath = await findChrome();
 const devServerHost = process.env.VISUAL_SMOKE_DEV_HOST || baseUrlParts.hostname || '127.0.0.1';
 const devServerPort = Number(process.env.VISUAL_SMOKE_DEV_PORT || baseUrlParts.port || 5174);
 const domDumpBudgetMs = Number(process.env.VISUAL_SMOKE_DOM_BUDGET_MS || 12000);
+const domDumpTimeoutMs = Number(process.env.VISUAL_SMOKE_DOM_TIMEOUT_MS || 90000);
+const domDumpAttempts = Math.max(1, Math.floor(Number(process.env.VISUAL_SMOKE_DOM_ATTEMPTS || 2)));
 
 const runtimeSnapshotChecks = [
   ['runtime shared contract', (snapshot) => contractHealthy(snapshot.sharedContract)],
@@ -288,7 +290,7 @@ async function ensureDevServer() {
 
 async function dumpDom(page, profileDir) {
   const url = `${baseUrl}${page.path}`;
-  const result = await runChrome([
+  const args = [
     '--headless=new',
     '--disable-gpu',
     '--disable-background-networking',
@@ -302,8 +304,23 @@ async function dumpDom(page, profileDir) {
     `--virtual-time-budget=${domDumpBudgetMs}`,
     '--dump-dom',
     url
-  ], { timeoutMs: 60000 });
-  return result.stdout;
+  ];
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= domDumpAttempts; attempt += 1) {
+    try {
+      const result = await runChrome(args, { timeoutMs: domDumpTimeoutMs });
+      return result.stdout;
+    } catch (error) {
+      lastError = error;
+      if (attempt < domDumpAttempts) {
+        await rm(profileDir, { recursive: true, force: true }).catch(() => {});
+        await mkdir(profileDir, { recursive: true });
+      }
+    }
+  }
+
+  throw lastError;
 }
 
 function missingExpectedMarkers(page, dom) {

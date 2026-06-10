@@ -1694,17 +1694,17 @@
             setElementVisible('password-panel', true);
         }
         function getUiClassState(id, classNames) {
-            return window.ASCIIUI?.getElementState?.(id, classNames) || { exists: false };
+            return SHARED_UI.getElementState(id, classNames);
         }
 
         function getDebugSnapshot() {
             return {
                 sharedContract: SHARED_DATA.getContractState?.('runtime') || {},
-                sharedUiContract: window.ASCIIUI?.getContractState?.('runtime') || {},
+                sharedUiContract: SHARED_UI.getContractState('runtime'),
                 hudPanels: {
-                    status: window.ASCIIUI?.getPanelState?.('ui-layer') || { exists: false },
-                    mission: window.ASCIIUI?.getPanelState?.('mission-layer') || { exists: false },
-                    log: window.ASCIIUI?.getPanelState?.('log-layer') || { exists: false }
+                    status: SHARED_UI.getPanelState('ui-layer'),
+                    mission: SHARED_UI.getPanelState('mission-layer'),
+                    log: SHARED_UI.getPanelState('log-layer')
                 },
                 screenUi: {
                     asciiCanvas: getUiClassState('ascii-canvas', ['al-fullscreen-canvas']),
