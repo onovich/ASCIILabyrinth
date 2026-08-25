@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-[在线试玩](https://blog.onovich.com/ASCIILabyrinth/)
+[在线试玩](https://game.onovich.com/ASCIILabyrinth/)
 
 ASCIILabyrinth 是一个可以游玩的第一人称迷宫射击游戏，整个画面由 ASCII 字符呈现。
 
