@@ -2,7 +2,7 @@
 
 [简体中文](README.zh-CN.md)
 
-[Play online](https://blog.onovich.com/ASCIILabyrinth/)
+[Play online](https://game.onovich.com/ASCIILabyrinth/)
 
 ASCIILabyrinth is a playable first-person maze shooter rendered as a field of ASCII characters.
 
